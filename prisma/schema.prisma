@@ -1,0 +1,61 @@
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO_MONTHLY
+  LIFETIME
+}
+
+model User {
+  id               String            @id @default(uuid())
+  email            String            @unique
+  name             String?
+  avatarUrl        String?
+  tier             SubscriptionTier  @default(FREE)
+  paddleCustomerId String?           @unique
+  subscriptionId   String?           @unique
+  resumes          Resume[]
+  scans            ScanResult[]
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+model Resume {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String   @default("Untitled Resume")
+  slug        String?  @unique
+  templateId  String   @default("classic-ats")
+  content     Json     // Stores Full Resume Data (Personal, Experience, Education, Skills, Projects)
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+}
+
+model ScanResult {
+  id              String   @id @default(uuid())
+  userId          String?
+  user            User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  fileName        String
+  overallScore    Int
+  formatScore     Int
+  contentScore    Int
+  skillsScore     Int
+  parsedText      String   @db.Text
+  reportData      Json     // Detailed findings, missing keywords, and suggestions
+  jobDescription  String?  @db.Text
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+}
