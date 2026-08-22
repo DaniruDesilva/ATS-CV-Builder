@@ -57,7 +57,7 @@ export interface ResumeContent {
   projects: ProjectItem[];
 }
 
-export type TemplateId = 'classic-ats' | 'modern-executive' | 'technical-clean';
+export type TemplateId = 'classic-ats' | 'modern-executive' | 'technical-clean' | 'traditional-ats';
 
 export interface ResumeData {
   id: string;
