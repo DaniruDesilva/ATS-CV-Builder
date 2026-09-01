@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
 import { ResumeContent } from '@/types/resume';
 
 const styles = StyleSheet.create({
@@ -6,147 +6,135 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     fontSize: 9,
     fontFamily: 'Helvetica',
-    lineHeight: 1.5,
+    lineHeight: 1.4,
   },
   leftColumn: {
     flex: 2,
     backgroundColor: '#ffffff',
-    padding: '40pt 30pt 40pt 40pt',
+    padding: '30pt 25pt',
   },
   rightColumn: {
     flex: 1,
-    backgroundColor: '#1e293b', // Slate 800 (Dark Navy)
-    padding: '40pt 25pt',
-    color: '#f1f5f9', // Slate 100
+    backgroundColor: '#0f172a', // Slate 900
+    padding: '30pt 18pt',
+    color: '#f8fafc',
   },
   // --- Left Column Styles ---
   name: {
-    fontSize: 26,
+    fontSize: 20,
     fontFamily: 'Helvetica-Bold',
     color: '#0f172a',
-    marginBottom: 4,
+    marginBottom: 2,
   },
   title: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontFamily: 'Helvetica-Bold',
     color: '#2563eb', // Blue 600
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 12,
+    letterSpacing: 0.8,
+    marginBottom: 8,
   },
   contactRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 6,
     fontSize: 8,
     color: '#64748b',
-    marginBottom: 20,
+    marginBottom: 12,
   },
   sectionLeft: {
-    marginBottom: 16,
+    marginBottom: 10,
   },
   sectionHeadingLeft: {
-    fontSize: 10,
+    fontSize: 9.5,
     fontFamily: 'Helvetica-Bold',
     color: '#0f172a',
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 0.8,
     borderBottomWidth: 1,
     borderBottomColor: '#cbd5e1',
-    paddingBottom: 4,
-    marginBottom: 8,
+    paddingBottom: 2,
+    marginBottom: 5,
   },
   summaryText: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: '#334155',
-    lineHeight: 1.6,
+    lineHeight: 1.4,
   },
   itemBlock: {
-    marginBottom: 12,
+    marginBottom: 6,
   },
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   roleTitle: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
     color: '#0f172a',
   },
   dateText: {
-    fontSize: 8.5,
+    fontSize: 8,
     fontFamily: 'Helvetica',
     color: '#64748b',
   },
   companyText: {
-    fontSize: 9.5,
+    fontSize: 8.5,
     fontFamily: 'Helvetica-Bold',
-    color: '#2563eb', // Blue 600
-    marginBottom: 4,
+    color: '#2563eb',
+    marginBottom: 2,
   },
   bulletRow: {
     flexDirection: 'row',
-    marginBottom: 3,
+    marginBottom: 2,
     paddingLeft: 4,
   },
   bulletPoint: {
     width: 8,
-    fontSize: 9,
+    fontSize: 8.5,
     color: '#64748b',
   },
   bulletText: {
     flex: 1,
-    fontSize: 9,
+    fontSize: 8.5,
     color: '#334155',
-    lineHeight: 1.5,
+    lineHeight: 1.35,
   },
   // --- Right Column Styles ---
-  avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    objectFit: 'cover',
-  },
   sectionRight: {
-    marginBottom: 18,
+    marginBottom: 12,
   },
   sectionHeadingRight: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
     color: '#ffffff',
     textTransform: 'uppercase',
-    letterSpacing: 1,
+    letterSpacing: 0.8,
     borderBottomWidth: 1,
-    borderBottomColor: '#475569',
-    paddingBottom: 4,
-    marginBottom: 10,
+    borderBottomColor: '#334155',
+    paddingBottom: 2,
+    marginBottom: 6,
   },
   rightItemBlock: {
-    marginBottom: 10,
+    marginBottom: 6,
   },
   rightItemTitle: {
-    fontSize: 9.5,
+    fontSize: 8.5,
     fontFamily: 'Helvetica-Bold',
     color: '#ffffff',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   rightItemText: {
-    fontSize: 8.5,
-    color: '#cbd5e1',
-    lineHeight: 1.5,
+    fontSize: 8,
+    color: '#94a3b8',
+    lineHeight: 1.35,
   }
 });
 
 export default function ModernExecutive({ content }: { content: ResumeContent }) {
   const { personalInfo } = content;
-  // Use github field as avatar url for now since it's not in the schema
-  const avatarUrl = personalInfo.github && personalInfo.github.startsWith('http') ? personalInfo.github : null;
 
   return (
     <Document title={`${personalInfo.fullName || 'Resume'} - Modern Executive`}>
@@ -161,7 +149,6 @@ export default function ModernExecutive({ content }: { content: ResumeContent })
             {personalInfo.email && <Text>{personalInfo.email}</Text>}
             {personalInfo.phone && <Text>•  {personalInfo.phone}</Text>}
             {personalInfo.location && <Text>•  {personalInfo.location}</Text>}
-            {personalInfo.linkedin && <Text>•  {personalInfo.linkedin}</Text>}
           </View>
 
           {content.summary && (
@@ -171,7 +158,25 @@ export default function ModernExecutive({ content }: { content: ResumeContent })
             </View>
           )}
 
-          {content.experience.length > 0 && (
+          {content.education && content.education.length > 0 && (
+            <View style={styles.sectionLeft}>
+              <Text style={styles.sectionHeadingLeft}>Education</Text>
+              {content.education.map((edu) => (
+                <View key={edu.id} style={styles.itemBlock}>
+                  <View style={styles.itemHeader}>
+                    <Text style={styles.roleTitle}>{edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}</Text>
+                    <Text style={styles.dateText}>
+                      {edu.startDate} – {edu.endDate}
+                    </Text>
+                  </View>
+                  <Text style={[styles.companyText, { marginBottom: 1 }]}>{edu.institution}</Text>
+                  {edu.gpa && <Text style={[styles.summaryText, { fontSize: 8 }]}>{edu.gpa}</Text>}
+                </View>
+              ))}
+            </View>
+          )}
+
+          {content.experience && content.experience.length > 0 && (
             <View style={styles.sectionLeft}>
               <Text style={styles.sectionHeadingLeft}>Experience</Text>
               {content.experience.map((exp) => (
@@ -179,7 +184,7 @@ export default function ModernExecutive({ content }: { content: ResumeContent })
                   <View style={styles.itemHeader}>
                     <Text style={styles.roleTitle}>{exp.position}</Text>
                     <Text style={styles.dateText}>
-                      {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
+                      {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
                     </Text>
                   </View>
                   <Text style={styles.companyText}>
@@ -198,18 +203,16 @@ export default function ModernExecutive({ content }: { content: ResumeContent })
             </View>
           )}
 
-          {content.education.length > 0 && (
+          {content.projects && content.projects.length > 0 && (
             <View style={styles.sectionLeft}>
-              <Text style={styles.sectionHeadingLeft}>Education</Text>
-              {content.education.map((edu) => (
-                <View key={edu.id} style={styles.itemBlock}>
-                  <View style={styles.itemHeader}>
-                    <Text style={styles.roleTitle}>{edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}</Text>
-                    <Text style={styles.dateText}>
-                      {edu.startDate} - {edu.endDate}
-                    </Text>
-                  </View>
-                  <Text style={[styles.companyText, { marginBottom: 0 }]}>{edu.institution}</Text>
+              <Text style={styles.sectionHeadingLeft}>Projects</Text>
+              {content.projects.map((proj) => (
+                <View key={proj.id} style={styles.itemBlock}>
+                  <Text style={styles.roleTitle}>{proj.name}</Text>
+                  {proj.technologies && (
+                    <Text style={[styles.companyText, { fontSize: 8, marginBottom: 1 }]}>{proj.technologies.join(', ')}</Text>
+                  )}
+                  {proj.description && <Text style={styles.summaryText}>{proj.description}</Text>}
                 </View>
               ))}
             </View>
@@ -218,41 +221,36 @@ export default function ModernExecutive({ content }: { content: ResumeContent })
 
         {/* Right Column (Dark Sidebar) */}
         <View style={styles.rightColumn}>
-          {avatarUrl && (
-            <View style={styles.avatarContainer}>
-              <Image src={avatarUrl} style={styles.avatar} />
+          {content.skills && content.skills.length > 0 && (
+            <View style={styles.sectionRight}>
+              <Text style={styles.sectionHeadingRight}>Skills</Text>
+              {content.skills.map((cat) => (
+                <View key={cat.id} style={styles.rightItemBlock}>
+                  <Text style={styles.rightItemTitle}>{cat.categoryName}</Text>
+                  <Text style={styles.rightItemText}>{cat.skills.join(', ')}</Text>
+                </View>
+              ))}
             </View>
           )}
 
-          {content.skills.length > 0 && (
-            <View>
-              {content.skills.map((cat) => (
-                <View key={cat.id} style={styles.sectionRight}>
-                  <Text style={styles.sectionHeadingRight}>{cat.categoryName}</Text>
-                  
-                  {/* If it's key achievements, we render them as separated blocks, else as a joined string */}
-                  {cat.categoryName.toLowerCase().includes('achievement') ? (
-                    cat.skills.map((skill, idx) => (
-                      <View key={idx} style={styles.rightItemBlock}>
-                        {/* We try to split title and description if it contains a colon, else just render it */}
-                        {skill.includes(':') ? (
-                          <>
-                            <Text style={styles.rightItemTitle}>{skill.split(':')[0]}</Text>
-                            <Text style={styles.rightItemText}>{skill.split(':')[1].trim()}</Text>
-                          </>
-                        ) : (
-                          <View style={{ flexDirection: 'row', marginBottom: 4 }}>
-                            <Text style={{ width: 8, fontSize: 10, color: '#2563eb' }}>›</Text>
-                            <Text style={styles.rightItemText}>{skill}</Text>
-                          </View>
-                        )}
-                      </View>
-                    ))
-                  ) : (
-                    <Text style={styles.rightItemText}>
-                      {cat.skills.join(', ')}
-                    </Text>
-                  )}
+          {content.certifications && content.certifications.length > 0 && (
+            <View style={styles.sectionRight}>
+              <Text style={styles.sectionHeadingRight}>Certifications</Text>
+              {content.certifications.map((cert) => (
+                <View key={cert.id} style={styles.rightItemBlock}>
+                  <Text style={styles.rightItemTitle}>{cert.issuer}: {cert.name}</Text>
+                  {cert.credentialId && <Text style={styles.rightItemText}>{cert.credentialId}</Text>}
+                </View>
+              ))}
+            </View>
+          )}
+
+          {content.achievements && content.achievements.length > 0 && (
+            <View style={styles.sectionRight}>
+              <Text style={styles.sectionHeadingRight}>Achievements</Text>
+              {content.achievements.map((ach) => (
+                <View key={ach.id} style={{ marginBottom: 3 }}>
+                  <Text style={styles.rightItemText}>• {ach.title}</Text>
                 </View>
               ))}
             </View>
@@ -263,3 +261,4 @@ export default function ModernExecutive({ content }: { content: ResumeContent })
     </Document>
   );
 }
+

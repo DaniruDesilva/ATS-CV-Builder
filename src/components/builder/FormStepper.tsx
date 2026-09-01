@@ -1,16 +1,31 @@
 'use client';
 
 import { useResumeStore } from '@/lib/store/useResumeStore';
-import { User, AlignLeft, Briefcase, GraduationCap, Code2, FolderGit2, Palette, CheckCircle2 } from 'lucide-react';
+import {
+  User,
+  AlignLeft,
+  Briefcase,
+  GraduationCap,
+  Code2,
+  FolderGit2,
+  Award,
+  Trophy,
+  Users2,
+  Palette,
+  CheckCircle2
+} from 'lucide-react';
 
 export const STEPS = [
   { id: 0, label: 'Contact', icon: User },
   { id: 1, label: 'Summary', icon: AlignLeft },
-  { id: 2, label: 'Experience', icon: Briefcase },
-  { id: 3, label: 'Education', icon: GraduationCap },
-  { id: 4, label: 'Skills', icon: Code2 },
+  { id: 2, label: 'Education', icon: GraduationCap },
+  { id: 3, label: 'Skills', icon: Code2 },
+  { id: 4, label: 'Experience', icon: Briefcase },
   { id: 5, label: 'Projects', icon: FolderGit2 },
-  { id: 6, label: 'Templates', icon: Palette },
+  { id: 6, label: 'Certifications', icon: Award },
+  { id: 7, label: 'Achievements', icon: Trophy },
+  { id: 8, label: 'References', icon: Users2 },
+  { id: 9, label: 'Templates', icon: Palette },
 ];
 
 export function FormStepper() {

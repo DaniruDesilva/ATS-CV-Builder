@@ -1,4 +1,4 @@
-import { Document, Page, Text, View, StyleSheet, Image } from '@react-pdf/renderer';
+import { Document, Page, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
 import { ResumeContent } from '@/types/resume';
 
 const styles = StyleSheet.create({
@@ -6,165 +6,144 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     fontSize: 9,
     fontFamily: 'Helvetica',
-    lineHeight: 1.5,
+    lineHeight: 1.4,
   },
   leftColumn: {
     flex: 1,
-    backgroundColor: '#f8fafc', // Slate 50 (Very light gray)
-    padding: '40pt 25pt',
+    backgroundColor: '#f8fafc',
+    padding: '30pt 18pt',
     borderRightWidth: 1,
     borderRightColor: '#e2e8f0',
   },
   rightColumn: {
     flex: 2,
     backgroundColor: '#ffffff',
-    padding: '40pt 40pt 40pt 30pt',
+    padding: '30pt 25pt',
   },
   
   // --- Left Column Styles ---
-  avatarContainer: {
-    alignItems: 'center',
-    marginBottom: 24,
-  },
-  avatar: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    objectFit: 'cover',
-  },
   sectionLeft: {
-    marginBottom: 18,
+    marginBottom: 12,
   },
   sectionHeadingLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
     color: '#047857', // Emerald 700
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 8,
+    letterSpacing: 0.8,
+    marginBottom: 6,
   },
   iconPlaceholder: {
-    marginRight: 6,
+    marginRight: 4,
     color: '#047857',
   },
   contactItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 6,
+    marginBottom: 3,
   },
   contactText: {
-    fontSize: 8.5,
+    fontSize: 8,
     color: '#475569',
   },
   leftItemBlock: {
-    marginBottom: 10,
+    marginBottom: 6,
   },
   leftItemTitle: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontFamily: 'Helvetica-Bold',
     color: '#0f172a',
-    marginBottom: 2,
+    marginBottom: 1,
   },
   leftItemText: {
-    fontSize: 8.5,
+    fontSize: 8,
     color: '#475569',
-    lineHeight: 1.5,
-  },
-  bulletPointLeft: {
-    width: 8,
-    fontSize: 9,
-    color: '#047857', // Emerald
+    lineHeight: 1.35,
   },
 
   // --- Right Column Styles ---
   headerPill: {
-    backgroundColor: '#ecfdf5', // Emerald 50
-    borderRadius: 16,
-    padding: '16pt 20pt',
-    marginBottom: 24,
+    backgroundColor: '#ecfdf5',
+    borderRadius: 8,
+    padding: '10pt 14pt',
+    marginBottom: 14,
   },
   name: {
-    fontSize: 24,
+    fontSize: 18,
     fontFamily: 'Helvetica-Bold',
-    color: '#064e3b', // Emerald 900
-    marginBottom: 4,
-    letterSpacing: -0.5,
+    color: '#064e3b',
+    marginBottom: 2,
   },
   title: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
-    color: '#047857', // Emerald 700
+    color: '#047857',
   },
   
   sectionRight: {
-    marginBottom: 18,
+    marginBottom: 12,
   },
   sectionHeadingRight: {
-    fontSize: 11,
+    fontSize: 9.5,
     fontFamily: 'Helvetica-Bold',
     color: '#047857',
     textTransform: 'uppercase',
-    letterSpacing: 1,
-    borderBottomWidth: 1.5,
-    borderBottomColor: '#a7f3d0', // Emerald 200
-    paddingBottom: 4,
-    marginBottom: 10,
+    letterSpacing: 0.8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#a7f3d0',
+    paddingBottom: 2,
+    marginBottom: 6,
   },
   summaryText: {
-    fontSize: 9,
+    fontSize: 8.5,
     color: '#334155',
-    lineHeight: 1.6,
+    lineHeight: 1.4,
   },
   itemBlock: {
-    marginBottom: 14,
+    marginBottom: 8,
   },
   itemHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'baseline',
-    marginBottom: 3,
+    marginBottom: 1,
   },
   roleTitle: {
-    fontSize: 10.5,
+    fontSize: 9,
     fontFamily: 'Helvetica-Bold',
     color: '#0f172a',
   },
   dateText: {
-    fontSize: 8.5,
+    fontSize: 8,
     fontFamily: 'Helvetica-Bold',
     color: '#64748b',
   },
   companyText: {
-    fontSize: 9.5,
+    fontSize: 8.5,
     fontFamily: 'Helvetica-Bold',
-    color: '#047857', // Emerald 700
-    marginBottom: 4,
+    color: '#047857',
+    marginBottom: 2,
   },
   bulletRow: {
     flexDirection: 'row',
-    marginBottom: 3,
+    marginBottom: 2,
     paddingLeft: 4,
   },
   bulletPointRight: {
-    width: 10,
-    fontSize: 9,
+    width: 8,
+    fontSize: 8.5,
     color: '#047857',
-    fontFamily: 'Helvetica-Bold',
   },
   bulletText: {
     flex: 1,
-    fontSize: 9,
+    fontSize: 8.5,
     color: '#334155',
-    lineHeight: 1.5,
+    lineHeight: 1.35,
   },
 });
 
 export default function TechnicalClean({ content }: { content: ResumeContent }) {
   const { personalInfo } = content;
-  // Use github field as avatar url for now since it's not in the schema
-  const avatarUrl = personalInfo.github && personalInfo.github.startsWith('http') ? personalInfo.github : null;
 
   return (
     <Document title={`${personalInfo.fullName || 'Resume'} - Technical Clean`}>
@@ -172,12 +151,6 @@ export default function TechnicalClean({ content }: { content: ResumeContent }) 
         
         {/* Left Column (Light Sidebar) */}
         <View style={styles.leftColumn}>
-          {avatarUrl && (
-            <View style={styles.avatarContainer}>
-              <Image src={avatarUrl} style={styles.avatar} />
-            </View>
-          )}
-
           {/* Contacts */}
           <View style={styles.sectionLeft}>
             <View style={styles.sectionHeadingLeft}>
@@ -191,7 +164,7 @@ export default function TechnicalClean({ content }: { content: ResumeContent }) 
           </View>
 
           {/* Skills / Categories in Sidebar */}
-          {content.skills.length > 0 && (
+          {content.skills && content.skills.length > 0 && (
             <View>
               {content.skills.map((cat) => (
                 <View key={cat.id} style={styles.sectionLeft}>
@@ -199,31 +172,23 @@ export default function TechnicalClean({ content }: { content: ResumeContent }) 
                     <Text style={styles.iconPlaceholder}>■</Text>
                     <Text>{cat.categoryName}</Text>
                   </View>
-                  
-                  {cat.categoryName.toLowerCase().includes('achievement') ? (
-                    cat.skills.map((skill, idx) => (
-                      <View key={idx} style={styles.leftItemBlock}>
-                        {skill.includes(':') ? (
-                          <>
-                            <View style={{ flexDirection: 'row', marginBottom: 2 }}>
-                              <Text style={styles.bulletPointLeft}>•</Text>
-                              <Text style={styles.leftItemTitle}>{skill.split(':')[0]}</Text>
-                            </View>
-                            <Text style={styles.leftItemText}>{skill.split(':')[1].trim()}</Text>
-                          </>
-                        ) : (
-                          <View style={{ flexDirection: 'row', marginBottom: 4 }}>
-                            <Text style={styles.bulletPointLeft}>•</Text>
-                            <Text style={styles.leftItemText}>{skill}</Text>
-                          </View>
-                        )}
-                      </View>
-                    ))
-                  ) : (
-                    <Text style={styles.leftItemText}>
-                      {cat.skills.join(', ')}
-                    </Text>
-                  )}
+                  <Text style={styles.leftItemText}>{cat.skills.join(', ')}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Certifications */}
+          {content.certifications && content.certifications.length > 0 && (
+            <View style={styles.sectionLeft}>
+              <View style={styles.sectionHeadingLeft}>
+                <Text style={styles.iconPlaceholder}>■</Text>
+                <Text>Certifications</Text>
+              </View>
+              {content.certifications.map((cert) => (
+                <View key={cert.id} style={styles.leftItemBlock}>
+                  <Text style={styles.leftItemTitle}>{cert.issuer}: {cert.name}</Text>
+                  {cert.credentialId && <Text style={styles.leftItemText}>{cert.credentialId}</Text>}
                 </View>
               ))}
             </View>
@@ -246,26 +211,19 @@ export default function TechnicalClean({ content }: { content: ResumeContent }) 
             </View>
           )}
 
-          {content.experience.length > 0 && (
+          {content.experience && content.experience.length > 0 && (
             <View style={styles.sectionRight}>
               <Text style={styles.sectionHeadingRight}>Experience</Text>
               {content.experience.map((exp) => (
                 <View key={exp.id} style={styles.itemBlock}>
                   <View style={styles.itemHeader}>
-                    <Text style={styles.companyText}>
-                      {exp.company}
-                    </Text>
+                    <Text style={styles.companyText}>{exp.company}</Text>
                     <Text style={styles.dateText}>
-                      {exp.location}
+                      {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
                     </Text>
                   </View>
-                  <View style={styles.itemHeader}>
-                    <Text style={styles.roleTitle}>{exp.position}</Text>
-                    <Text style={styles.dateText}>
-                      {exp.startDate} - {exp.current ? 'Present' : exp.endDate}
-                    </Text>
-                  </View>
-                  <View>
+                  <Text style={styles.roleTitle}>{exp.position}</Text>
+                  <View style={{ marginTop: 2 }}>
                     {exp.highlights.map((bullet, idx) => bullet ? (
                       <View key={idx} style={styles.bulletRow}>
                         <Text style={styles.bulletPointRight}>•</Text>
@@ -278,7 +236,22 @@ export default function TechnicalClean({ content }: { content: ResumeContent }) 
             </View>
           )}
 
-          {content.education.length > 0 && (
+          {content.projects && content.projects.length > 0 && (
+            <View style={styles.sectionRight}>
+              <Text style={styles.sectionHeadingRight}>Projects</Text>
+              {content.projects.map((proj) => (
+                <View key={proj.id} style={styles.itemBlock}>
+                  <Text style={styles.roleTitle}>{proj.name}</Text>
+                  {proj.technologies && (
+                    <Text style={[styles.companyText, { fontSize: 8, marginBottom: 1 }]}>{proj.technologies.join(', ')}</Text>
+                  )}
+                  {proj.description && <Text style={styles.summaryText}>{proj.description}</Text>}
+                </View>
+              ))}
+            </View>
+          )}
+
+          {content.education && content.education.length > 0 && (
             <View style={styles.sectionRight}>
               <Text style={styles.sectionHeadingRight}>Education</Text>
               {content.education.map((edu) => (
@@ -286,10 +259,11 @@ export default function TechnicalClean({ content }: { content: ResumeContent }) 
                   <View style={styles.itemHeader}>
                     <Text style={styles.roleTitle}>{edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}</Text>
                     <Text style={styles.dateText}>
-                      {edu.startDate} - {edu.endDate}
+                      {edu.startDate} – {edu.endDate}
                     </Text>
                   </View>
                   <Text style={[styles.companyText, { marginBottom: 0, color: '#334155' }]}>{edu.institution}</Text>
+                  {edu.gpa && <Text style={[styles.summaryText, { fontSize: 8 }]}>{edu.gpa}</Text>}
                 </View>
               ))}
             </View>
@@ -300,3 +274,4 @@ export default function TechnicalClean({ content }: { content: ResumeContent }) 
     </Document>
   );
 }
+

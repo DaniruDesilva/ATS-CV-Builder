@@ -48,6 +48,31 @@ export interface ProjectItem {
   highlights: string[];
 }
 
+export interface CertificationItem {
+  id: string;
+  name: string;
+  issuer?: string;
+  issueDate?: string;
+  credentialId?: string;
+  url?: string;
+}
+
+export interface AchievementItem {
+  id: string;
+  title: string;
+  description?: string;
+  date?: string;
+}
+
+export interface ReferenceItem {
+  id: string;
+  name: string;
+  designation?: string;
+  institution?: string;
+  email?: string;
+  phone?: string;
+}
+
 export interface ResumeContent {
   personalInfo: PersonalInfo;
   summary: string;
@@ -55,6 +80,9 @@ export interface ResumeContent {
   education: EducationItem[];
   skills: SkillCategory[];
   projects: ProjectItem[];
+  achievements?: AchievementItem[];
+  certifications?: CertificationItem[];
+  references?: ReferenceItem[];
 }
 
 export type TemplateId = 'classic-ats' | 'modern-executive' | 'technical-clean' | 'traditional-ats';

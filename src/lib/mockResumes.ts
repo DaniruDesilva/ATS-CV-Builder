@@ -1,71 +1,8 @@
 import { ResumeContent } from '@/types/resume';
+import { DANIRU_SAMPLE_RESUME } from './store/useResumeStore';
 
-export const mockResume1: ResumeContent = {
-  personalInfo: {
-    fullName: 'Abigail Hall',
-    jobTitle: 'Senior Business Analyst | Data Analytics Expert',
-    email: 'ahall@enhancv.com',
-    phone: 'San Francisco, CA', // Hack for spacing in single column
-    location: 'linkedin.com/in/abigail',
-    linkedin: '',
-    github: ''
-  },
-  summary: 'Seasoned IT business analyst with over 12 years in business analytics, specializing in data visualization and BI software, including Qlikview and SAS. Demonstrated success in leading major analytics dashboard projects that enhanced reporting efficiency by 30%. Expertise extends to Agile and Scrum methodologies, JIRA, SQL, ETL, and Master Data Management. Proven ability in boosting operational efficiencies and achieving substantial cost savings through strategic data integration projects.',
-  experience: [
-    {
-      id: '1',
-      position: 'Business Systems Analyst',
-      company: 'Genentech',
-      location: 'South San Francisco, CA',
-      startDate: '01/2016',
-      endDate: 'Present',
-      current: true,
-      highlights: [
-        'Led the development of an advanced analytics dashboard that improved decision-making speed for senior management by 25%.',
-        'Facilitated over 40 workshops to define and refine project scopes, translating complex data into actionable insights for cross-functional teams.',
-        'Conducted in-depth data analysis to validate the feasibility of new dashboard features, which increased user engagement by 15%.'
-      ]
-    },
-    {
-      id: '2',
-      position: 'Business Systems Analyst',
-      company: 'Amgen',
-      location: 'Thousand Oaks, CA',
-      startDate: '06/2012',
-      endDate: '12/2015',
-      current: false,
-      highlights: [
-        'Implemented a strategic data integration solution that streamlined operations and saved the company $120K annually.',
-        'Managed a portfolio of data analytics projects, ensuring alignment with business goals and continuous delivery of value.',
-        'Developed user stories and use cases for BI solutions, improving data-driven decision-making across the organization.'
-      ]
-    }
-  ],
-  education: [
-    {
-      id: '1',
-      degree: 'Master of Science in Information Systems',
-      fieldOfStudy: '',
-      institution: 'University of San Francisco',
-      startDate: '01/2006',
-      endDate: '01/2008'
-    },
-    {
-      id: '2',
-      degree: 'Bachelor of Science in Computer Science',
-      fieldOfStudy: '',
-      institution: 'University of California, Berkeley',
-      startDate: '01/2002',
-      endDate: '01/2006'
-    }
-  ],
-  skills: [
-    { id: '1', categoryName: 'Key Achievements', skills: ['Streamlined reporting processes', 'Enhanced data integration', 'Award for Innovation'] },
-    { id: '2', categoryName: 'Skills', skills: ['Data Visualization', 'Agile and Scrum', 'JIRA', 'SQL', 'ETL', 'Business Intelligence'] },
-    { id: '3', categoryName: 'Certification', skills: ['Certified Scrum Master - Certification focusing on Agile project management methodologies, provided by Scrum Alliance.'] }
-  ],
-  projects: []
-};
+export const mockResume1: ResumeContent = DANIRU_SAMPLE_RESUME;
+
 
 export const mockResume2: ResumeContent = {
   personalInfo: {

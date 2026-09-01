@@ -4,10 +4,13 @@ import { useResumeStore } from '@/lib/store/useResumeStore';
 import { FormStepper, STEPS } from '@/components/builder/FormStepper';
 import { ContactForm } from '@/components/builder/forms/ContactForm';
 import { SummaryForm } from '@/components/builder/forms/SummaryForm';
-import { ExperienceForm } from '@/components/builder/forms/ExperienceForm';
 import { EducationForm } from '@/components/builder/forms/EducationForm';
 import { SkillsForm } from '@/components/builder/forms/SkillsForm';
+import { ExperienceForm } from '@/components/builder/forms/ExperienceForm';
 import { ProjectsForm } from '@/components/builder/forms/ProjectsForm';
+import { CertificationsForm } from '@/components/builder/forms/CertificationsForm';
+import { AchievementsForm } from '@/components/builder/forms/AchievementsForm';
+import { ReferencesForm } from '@/components/builder/forms/ReferencesForm';
 import { LivePreview } from '@/components/builder/LivePreview';
 import {
   ChevronLeft,
@@ -37,24 +40,34 @@ export default function BuilderPage() {
   // Real-time ATS Content Score Engine
   const calculateAtsScore = () => {
     let score = 0;
-    const { personalInfo, summary, experience, education, skills } = content;
+    const { personalInfo, summary, experience, education, skills, projects, certifications, achievements } = content;
     
     if (personalInfo.fullName) score += 5;
     if (personalInfo.email) score += 5;
     if (personalInfo.phone) score += 5;
     if (personalInfo.location) score += 5;
+    if (personalInfo.linkedin || personalInfo.github) score += 5;
     
-    if (summary && summary.length > 40) score += 15;
+    if (summary && summary.length > 40) score += 10;
     
-    if (experience.length > 0) {
-      score += 15;
-      const totalHighlights = experience.reduce((acc, e) => acc + (e.highlights?.length || 0), 0);
-      if (totalHighlights >= 3) score += 20;
-    }
-    
-    if (education.length > 0) score += 15;
+    if (education.length > 0) score += 10;
     
     if (skills.length > 0 && skills.some((s) => s.skills.length > 0)) score += 15;
+
+    if (experience.length > 0) {
+      score += 15;
+      const totalExpHighlights = experience.reduce((acc, e) => acc + (e.highlights?.length || 0), 0);
+      if (totalExpHighlights >= 2) score += 5;
+    }
+    
+    if (projects && projects.length > 0) {
+      score += 10;
+      const totalProjHighlights = projects.reduce((acc, p) => acc + (p.highlights?.length || 0), 0);
+      if (totalProjHighlights >= 2) score += 5;
+    }
+
+    if (certifications && certifications.length > 0) score += 5;
+    if (achievements && achievements.length > 0) score += 5;
     
     return Math.min(100, score);
   };
@@ -68,27 +81,54 @@ export default function BuilderPage() {
       case 1:
         return <SummaryForm />;
       case 2:
-        return <ExperienceForm />;
-      case 3:
         return <EducationForm />;
-      case 4:
+      case 3:
         return <SkillsForm />;
+      case 4:
+        return <ExperienceForm />;
       case 5:
         return <ProjectsForm />;
       case 6:
+        return <CertificationsForm />;
+      case 7:
+        return <AchievementsForm />;
+      case 8:
+        return <ReferencesForm />;
+      case 9:
         return (
           <div className="space-y-4">
             <div>
               <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Palette className="w-5 h-5 text-emerald-600" /> Choose Template
+                <Palette className="w-5 h-5 text-emerald-600" /> Choose ATS Template
               </h2>
               <p className="text-sm text-slate-500 mt-1">
-                All templates use single-column layouts with guaranteed ATS parseability.
+                All templates are engineered with clean single-column structure and guaranteed 100% ATS parseability.
               </p>
             </div>
 
             <div className="grid grid-cols-1 gap-3 pt-2">
               <button
+                type="button"
+                onClick={() => setTemplateId('traditional-ats')}
+                className={`p-4 rounded-xl border text-left transition-all ${
+                  templateId === 'traditional-ats'
+                    ? 'bg-emerald-50 border-emerald-300 ring-2 ring-emerald-200'
+                    : 'bg-white border-slate-200 hover:border-slate-300'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-sm text-slate-900">Traditional ATS (Gold Standard)</span>
+                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 font-semibold">
+                    Top Tech Pick
+                  </span>
+                </div>
+                <p className="text-sm text-slate-500 mt-1">
+                  The quintessential Ivy League / Software Engineering standard. Centered contact header with horizontal rules.
+                </p>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setTemplateId('classic-ats')}
                 className={`p-4 rounded-xl border text-left transition-all ${
                   templateId === 'classic-ats'
@@ -97,17 +137,18 @@ export default function BuilderPage() {
                 }`}
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-sm text-slate-900">Classic ATS</span>
-                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-700 font-semibold">
+                  <span className="font-bold text-sm text-slate-900">Classic ATS Modern</span>
+                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 font-semibold">
                     Most Popular
                   </span>
                 </div>
                 <p className="text-sm text-slate-500 mt-1">
-                  100% parsing score across Taleo, Workday, Greenhouse, and Lever.
+                  Clean sans-serif layout with subtle dividers, ideal for general software and tech roles.
                 </p>
               </button>
 
               <button
+                type="button"
                 onClick={() => setTemplateId('modern-executive')}
                 className={`p-4 rounded-xl border text-left transition-all ${
                   templateId === 'modern-executive'
@@ -127,6 +168,7 @@ export default function BuilderPage() {
               </button>
 
               <button
+                type="button"
                 onClick={() => setTemplateId('technical-clean')}
                 className={`p-4 rounded-xl border text-left transition-all ${
                   templateId === 'technical-clean'

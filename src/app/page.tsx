@@ -12,7 +12,7 @@ import {
   Code,
   Sparkles
 } from 'lucide-react';
-import { ClassicAtsDom, ModernExecutiveDom, TechnicalCleanDom, TraditionalAtsDom } from '@/components/builder/LivePreview';
+import { ClassicAtsDom, ModernExecutiveDom, TechnicalCleanDom, TraditionalAtsDom } from '@/components/builder/DomTemplates';
 import { mockResume1, mockResume2, mockResume3 } from '@/lib/mockResumes';
 import AiFeaturesSection from '@/components/layout/AiFeaturesSection';
 

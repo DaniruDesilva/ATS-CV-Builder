@@ -2,8 +2,21 @@
 
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { SkillCategory } from '@/types/resume';
-import { Code2, Plus, Trash2, X } from 'lucide-react';
+import { Code2, Plus, Trash2, X, Sparkles } from 'lucide-react';
 import { useState } from 'react';
+
+const COMMON_CATEGORIES = [
+  'Programming Languages',
+  'Frontend Technologies',
+  'Backend & APIs',
+  'Databases & ORM',
+  'Mobile Development',
+  'Cloud & DevOps',
+  'Hosting & Deployment',
+  'UI/UX',
+  'Version Control',
+  'Graphic Design'
+];
 
 export function SkillsForm() {
   const { content, addSkillCategory, updateSkillCategory, removeSkillCategory } = useResumeStore();
@@ -11,10 +24,10 @@ export function SkillsForm() {
 
   const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors";
 
-  const handleAddCategory = () => {
+  const handleAddCategory = (name = 'Technical Skills') => {
     const newCat: SkillCategory = {
-      id: `sk-${Date.now()}`,
-      categoryName: 'Technical Skills',
+      id: `sk-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
+      categoryName: name,
       skills: []
     };
     addSkillCategory(newCat);
@@ -25,9 +38,17 @@ export function SkillsForm() {
     if (!text) return;
     const cat = content.skills.find((s) => s.id === catId);
     if (!cat) return;
-    if (!cat.skills.includes(text)) {
-      updateSkillCategory(catId, cat.categoryName, [...cat.skills, text]);
-    }
+
+    // Support comma-separated batch adding
+    const tagsToAdd = text.split(',').map((t) => t.trim()).filter((t) => t.length > 0);
+    const updatedSkills = [...cat.skills];
+    tagsToAdd.forEach((t) => {
+      if (!updatedSkills.includes(t)) {
+        updatedSkills.push(t);
+      }
+    });
+
+    updateSkillCategory(catId, cat.categoryName, updatedSkills);
     setNewSkillInput((prev) => ({ ...prev, [catId]: '' }));
   };
 
@@ -46,29 +67,56 @@ export function SkillsForm() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <Code2 className="w-5 h-5 text-blue-600" /> Skills
+            <Code2 className="w-5 h-5 text-blue-600" /> Technical Skills & Competencies
           </h2>
           <p className="text-sm text-slate-500 mt-1">
-            Group skills into categories (e.g., Languages, Databases, Cloud & DevOps).
+            Group your skills into focused categories (e.g. Programming Languages, Frontend, Backend, Databases).
           </p>
         </div>
 
         <button
-          onClick={handleAddCategory}
+          onClick={() => handleAddCategory()}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
         >
           <Plus className="w-4 h-4" /> Add Category
         </button>
       </div>
 
+      {/* Suggested Categories Quick Chips */}
+      <div className="bg-blue-50/70 border border-blue-100 rounded-xl p-3">
+        <span className="text-xs font-bold text-blue-800 flex items-center gap-1 mb-2">
+          <Sparkles className="w-3.5 h-3.5 text-blue-600" /> Quick Add Common Categories:
+        </span>
+        <div className="flex flex-wrap gap-1.5">
+          {COMMON_CATEGORIES.map((catName) => {
+            const exists = content.skills.some((s) => s.categoryName.toLowerCase() === catName.toLowerCase());
+            return (
+              <button
+                key={catName}
+                type="button"
+                disabled={exists}
+                onClick={() => handleAddCategory(catName)}
+                className={`text-[11px] font-medium px-2.5 py-1 rounded-md transition-all ${
+                  exists
+                    ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    : 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-600 hover:text-white shadow-2xs'
+                }`}
+              >
+                + {catName}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
       {content.skills.length === 0 ? (
         <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50">
           <p className="text-sm text-slate-500">No skill categories defined yet.</p>
           <button
-            onClick={handleAddCategory}
+            onClick={() => handleAddCategory()}
             className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold"
           >
-            <Plus className="w-4 h-4" /> Add Skill Category
+            <Plus className="w-4 h-4" /> Add First Category
           </button>
         </div>
       ) : (
@@ -79,7 +127,7 @@ export function SkillsForm() {
                 type="text"
                 value={cat.categoryName}
                 onChange={(e) => updateSkillCategory(cat.id, e.target.value, cat.skills)}
-                placeholder="Category Name (e.g., Languages & Frameworks)"
+                placeholder="Category Name (e.g. Programming Languages)"
                 className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 w-2/3 transition-colors"
               />
               <button
@@ -99,6 +147,7 @@ export function SkillsForm() {
                 >
                   {skill}
                   <button
+                    type="button"
                     onClick={() => handleRemoveSkillTag(cat.id, skill)}
                     className="hover:text-red-500 focus:outline-none transition-colors"
                   >
@@ -120,10 +169,11 @@ export function SkillsForm() {
                     handleAddSkillTag(cat.id);
                   }
                 }}
-                placeholder="Type skill & press Enter"
+                placeholder="e.g. Java, JavaScript, TypeScript (comma-separated supported) & press Enter"
                 className={`flex-1 ${inputClass} text-xs`}
               />
               <button
+                type="button"
                 onClick={() => handleAddSkillTag(cat.id)}
                 className="px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold transition-colors"
               >
