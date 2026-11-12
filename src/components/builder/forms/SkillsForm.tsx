@@ -22,7 +22,7 @@ export function SkillsForm() {
   const { content, addSkillCategory, updateSkillCategory, removeSkillCategory } = useResumeStore();
   const [newSkillInput, setNewSkillInput] = useState<{ [catId: string]: string }>({});
 
-  const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors";
+  const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors";
 
   const handleAddCategory = (name = 'Technical Skills') => {
     const newCat: SkillCategory = {
@@ -67,7 +67,7 @@ export function SkillsForm() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <Code2 className="w-5 h-5 text-blue-600" /> Technical Skills & Competencies
+            <Code2 className="w-5 h-5 text-emerald-600" /> Technical Skills & Competencies
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             Group your skills into focused categories (e.g. Programming Languages, Frontend, Backend, Databases).
@@ -76,16 +76,16 @@ export function SkillsForm() {
 
         <button
           onClick={() => handleAddCategory()}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all"
         >
           <Plus className="w-4 h-4" /> Add Category
         </button>
       </div>
 
       {/* Suggested Categories Quick Chips */}
-      <div className="bg-blue-50/70 border border-blue-100 rounded-xl p-3">
-        <span className="text-xs font-bold text-blue-800 flex items-center gap-1 mb-2">
-          <Sparkles className="w-3.5 h-3.5 text-blue-600" /> Quick Add Common Categories:
+      <div className="bg-emerald-50/70 border border-emerald-100 rounded-xl p-3">
+        <span className="text-xs font-bold text-emerald-900 flex items-center gap-1 mb-2">
+          <Sparkles className="w-3.5 h-3.5 text-emerald-600" /> Quick Add Common Categories:
         </span>
         <div className="flex flex-wrap gap-1.5">
           {COMMON_CATEGORIES.map((catName) => {
@@ -99,7 +99,7 @@ export function SkillsForm() {
                 className={`text-[11px] font-medium px-2.5 py-1 rounded-md transition-all ${
                   exists
                     ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
-                    : 'bg-white text-blue-700 border border-blue-200 hover:bg-blue-600 hover:text-white shadow-2xs'
+                    : 'bg-white text-emerald-800 border border-emerald-200 hover:bg-emerald-600 hover:text-white shadow-xs'
                 }`}
               >
                 + {catName}
@@ -114,7 +114,7 @@ export function SkillsForm() {
           <p className="text-sm text-slate-500">No skill categories defined yet.</p>
           <button
             onClick={() => handleAddCategory()}
-            className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold"
+            className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-colors"
           >
             <Plus className="w-4 h-4" /> Add First Category
           </button>
@@ -128,7 +128,7 @@ export function SkillsForm() {
                 value={cat.categoryName}
                 onChange={(e) => updateSkillCategory(cat.id, e.target.value, cat.skills)}
                 placeholder="Category Name (e.g. Programming Languages)"
-                className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 w-2/3 transition-colors"
+                className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-bold text-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 w-2/3 transition-colors"
               />
               <button
                 onClick={() => removeSkillCategory(cat.id)}
@@ -143,7 +143,7 @@ export function SkillsForm() {
               {cat.skills.map((skill) => (
                 <span
                   key={skill}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-medium border border-blue-200"
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200"
                 >
                   {skill}
                   <button
@@ -175,7 +175,7 @@ export function SkillsForm() {
               <button
                 type="button"
                 onClick={() => handleAddSkillTag(cat.id)}
-                className="px-3 py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 text-xs font-semibold transition-colors"
+                className="px-3 py-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-semibold transition-colors"
               >
                 Add Skill
               </button>

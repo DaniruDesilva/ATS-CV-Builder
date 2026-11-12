@@ -7,13 +7,14 @@ export function ContactForm() {
   const { content, updatePersonalInfo } = useResumeStore();
   const info = content.personalInfo;
 
-  const inputClass = "w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors";
+  const inputClass = "w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors";
+  const urlInputClass = "w-full bg-white border border-slate-200 rounded-lg pl-9 pr-3 py-2.5 text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors";
 
   return (
     <div className="space-y-4">
       <div>
         <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-          <User className="w-5 h-5 text-blue-600" /> Personal Contact Details
+          <User className="w-5 h-5 text-emerald-600" /> Personal Contact Details
         </h2>
         <p className="text-sm text-slate-500 mt-1">
           ATS algorithms parse email, phone, location, and LinkedIn profiles first.
@@ -112,7 +113,7 @@ export function ContactForm() {
               value={info.linkedin || ''}
               onChange={(e) => updatePersonalInfo({ linkedin: e.target.value })}
               placeholder="e.g. https://linkedin.com/in/janedoe"
-              className={inputClass}
+              className={urlInputClass}
             />
           </div>
         </div>
@@ -128,7 +129,7 @@ export function ContactForm() {
               value={info.github || ''}
               onChange={(e) => updatePersonalInfo({ github: e.target.value })}
               placeholder="e.g. https://github.com/janedoe"
-              className={inputClass}
+              className={urlInputClass}
             />
           </div>
         </div>
@@ -144,7 +145,7 @@ export function ContactForm() {
               value={info.website || ''}
               onChange={(e) => updatePersonalInfo({ website: e.target.value })}
               placeholder="e.g. https://janedoe.dev"
-              className={inputClass}
+              className={urlInputClass}
             />
           </div>
         </div>

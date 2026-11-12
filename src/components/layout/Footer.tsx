@@ -1,9 +1,16 @@
 'use client';
 
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { FileText, Shield, Sparkles, Heart } from 'lucide-react';
 
 export function Footer() {
+  const pathname = usePathname();
+
+  // Hide the marketing footer on the builder workbench page for an app-like workspace
+  if (pathname === '/builder' || pathname?.startsWith('/builder/')) {
+    return null;
+  }
   return (
     <footer className="border-t border-slate-200 bg-slate-50 text-slate-600 text-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

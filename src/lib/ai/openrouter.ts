@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { generateBulletImprovement, generateSummaryImprovement } from '@/lib/checker/ruleEngine';
 
 const apiKey = process.env.OPENROUTER_API_KEY || process.env.GEMINI_API_KEY || '';
 const modelName = process.env.OPENROUTER_MODEL || 'google/gemini-2.0-flash-001';
@@ -77,8 +78,18 @@ Respond ONLY with a valid JSON object matching this schema:
 }
 
 export async function optimizeBulletPointWithOpenRouter(bulletText: string, isSummary = false): Promise<string> {
+  const fallbackOptimization = () => {
+    if (isSummary) {
+      return generateSummaryImprovement(bulletText);
+    }
+    const imp = generateBulletImprovement(bulletText);
+    return imp?.improved || bulletText;
+  };
+
   const client = getOpenRouterClient();
-  if (!client) return bulletText;
+  if (!client) {
+    return fallbackOptimization();
+  }
 
   try {
     const prompt = isSummary
@@ -100,11 +111,14 @@ export async function optimizeBulletPointWithOpenRouter(bulletText: string, isSu
       temperature: 0.3
     });
 
-    const result = completion.choices[0]?.message?.content || bulletText;
+    const result = completion.choices[0]?.message?.content || '';
+    if (!result || result.trim().length === 0) {
+      return fallbackOptimization();
+    }
     return result.trim().replace(/^["']|["']$/g, '');
   } catch (error) {
-    console.error('OpenRouter Bullet Optimization Error:', error);
-    return bulletText;
+    console.error('OpenRouter Bullet Optimization Error, falling back to deterministic engine:', error);
+    return fallbackOptimization();
   }
 }
 

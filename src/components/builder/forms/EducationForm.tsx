@@ -15,7 +15,7 @@ export function EducationForm() {
     removeEducationHighlight
   } = useResumeStore();
 
-  const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors";
+  const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors";
 
   const handleAddEdu = () => {
     const newEdu: EducationItem = {
@@ -37,7 +37,7 @@ export function EducationForm() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <GraduationCap className="w-5 h-5 text-blue-600" /> Education & Academic Background
+            <GraduationCap className="w-5 h-5 text-emerald-600" /> Education & Academic Background
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             List degrees, universities, cumulative GPA, district rank, Z-scores, and honors.
@@ -46,7 +46,7 @@ export function EducationForm() {
 
         <button
           onClick={handleAddEdu}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all"
         >
           <Plus className="w-4 h-4" /> Add Degree
         </button>
@@ -57,7 +57,7 @@ export function EducationForm() {
           <p className="text-sm text-slate-500">No education entries added yet.</p>
           <button
             onClick={handleAddEdu}
-            className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold"
+            className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-colors"
           >
             <Plus className="w-4 h-4" /> Add Education
           </button>
@@ -66,7 +66,7 @@ export function EducationForm() {
         content.education.map((edu, idx) => (
           <div key={edu.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
                 Degree #{idx + 1}: {edu.degree || 'Degree'} {edu.institution ? `@ ${edu.institution}` : ''}
               </span>
               <button
@@ -166,7 +166,7 @@ export function EducationForm() {
                 <button
                   type="button"
                   onClick={() => addEducationHighlight(edu.id, '')}
-                  className="text-xs text-blue-600 hover:text-blue-700 font-semibold flex items-center gap-1"
+                  className="text-xs text-emerald-700 hover:text-emerald-800 font-semibold flex items-center gap-1 transition-colors"
                 >
                   <Plus className="w-3.5 h-3.5" /> Add Highlight
                 </button>

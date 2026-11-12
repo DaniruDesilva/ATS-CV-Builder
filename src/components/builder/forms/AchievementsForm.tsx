@@ -7,7 +7,7 @@ import { Trophy, Plus, Trash2 } from 'lucide-react';
 export function AchievementsForm() {
   const { content, addAchievement, updateAchievement, removeAchievement } = useResumeStore();
 
-  const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors";
+  const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors";
 
   const handleAddAch = () => {
     const newAch: AchievementItem = {
@@ -26,7 +26,7 @@ export function AchievementsForm() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-blue-600" /> Extra-Curricular & Achievements
+            <Trophy className="w-5 h-5 text-emerald-600" /> Extra-Curricular & Achievements
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             Highlight leadership, sports, university clubs, hackathons, and competitions.
@@ -36,7 +36,7 @@ export function AchievementsForm() {
         <button
           type="button"
           onClick={handleAddAch}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all"
         >
           <Plus className="w-4 h-4" /> Add Activity / Award
         </button>
@@ -48,7 +48,7 @@ export function AchievementsForm() {
           <button
             type="button"
             onClick={handleAddAch}
-            className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold"
+            className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-colors"
           >
             <Plus className="w-4 h-4" /> Add Activity
           </button>
@@ -57,7 +57,7 @@ export function AchievementsForm() {
         achievements.map((ach, idx) => (
           <div key={ach.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
                 Achievement #{idx + 1}
               </span>
               <button

@@ -7,7 +7,7 @@ import { Award, Plus, Trash2, Globe, FileBadge2 } from 'lucide-react';
 export function CertificationsForm() {
   const { content, addCertification, updateCertification, removeCertification } = useResumeStore();
 
-  const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors";
+  const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors";
 
   const handleAddCert = () => {
     const newCert: CertificationItem = {
@@ -28,7 +28,7 @@ export function CertificationsForm() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-            <Award className="w-5 h-5 text-blue-600" /> Certifications & Licenses
+            <Award className="w-5 h-5 text-emerald-600" /> Certifications & Licenses
           </h2>
           <p className="text-sm text-slate-500 mt-1">
             Add online certifications, course credentials, certificate IDs, and issuing platforms.
@@ -38,7 +38,7 @@ export function CertificationsForm() {
         <button
           type="button"
           onClick={handleAddCert}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-all"
         >
           <Plus className="w-4 h-4" /> Add Certification
         </button>
@@ -50,7 +50,7 @@ export function CertificationsForm() {
           <button
             type="button"
             onClick={handleAddCert}
-            className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-600 text-white text-xs font-semibold"
+            className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-sm transition-colors"
           >
             <Plus className="w-4 h-4" /> Add Certification
           </button>
@@ -59,7 +59,7 @@ export function CertificationsForm() {
         certs.map((cert, idx) => (
           <div key={cert.id} className="bg-slate-50 border border-slate-200 rounded-xl p-4 space-y-3">
             <div className="flex items-center justify-between border-b border-slate-200 pb-2">
-              <span className="text-xs font-bold text-blue-600 uppercase tracking-wider flex items-center gap-1.5">
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
                 <FileBadge2 className="w-3.5 h-3.5" />
                 Certification #{idx + 1}: {cert.issuer ? `${cert.issuer}: ` : ''}{cert.name || 'Untitled Certification'}
               </span>

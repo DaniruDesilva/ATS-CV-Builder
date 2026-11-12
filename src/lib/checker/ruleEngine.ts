@@ -271,7 +271,7 @@ function extractKeywordsFromJD(jd: string): string[] {
 
 /* ── INTELLIGENT GOOGLE X-Y-Z REWRITER ── */
 
-function generateBulletImprovement(bullet: string): BulletImprovement | null {
+export function generateBulletImprovement(bullet: string): BulletImprovement | null {
   const cleaned = bullet.replace(/^[•\-*–▪►]\s*/, '').trim().replace(/\s+/g, ' ');
   if (cleaned.length < 25) return null;
 
@@ -342,6 +342,30 @@ function generateBulletImprovement(bullet: string): BulletImprovement | null {
     improved,
     reason
   };
+}
+
+export function generateSummaryImprovement(summary: string): string {
+  const cleaned = summary.trim().replace(/\s+/g, ' ');
+  if (!cleaned || cleaned.length < 15) return summary;
+
+  // Remove first-person openers
+  let polished = cleaned
+    .replace(/^(i\s+am\s+(an?|the)?|i'm\s+(an?|the)?)\s*/i, '')
+    .replace(/\bi\s+have\s+been\s+/gi, 'Experienced in ')
+    .replace(/\bi\s+have\s+/gi, 'Demonstrated expertise in ')
+    .replace(/\bi\s+specialize\s+in\s+/gi, 'Specializing in ')
+    .replace(/\bmy\s+skills\s+include\s+/gi, 'Proficient in ')
+    .replace(/\b(i|my|me)\b/gi, '');
+
+  // Capitalize first letter
+  polished = polished.charAt(0).toUpperCase() + polished.slice(1).trim();
+
+  // If summary lacks a strong closing impact sentence, add one
+  if (!polished.match(/(delivering|accelerating|scaling|improving|reducing|driving|optimizing)/i)) {
+    polished = polished.replace(/\.\s*$/, '') + '. Dedicated to architecting robust, scalable software systems that accelerate development velocity and business outcomes.';
+  }
+
+  return polished;
 }
 
 /* ── MAIN EVALUATION FUNCTION ── */
