@@ -67,9 +67,11 @@ Respond ONLY with a valid JSON object matching this schema:
 
     const content = completion.choices[0]?.message?.content || '{}';
     const cleanedJson = content.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
-    return JSON.parse(cleanedJson);
+    const parsed = JSON.parse(cleanedJson);
+    parsed._isAiGenerated = true;
+    return parsed;
   } catch (error) {
-    console.error('OpenRouter API Error, falling back to heuristic engine:', error);
+    console.error('OpenRouter API Error, falling back to deterministic engine:', error);
     return generateFallbackAiAnalysis(resumeText, jobDescription);
   }
 }
@@ -106,30 +108,16 @@ export async function optimizeBulletPointWithOpenRouter(bulletText: string, isSu
   }
 }
 
-function generateFallbackAiAnalysis(resumeText: string, jobDescription?: string) {
-  const commonSkills = [
-    'TypeScript', 'JavaScript', 'React', 'Next.js', 'Node.js', 'Python', 'SQL', 'PostgreSQL',
-    'Docker', 'AWS', 'REST API', 'GraphQL', 'CI/CD', 'Git', 'Tailwind CSS', 'Redux', 'System Architecture'
-  ];
-
-  const matched = commonSkills.filter((s) => new RegExp(`\\b${s}\\b`, 'i').test(resumeText));
-  const missing = commonSkills.filter((s) => !matched.includes(s)).slice(0, 5);
-
-  const lines = resumeText.split('\n').map((l) => l.trim()).filter((l) => l.length > 25);
-  const weakLine = lines.find((l) => !/\b(\d+|%|\$)\b/.test(l)) || lines[0] || 'Worked on developing frontend applications';
-
+function generateFallbackAiAnalysis(_resumeText: string, _jobDescription?: string) {
+  // Return neutral values — the comprehensive deterministic rule engine
+  // in ruleEngine.ts handles all actual scoring and analysis.
   return {
-    contentScore: 78,
-    skillsScore: Math.min(95, Math.max(50, matched.length * 10)),
-    summary: 'Candidate shows strong technical fundamentals with parseable structure. Increasing quantified metrics and target JD keywords will boost ATS candidate ranking into the top 5%.',
-    matchedSkills: matched.length > 0 ? matched : ['JavaScript', 'React', 'Git', 'Problem Solving'],
-    missingKeywords: missing.length > 0 ? missing : ['Kubernetes', 'Microservices', 'GraphQL'],
-    bulletImprovements: [
-      {
-        original: weakLine,
-        improved: `Architected scalable features (${weakLine.slice(0, 40)}...), increasing user engagement by 35% and reducing load times by 250ms.`,
-        reason: "Transformed passive phrasing into Google's X-Y-Z formula with quantified results."
-      }
-    ]
+    _isAiGenerated: false,
+    contentScore: null,
+    skillsScore: null,
+    summary: null,
+    matchedSkills: [],
+    missingKeywords: [],
+    bulletImprovements: []
   };
 }

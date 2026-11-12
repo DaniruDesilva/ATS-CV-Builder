@@ -16,6 +16,12 @@ export interface QuantificationStats {
   percentage: number;
 }
 
+export interface ActionVerbStats {
+  totalBullets: number;
+  strongVerbBullets: number;
+  percentage: number;
+}
+
 export interface ScanReportData {
   overallScore: number;
   formatScore: number;
@@ -27,10 +33,14 @@ export interface ScanReportData {
   bulletImprovements: BulletImprovement[];
   formattingIssues: FormattingIssue[];
   quantificationStats: QuantificationStats;
+  actionVerbStats: ActionVerbStats;
   contactCompleteness: {
     hasEmail: boolean;
     hasPhone: boolean;
     hasLinkedIn: boolean;
+    hasGitHub: boolean;
+    hasWebsite: boolean;
+    hasLocation: boolean;
     score: number;
   };
   atsHeadingsFound: string[];

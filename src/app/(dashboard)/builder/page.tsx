@@ -37,42 +37,147 @@ export default function BuilderPage() {
     content
   } = useResumeStore();
 
-  // Real-time ATS Content Score Engine
-  const calculateAtsScore = () => {
-    let score = 0;
+  // ── Comprehensive Real-Time ATS Score Engine ──
+  // Multi-dimensional scoring: contact (15), summary (10), education (10),
+  // skills (15), experience (20), projects (10), extras (5), content quality (15)
+  const calculateAtsScore = (): number => {
     const { personalInfo, summary, experience, education, skills, projects, certifications, achievements } = content;
-    
-    if (personalInfo.fullName) score += 5;
-    if (personalInfo.email) score += 5;
-    if (personalInfo.phone) score += 5;
-    if (personalInfo.location) score += 5;
-    if (personalInfo.linkedin || personalInfo.github) score += 5;
-    
-    if (summary && summary.length > 40) score += 10;
-    
-    if (education.length > 0) score += 10;
-    
-    if (skills.length > 0 && skills.some((s) => s.skills.length > 0)) score += 15;
+    let score = 0;
 
+    // ═══ CONTACT INFO (max 15) ═══
+    if (personalInfo.fullName?.trim()) score += 3;
+    if (personalInfo.email?.trim()) score += 3;
+    if (personalInfo.phone?.trim()) score += 3;
+    if (personalInfo.location?.trim()) score += 2;
+    if (personalInfo.linkedin?.trim()) score += 2;
+    if (personalInfo.github?.trim() || personalInfo.website?.trim()) score += 2;
+
+    // ═══ SUMMARY (max 10) ═══
+    if (summary) {
+      const len = summary.trim().length;
+      if (len >= 150 && len <= 500) score += 7;       // Ideal length
+      else if (len >= 50 && len < 150) score += 4;    // Too short
+      else if (len > 500) score += 5;                  // Too long
+      else if (len > 0) score += 2;                    // Minimal
+
+      // Bonus for no first-person ("I", "my", "me")
+      if (!/\b(I|my|me)\b/.test(summary)) score += 2;
+      // Bonus for containing numbers
+      if (/\d/.test(summary)) score += 1;
+    }
+
+    // ═══ EDUCATION (max 10) ═══
+    if (education.length > 0) {
+      score += 4; // Has education section
+      const firstEdu = education[0];
+      if (firstEdu.institution?.trim()) score += 2;
+      if (firstEdu.degree?.trim()) score += 2;
+      if (firstEdu.startDate || firstEdu.endDate) score += 1;
+      if (firstEdu.gpa?.trim()) score += 1;
+    }
+
+    // ═══ SKILLS (max 15) ═══
+    if (skills.length > 0) {
+      const totalSkills = skills.reduce((acc, cat) => acc + cat.skills.length, 0);
+      const categories = skills.filter(s => s.categoryName?.trim() && s.skills.length > 0).length;
+
+      if (categories >= 3) score += 5;
+      else if (categories >= 2) score += 3;
+      else if (categories >= 1) score += 2;
+
+      if (totalSkills >= 15) score += 5;
+      else if (totalSkills >= 8) score += 4;
+      else if (totalSkills >= 4) score += 2;
+      else if (totalSkills >= 1) score += 1;
+
+      // Bonus for well-organized categories
+      if (categories >= 2 && totalSkills >= 6) score += 5;
+      else if (categories >= 1 && totalSkills >= 3) score += 3;
+    }
+
+    // ═══ EXPERIENCE (max 20) ═══
     if (experience.length > 0) {
-      score += 15;
-      const totalExpHighlights = experience.reduce((acc, e) => acc + (e.highlights?.length || 0), 0);
-      if (totalExpHighlights >= 2) score += 5;
-    }
-    
-    if (projects && projects.length > 0) {
-      score += 10;
-      const totalProjHighlights = projects.reduce((acc, p) => acc + (p.highlights?.length || 0), 0);
-      if (totalProjHighlights >= 2) score += 5;
+      score += 5; // Has experience section
+
+      // Count all bullet points and check quality
+      let totalBullets = 0;
+      let quantifiedBullets = 0;
+      let actionVerbBullets = 0;
+      const actionVerbs = ['achieved', 'architected', 'automated', 'built', 'created', 'delivered',
+        'deployed', 'designed', 'developed', 'drove', 'engineered', 'enhanced', 'established',
+        'executed', 'generated', 'grew', 'implemented', 'improved', 'increased', 'integrated',
+        'launched', 'led', 'managed', 'modernized', 'optimized', 'orchestrated', 'piloted',
+        'pioneered', 'produced', 'reduced', 'refactored', 'resolved', 'scaled', 'spearheaded',
+        'streamlined', 'transformed', 'upgraded'];
+
+      experience.forEach(exp => {
+        if (exp.position?.trim()) score += 0.5;
+        if (exp.company?.trim()) score += 0.5;
+        if (exp.startDate) score += 0.25;
+
+        (exp.highlights || []).forEach(bullet => {
+          if (!bullet?.trim()) return;
+          totalBullets++;
+
+          // Check for quantification
+          if (/(\d+%|\$[\d,]+|\b\d+\s*(k|m|users|clients|percent|x)\b|\b\d{2,}\b)/i.test(bullet)) {
+            quantifiedBullets++;
+          }
+
+          // Check for strong action verb start
+          const firstWord = bullet.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g, '') || '';
+          if (actionVerbs.includes(firstWord)) {
+            actionVerbBullets++;
+          }
+        });
+      });
+
+      // Bullet quantity (max 3)
+      if (totalBullets >= 8) score += 3;
+      else if (totalBullets >= 4) score += 2;
+      else if (totalBullets >= 1) score += 1;
+
+      // Quantification rate (max 5)
+      if (totalBullets > 0) {
+        const quantRate = quantifiedBullets / totalBullets;
+        if (quantRate >= 0.5) score += 5;
+        else if (quantRate >= 0.3) score += 3;
+        else if (quantRate >= 0.1) score += 1;
+      }
+
+      // Action verb rate (max ~2 from remaining)
+      if (totalBullets > 0) {
+        const verbRate = actionVerbBullets / totalBullets;
+        if (verbRate >= 0.5) score += 2;
+        else if (verbRate >= 0.2) score += 1;
+      }
     }
 
-    if (certifications && certifications.length > 0) score += 5;
-    if (achievements && achievements.length > 0) score += 5;
-    
-    return Math.min(100, score);
+    // ═══ PROJECTS (max 10) ═══
+    if (projects && projects.length > 0) {
+      score += 3;
+      const projWithDetails = projects.filter(p =>
+        p.name?.trim() && (p.description?.trim() || (p.highlights && p.highlights.length > 0))
+      ).length;
+      if (projWithDetails >= 3) score += 4;
+      else if (projWithDetails >= 2) score += 3;
+      else if (projWithDetails >= 1) score += 2;
+
+      // Bonus for technologies listed
+      const projWithTech = projects.filter(p => p.technologies && p.technologies.length > 0).length;
+      if (projWithTech >= 2) score += 3;
+      else if (projWithTech >= 1) score += 2;
+    }
+
+    // ═══ EXTRAS (max 5) ═══
+    if (certifications && certifications.length > 0) score += 3;
+    if (achievements && achievements.length > 0) score += 2;
+
+    return Math.min(100, Math.round(score));
   };
 
   const atsScore = calculateAtsScore();
+
 
   const renderActiveStepForm = () => {
     switch (activeStep) {

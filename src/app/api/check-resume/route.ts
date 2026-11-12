@@ -34,30 +34,58 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Deterministic Regex Evaluation
-    const deterministic = evaluateDeterministicRules(extracted.text, extracted.pageCount);
+    // 2. Comprehensive Deterministic Evaluation (works without any API key)
+    const deterministic = evaluateDeterministicRules(extracted.text, extracted.pageCount, jobDescription);
 
-    // 3. Gemini Semantic AI Evaluation
-    const aiResult = await analyzeResumeWithGemini(extracted.text, jobDescription);
+    // 3. Try AI enhancement (optional — falls back gracefully if no API key)
+    let aiEnhanced = false;
+    let aiResult: any = null;
+    try {
+      aiResult = await analyzeResumeWithGemini(extracted.text, jobDescription);
+      // Check if this is a real AI result (not fallback) by checking if it has non-default values
+      if (aiResult && aiResult._isAiGenerated) {
+        aiEnhanced = true;
+      }
+    } catch {
+      // AI failed silently — deterministic engine handles everything
+    }
 
-    // 4. Aggregated Score Calculation (Content: 40%, Format: 30%, Skills: 30%)
-    const contentScore = aiResult.contentScore || 75;
+    // 4. Use deterministic scores as primary, AI as optional enhancement
+    const contentScore = aiEnhanced ? Math.round((deterministic.contentScore + (aiResult.contentScore || deterministic.contentScore)) / 2) : deterministic.contentScore;
+    const skillsScore = aiEnhanced ? Math.round((deterministic.skillsScore + (aiResult.skillsScore || deterministic.skillsScore)) / 2) : deterministic.skillsScore;
     const formatScore = deterministic.formatScore;
-    const skillsScore = aiResult.skillsScore || 70;
 
     const overallScore = Math.round(contentScore * 0.4 + formatScore * 0.3 + skillsScore * 0.3);
+
+    // Merge AI bullet improvements with deterministic ones
+    const bulletImprovements = aiEnhanced && aiResult.bulletImprovements?.length > 0
+      ? aiResult.bulletImprovements
+      : deterministic.bulletImprovements;
+
+    // Merge matched skills (union of both)
+    const matchedSkills = [...new Set([
+      ...deterministic.matchedSkills,
+      ...(aiEnhanced && aiResult.matchedSkills ? aiResult.matchedSkills : [])
+    ])];
+
+    // Merge missing keywords
+    const missingKeywords = [...new Set([
+      ...deterministic.missingKeywords,
+      ...(aiEnhanced && aiResult.missingKeywords ? aiResult.missingKeywords : [])
+    ])];
 
     const reportData: ScanReportData = {
       overallScore,
       formatScore,
       contentScore,
       skillsScore,
-      summary: aiResult.summary || 'Resume analyzed successfully.',
-      matchedSkills: aiResult.matchedSkills || [],
-      missingKeywords: aiResult.missingKeywords || [],
-      bulletImprovements: aiResult.bulletImprovements || [],
+      summary: aiEnhanced && aiResult.summary ? aiResult.summary : deterministic.summary,
+      matchedSkills,
+      missingKeywords,
+      bulletImprovements,
       formattingIssues: deterministic.formattingIssues,
       quantificationStats: deterministic.quantificationStats,
+      actionVerbStats: deterministic.actionVerbStats,
       contactCompleteness: deterministic.contactCompleteness,
       atsHeadingsFound: deterministic.atsHeadingsFound,
       missingStandardHeadings: deterministic.missingStandardHeadings

@@ -111,7 +111,7 @@ export default function CheckerPage() {
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
               <CheckCircle2 className="w-5 h-5 text-blue-600" /> Actionable Findings
             </h3>
-            <SuggestionList report={scanResult.reportData} />
+            <SuggestionList report={scanResult.reportData} parsedText={scanResult.parsedText} />
           </div>
         </div>
       )}
