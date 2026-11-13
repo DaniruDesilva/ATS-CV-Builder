@@ -18,7 +18,7 @@ import Link from 'next/link';
 
 interface FeatureItem {
   id: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string }>;
   title: string;
   tag: string;
   description: string;
