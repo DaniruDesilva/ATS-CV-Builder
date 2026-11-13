@@ -28,9 +28,9 @@ export default function LandingPage() {
     {
       id: 'classic-ats',
       templateId: 'classic-ats',
-      name: 'Classic Professional',
+      name: 'Classic ATS',
       tag: 'Most Popular',
-      description: 'Clean, elegant typography with balanced sections. Universally trusted by recruiters across all industries.',
+      description: 'Clean typography with balanced sections engineered for 100% ATS compatibility. Trusted by recruiters across all industries.',
       mock: mockResume1,
       Component: ClassicAtsDom,
       badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
@@ -38,9 +38,9 @@ export default function LandingPage() {
     {
       id: 'traditional-ats',
       templateId: 'traditional-ats',
-      name: 'Traditional Corporate',
-      tag: 'Formal Standard',
-      description: 'The timeless single-column format favored in finance, law, healthcare, education, and corporate management.',
+      name: 'Traditional ATS',
+      tag: 'Corporate Gold Standard',
+      description: 'The quintessential single-column ATS format. Highly favored in finance, business management, healthcare, law, and corporate roles.',
       mock: mockResume2,
       Component: TraditionalAtsDom,
       badgeColor: 'bg-slate-100 text-slate-800 border-slate-200',
@@ -48,9 +48,9 @@ export default function LandingPage() {
     {
       id: 'technical-clean',
       templateId: 'technical-clean',
-      name: 'Skills & Experience',
-      tag: 'Skills Focused',
-      description: 'Dedicated competency sidebar that highlights specialized tools, certifications, and project achievements.',
+      name: 'Skills ATS',
+      tag: 'Competency Focused',
+      description: 'Dedicated skills matrix layout that ensures your core tools, certifications, and qualifications get indexed by ATS search filters.',
       mock: mockResume3,
       Component: TechnicalCleanDom,
       badgeColor: 'bg-teal-100 text-teal-800 border-teal-200',
@@ -58,9 +58,9 @@ export default function LandingPage() {
     {
       id: 'modern-executive',
       templateId: 'modern-executive',
-      name: 'Executive & Leadership',
-      tag: 'Senior Careers',
-      description: 'High-impact layout designed for department heads, team leads, directors, and senior management.',
+      name: 'Executive ATS',
+      tag: 'Senior Leadership',
+      description: 'High-impact layout designed for department heads, team leads, directors, and senior managers with complete ATS readability.',
       mock: mockResume2,
       Component: ModernExecutiveDom,
       badgeColor: 'bg-indigo-100 text-indigo-800 border-indigo-200',
@@ -122,16 +122,16 @@ export default function LandingPage() {
             
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs font-bold shadow-2xs">
               <Sparkles className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
-              <span>AI-Powered Resume Builder • Beat Automated Hiring Filters</span>
+              <span>🎯 Real-Time ATS Optimization • Built to Beat Applicant Tracking Systems</span>
             </div>
 
             <h1 className="text-[2.75rem] sm:text-[3.5rem] lg:text-[4.25rem] leading-[1.04] font-black text-slate-900 tracking-tight text-balance">
               Land more <span className="text-slate-800">interviews with</span><br className="hidden sm:block" />
-              ResumAI&apos;s <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">Resume Builder</span>
+              ResumAI&apos;s <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">ATS Resume Builder</span>
             </h1>
             
             <p className="text-base sm:text-lg lg:text-xl text-slate-600 leading-relaxed font-normal max-w-xl mx-auto lg:mx-0">
-              Build a modern, job-winning resume in minutes. ResumAI automatically organizes your experience, suggests high-impact bullet points, and ensures your resume easily passes employer screening filters.
+              Create an ATS-optimized, recruiter-ready resume in minutes. ResumAI scores your CV against real Applicant Tracking Systems, suggests high-impact bullet points, and ensures 100% ATS readability across every career.
             </p>
 
             {/* CTA Buttons */}
@@ -141,7 +141,7 @@ export default function LandingPage() {
                 className="w-full sm:w-auto px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-extrabold rounded-xl shadow-lg shadow-emerald-600/25 hover:shadow-emerald-600/35 hover:-translate-y-0.5 transition-all text-center flex items-center justify-center gap-2"
               >
                 <Sparkles className="w-4 h-4" />
-                <span>Build Your Resume</span>
+                <span>Build ATS Resume Free</span>
               </Link>
               
               <Link
@@ -149,7 +149,7 @@ export default function LandingPage() {
                 className="w-full sm:w-auto px-7 py-3.5 bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white text-base font-bold rounded-xl transition-all text-center hover:-translate-y-0.5 flex items-center justify-center gap-2 shadow-2xs"
               >
                 <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                <span>Check Resume Score</span>
+                <span>Check ATS Resume Score</span>
               </Link>
             </div>
 
@@ -176,7 +176,7 @@ export default function LandingPage() {
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 </div>
                 <p className="text-slate-600 text-xs font-semibold text-left leading-tight">
-                  <strong className="text-slate-900 font-extrabold">Over 45,000 job seekers</strong> landed interviews in 2026
+                  <strong className="text-slate-900 font-extrabold">Over 45,000 candidates</strong> passed ATS screening in 2026
                 </p>
               </div>
             </div>
@@ -196,7 +196,7 @@ export default function LandingPage() {
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                Classic
+                Classic ATS
               </button>
               <button
                 type="button"
@@ -207,7 +207,7 @@ export default function LandingPage() {
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                Traditional
+                Traditional ATS
               </button>
               <button
                 type="button"
@@ -218,7 +218,7 @@ export default function LandingPage() {
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                Skills Focused
+                Skills ATS
               </button>
               <button
                 type="button"
@@ -229,7 +229,7 @@ export default function LandingPage() {
                     : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                 }`}
               >
-                Executive
+                Executive ATS
               </button>
             </div>
 
@@ -248,7 +248,7 @@ export default function LandingPage() {
               {/* Floating Bottom Badge: Safety */}
               <div className="absolute -bottom-3.5 right-4 z-20 flex items-center gap-2 bg-slate-900/95 backdrop-blur-xs text-white rounded-full px-3.5 py-1.5 shadow-xl border border-slate-800 text-[11px] font-bold">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span>Recruiter Approved • Screening System Ready</span>
+                <span>100% ATS-Compliant • Workday &amp; Taleo Ready</span>
               </div>
 
               {/* The Styled A4 Preview Window */}
@@ -262,7 +262,7 @@ export default function LandingPage() {
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
                   </div>
                   <span className="text-[11px] font-bold text-slate-500">
-                    A4 Standard • Ready to Print &amp; Apply
+                    A4 Standard • 100% ATS Parseable
                   </span>
                   <Link
                     href={`/builder?template=${activeHeroTab === 'classic' ? 'classic-ats' : activeHeroTab === 'traditional' ? 'traditional-ats' : activeHeroTab === 'skills' ? 'technical-clean' : 'modern-executive'}&step=9`}
@@ -301,10 +301,10 @@ export default function LandingPage() {
           
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
             <h2 className="text-3xl lg:text-[2.5rem] font-black text-slate-900 tracking-tight">
-              Professional Templates for Every Career
+              ATS-Compliant Resume Templates Built to Pass Screeners
             </h2>
             <p className="text-base text-slate-600 font-normal leading-relaxed">
-              Whether you&apos;re in business, healthcare, education, tech, or creative services, our recruiter-approved templates ensure your resume looks stunning and gets read accurately.
+              Over 75% of resumes are discarded by Applicant Tracking Systems (ATS). Our templates are built to parse cleanly in Workday, Taleo, Greenhouse, and Lever while looking polished and compelling for human recruiters.
             </p>
           </div>
 
@@ -378,15 +378,15 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto text-slate-600 text-sm font-medium text-center mt-12 pt-8 border-t border-slate-100">
             <div className="flex items-center justify-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Screening-System Friendly Formatting</span>
+              <span>100% ATS-Compliant Structure</span>
             </div>
             <div className="flex items-center justify-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Clean, High-Quality PDF Downloads</span>
+              <span>ATS-Friendly Clean PDF Downloads</span>
             </div>
             <div className="flex items-center justify-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <span>Instant AI Bullet Point Improvements</span>
+              <span>AI-Powered ATS Keyword Optimization</span>
             </div>
           </div>
           
@@ -395,7 +395,7 @@ export default function LandingPage() {
               href="/builder?step=9"
               className="text-emerald-700 font-extrabold text-sm hover:text-emerald-800 flex items-center justify-center gap-1.5 transition-all hover:gap-2"
             >
-              Browse All Templates in Builder <ArrowRight className="w-4 h-4" />
+              Browse All ATS Templates in Builder <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
@@ -413,7 +413,7 @@ export default function LandingPage() {
               Trusted by 50,000+ Job Seekers
             </h2>
             <p className="text-base text-slate-600 font-normal leading-relaxed">
-              Stop guessing what corporate recruiters want. Our intelligent system formats, scores, and tailors your application for maximum impact.
+              Stop guessing what corporate ATS algorithms and recruiters want. Our intelligent system formats, scores, and tailors your application for maximum hiring success.
             </p>
           </div>
 
@@ -422,16 +422,16 @@ export default function LandingPage() {
               <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-emerald-700 tracking-tight">
                 98%
               </div>
-              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">Screening Pass Rate</h3>
-              <p className="text-xs text-slate-600">Clean structure easily read by all major employer hiring systems.</p>
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">ATS Pass Rate</h3>
+              <p className="text-xs text-slate-600">Tested and verified against Workday, Taleo, Greenhouse &amp; Lever ATS.</p>
             </div>
 
             <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 sm:p-8 space-y-2 shadow-2xs hover:shadow-sm transition-all text-center sm:text-left">
               <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight">
                 50,000+
               </div>
-              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">Resumes Created</h3>
-              <p className="text-xs text-slate-600">Trusted by professionals across business, healthcare, tech &amp; education.</p>
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">ATS Resumes Built</h3>
+              <p className="text-xs text-slate-600">Trusted by job seekers across business, healthcare, tech, finance &amp; education.</p>
             </div>
 
             <div className="bg-teal-50/60 border border-teal-100 rounded-2xl p-6 sm:p-8 space-y-2 shadow-2xs hover:shadow-sm transition-all text-center sm:text-left">
@@ -439,15 +439,15 @@ export default function LandingPage() {
                 3.5x
               </div>
               <h3 className="text-sm sm:text-base font-extrabold text-slate-900">More Callbacks</h3>
-              <p className="text-xs text-slate-600">Candidates with AI-enhanced achievements get more interviews.</p>
+              <p className="text-xs text-slate-600">Resumes with high ATS scores receive significantly more recruiter responses.</p>
             </div>
 
             <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 sm:p-8 space-y-2 shadow-2xs hover:shadow-sm transition-all text-center sm:text-left">
               <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight">
                 100%
               </div>
-              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">Error-Free Layout</h3>
-              <p className="text-xs text-slate-600">Clear, legible formatting that recruiters and hiring software read smoothly.</p>
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">ATS Text Readability</h3>
+              <p className="text-xs text-slate-600">Zero formatting glitches — clean, legible text that ATS scanners parse without error.</p>
             </div>
           </div>
 
@@ -467,15 +467,15 @@ export default function LandingPage() {
           <div className="space-y-6 max-w-xl text-center lg:text-left mx-auto lg:mx-0">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Automated Screening Protection</span>
+              <span>Beat the ATS (Applicant Tracking Systems)</span>
             </div>
 
             <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-white leading-[1.1] tracking-tight">
-              Get Past Automated Filters and Land More Interviews
+              Beat the ATS Algorithms &amp; Land More Interviews
             </h2>
             
             <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
-              Over 75% of resumes are filtered out by automated screening systems before a real hiring manager ever reads them. ResumAI organizes your resume, highlights the skills employers search for, and rewrites basic job duties into impressive achievements.
+              Over 75% of qualified applicants are silently filtered out by Applicant Tracking Systems (ATS) like Workday, Taleo, and Greenhouse before a hiring manager ever sees them. ResumAI structures your experience, highlights the keywords ATS algorithms search for, and turns basic duties into impressive achievements.
             </p>
 
             <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
@@ -483,13 +483,13 @@ export default function LandingPage() {
                 href="/builder"
                 className="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-extrabold rounded-xl shadow-lg shadow-emerald-950/40 transition-all text-center"
               >
-                Create Job-Ready Resume
+                Create ATS-Friendly Resume
               </Link>
               <Link
                 href="/checker"
                 className="w-full sm:w-auto px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-sm font-bold rounded-xl transition-all text-center"
               >
-                Check Resume Score
+                Check ATS Resume Score
               </Link>
             </div>
           </div>
@@ -500,8 +500,8 @@ export default function LandingPage() {
                 <Sparkles className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="text-white font-extrabold text-sm">Smart Keyword Matching</h4>
-                <p className="text-xs text-slate-400 mt-0.5">Identifies essential skills and qualifications missing from your resume.</p>
+                <h4 className="text-white font-extrabold text-sm">ATS Keyword Gap Matching</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Instantly identifies high-priority skills and qualifications that ATS algorithms scan for.</p>
               </div>
             </div>
 
@@ -510,8 +510,8 @@ export default function LandingPage() {
                 <ShieldCheck className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="text-white font-extrabold text-sm">Recruiter-Approved Formatting</h4>
-                <p className="text-xs text-slate-400 mt-0.5">Clear layouts ensure hiring systems read your experience without errors.</p>
+                <h4 className="text-white font-extrabold text-sm">100% ATS-Compliant Layout</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Clean section hierarchy guaranteed to parse smoothly into employer ATS databases.</p>
               </div>
             </div>
 
@@ -520,8 +520,8 @@ export default function LandingPage() {
                 <FileCheck2 className="w-6 h-6" />
               </div>
               <div>
-                <h4 className="text-white font-extrabold text-sm">Results-Driven Bullet Points</h4>
-                <p className="text-xs text-slate-400 mt-0.5">Rewrites ordinary task lists into quantifiable accomplishments with measurable results.</p>
+                <h4 className="text-white font-extrabold text-sm">Quantified Impact Rewriting</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Transforms ordinary task lists into measurable, action-driven achievements that impress both ATS scanners and recruiters.</p>
               </div>
             </div>
           </div>
@@ -540,10 +540,10 @@ export default function LandingPage() {
       <section className="py-20 lg:py-24 bg-white text-center border-t border-slate-100">
         <div className="max-w-3xl mx-auto px-4 space-y-6">
           <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-black text-slate-900 tracking-tight">
-            Ready to Build Your Winning Resume?
+            Ready to Build Your ATS-Optimized Resume?
           </h2>
           <p className="text-base text-slate-600 font-normal max-w-xl mx-auto">
-            Join over 50,000 job seekers who landed interviews in healthcare, business, technology, finance, education, and creative fields.
+            Join over 50,000 job seekers who beat the ATS and landed interviews in healthcare, business, technology, finance, education, and creative fields.
           </p>
           <div className="pt-2">
             <Link
@@ -551,7 +551,7 @@ export default function LandingPage() {
               className="inline-flex items-center gap-2 px-9 py-4 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-extrabold rounded-xl shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-1"
             >
               <Sparkles className="w-5 h-5" />
-              <span>Create Your Resume for Free</span>
+              <span>Build Your Free ATS Resume</span>
             </Link>
           </div>
         </div>

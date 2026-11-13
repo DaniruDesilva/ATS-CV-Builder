@@ -117,7 +117,7 @@ export function Navbar() {
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block">AI Resume Builder</span>
+                    <span className="text-xs font-bold text-slate-900 block">AI ATS Resume Builder</span>
                     <span className="text-[11px] text-slate-500">Create ATS-friendly CVs</span>
                   </div>
                 </Link>
@@ -131,7 +131,7 @@ export function Navbar() {
                     <Layers className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block">Resume Templates</span>
+                    <span className="text-xs font-bold text-slate-900 block">ATS Resume Templates</span>
                     <span className="text-[11px] text-slate-500">Recruiter-approved styles</span>
                   </div>
                 </Link>
@@ -175,8 +175,8 @@ export function Navbar() {
                     <Zap className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-xs font-bold text-slate-900 block">AI Bullet Optimizer</span>
-                    <span className="text-[11px] text-slate-500">Action &amp; metrics rewriter</span>
+                    <span className="text-xs font-bold text-slate-900 block">ATS Bullet Optimizer</span>
+                    <span className="text-[11px] text-slate-500">Score-boosting achievements</span>
                   </div>
                 </Link>
               </div>
@@ -307,14 +307,14 @@ export function Navbar() {
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-900 bg-slate-50"
           >
-            <Sparkles className="w-4 h-4 text-emerald-600" /> AI Resume Builder
+            <Sparkles className="w-4 h-4 text-emerald-600" /> AI ATS Resume Builder
           </Link>
           <Link
             href="/checker"
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-900 bg-slate-50"
           >
-            <FileSearch className="w-4 h-4 text-blue-600" /> Resume Checker
+            <FileSearch className="w-4 h-4 text-blue-600" /> ATS Resume Checker
           </Link>
           <Link
             href="/pricing"

@@ -53,12 +53,12 @@ export function Footer() {
             <ul className="space-y-2 font-medium">
               <li>
                 <Link href="/builder" className="hover:text-emerald-600 transition-colors">
-                  Smart Bullet Rewriter
+                  Smart ATS Bullet Rewriter
                 </Link>
               </li>
               <li>
                 <Link href="/checker" className="hover:text-emerald-600 transition-colors">
-                  Resume Compatibility Score
+                  Real-Time ATS Scoring
                 </Link>
               </li>
               <li>
@@ -68,29 +68,29 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/builder" className="hover:text-emerald-600 transition-colors">
-                  Print-Ready PDF Export
+                  ATS-Friendly PDF Export
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: Career Resources */}
+          {/* Col 3: ATS Compliance */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
-              Career Guide
+              ATS Compliance
             </h4>
             <ul className="space-y-2 font-medium">
               <li>
-                <span className="text-slate-700 font-semibold block">Screening System Guide</span>
+                <span className="text-slate-700 font-semibold block">Workday &amp; Taleo Guide</span>
               </li>
               <li>
-                <span className="text-slate-700 font-semibold block">Job Keyword Tips</span>
+                <span className="text-slate-700 font-semibold block">ATS Keyword Optimization</span>
               </li>
               <li>
-                <span className="text-slate-700 font-semibold block">Formatting Best Practices</span>
+                <span className="text-slate-700 font-semibold block">ATS Formatting Checklist</span>
               </li>
               <li>
-                <span className="text-slate-700 font-semibold block">Interview Preparation</span>
+                <span className="text-slate-700 font-semibold block">Greenhouse ATS Testing</span>
               </li>
             </ul>
           </div>
@@ -98,27 +98,27 @@ export function Footer() {
           {/* Col 4: Templates */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
-              Templates
+              ATS Templates
             </h4>
             <ul className="space-y-2 font-medium">
               <li>
                 <Link href="/builder?template=classic-ats" className="hover:text-emerald-600 transition-colors">
-                  Classic Professional
-                </Link>
-              </li>
-              <li>
-                <Link href="/builder?template=modern-executive" className="hover:text-emerald-600 transition-colors">
-                  Executive &amp; Leadership
-                </Link>
-              </li>
-              <li>
-                <Link href="/builder?template=technical-clean" className="hover:text-emerald-600 transition-colors">
-                  Skills &amp; Experience
+                  Classic ATS Template
                 </Link>
               </li>
               <li>
                 <Link href="/builder?template=traditional-ats" className="hover:text-emerald-600 transition-colors">
-                  Traditional Corporate
+                  Traditional ATS Template
+                </Link>
+              </li>
+              <li>
+                <Link href="/builder?template=technical-clean" className="hover:text-emerald-600 transition-colors">
+                  Skills ATS Template
+                </Link>
+              </li>
+              <li>
+                <Link href="/builder?template=modern-executive" className="hover:text-emerald-600 transition-colors">
+                  Executive ATS Template
                 </Link>
               </li>
             </ul>

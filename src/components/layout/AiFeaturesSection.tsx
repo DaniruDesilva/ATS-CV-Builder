@@ -29,34 +29,34 @@ const features = [
     id: 'generate',
     title: 'AI content generation',
     bullets: [
-      'Get content suggestions for your target job, grounded in your real experience',
-      'Match the tone and language recruiters expect',
-      'You control the input, so the output stays focused and relevant'
+      'Get role-tailored bullet points and summaries, grounded in your real experience',
+      'Match the keywords and phrasing that ATS algorithms and recruiters expect',
+      'You control the input, so the output stays authentic and focused'
     ]
   },
   {
     id: 'parse',
-    title: 'AI resume parsing',
+    title: 'ATS resume parsing',
     bullets: [
-      'Upload your old resume or LinkedIn profile',
-      'Get instant section parsing, the way a modern AI-based ATS reads it'
+      'Upload your existing resume or LinkedIn profile',
+      'See instant section parsing, exactly how modern AI-based ATS systems read it'
     ]
   },
   {
     id: 'skills',
-    title: 'AI skills finder',
+    title: 'ATS skills finder',
     bullets: [
-      'Uncover the exact hard and soft skills employers look for',
-      'Generate as many relevant skills as you need automatically'
+      'Uncover the exact hard and soft skills ATS algorithms score your resume against',
+      'Generate as many relevant competencies as you need automatically'
     ]
   },
   {
     id: 'tailor',
-    title: 'Target Job Keyword Matcher',
+    title: 'Target Job ATS Keyword Matcher',
     bullets: [
       'Paste any target job description or role requirements',
       'Instantly uncover missing ATS keywords, tools, and skills',
-      'One-click injection into your resume bullets to boost recruiter match'
+      'One-click injection into your resume bullets to maximize ATS match percentage'
     ]
   }
 ];
@@ -77,10 +77,10 @@ export default function AiFeaturesSection() {
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
           <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-slate-900 leading-[1.15] tracking-tight">
-            Write a stronger resume with the AI assistant
+            Write an ATS-Winning Resume with the AI Assistant
           </h2>
           <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto">
-            Chat in plain language or trigger preset actions to write, edit, and improve your resume, right where you&apos;re working. Every suggestion stays grounded in your real experience.
+            Chat in plain language or trigger preset actions to optimize, edit, and tailor your resume for any job opening. Every suggestion improves your ATS score while showcasing your real accomplishments.
           </p>
         </div>
 
