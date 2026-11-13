@@ -1,533 +1,558 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Sparkles,
-  ArrowRight,
-  CheckCircle2,
-  Search,
+  ShieldCheck,
   Target,
-  RotateCcw,
-  RotateCw,
-  Type,
-  LayoutGrid,
-  Palette,
-  CheckSquare,
-  Shield,
+  FileCheck2,
+  ArrowRight,
+  Check,
+  CheckCircle2,
+  Copy,
   Download,
-  Link2,
-  Clock,
-  MousePointer,
-  FileCheck,
-  Languages,
-  Check
+  AlertCircle,
+  TrendingUp,
 } from 'lucide-react';
 import Link from 'next/link';
 
-const features = [
+interface FeatureItem {
+  id: string;
+  icon: React.ElementType;
+  title: string;
+  tag: string;
+  description: string;
+  bullets: string[];
+}
+
+const features: FeatureItem[] = [
   {
-    id: 'generate',
-    title: 'AI content generation',
+    id: 'bullet-optimizer',
+    icon: Sparkles,
+    title: 'AI Bullet Point Optimizer',
+    tag: 'Impact Formula',
+    description: 'Converts ordinary job duties into quantifiable, metric-driven achievements that impress hiring managers and ATS algorithms.',
     bullets: [
-      'Get role-tailored bullet points and summaries, grounded in your real experience',
-      'Match the keywords and phrasing that ATS algorithms and recruiters expect',
-      'You control the input, so the output stays authentic and focused'
+      'Rewrites passive duty lists using strong, industry-proven action verbs',
+      'Automatically prompts and weaves in measurable metrics (%, $, scale)',
+      'Direct one-click replacement into your active resume experience'
     ]
   },
   {
-    id: 'parse',
-    title: 'ATS resume parsing',
+    id: 'ats-scoring',
+    icon: ShieldCheck,
+    title: 'Real-Time ATS Compatibility Scoring',
+    tag: 'Instant 0–100 Audit',
+    description: 'Continuously scores your resume format, keyword coverage, and section structure against enterprise ATS screening standards.',
     bullets: [
-      'Upload your existing resume or LinkedIn profile',
-      'See instant section parsing, exactly how modern AI-based ATS systems read it'
+      'Live score audit assessing format compliance, content depth, and keyword density',
+      'Detects text traps, table corruptions, and missing standard section headers',
+      'Actionable recommendations to push your CV into the top 5% candidate pool'
     ]
   },
   {
-    id: 'skills',
-    title: 'ATS skills finder',
+    id: 'keyword-matcher',
+    icon: Target,
+    title: 'Target Job Keyword Gap Matcher',
+    tag: 'Beat Job Filters',
+    description: 'Compares your resume against any target job description to highlight high-priority keywords missing from your application.',
     bullets: [
-      'Uncover the exact hard and soft skills ATS algorithms score your resume against',
-      'Generate as many relevant competencies as you need automatically'
+      'Paste any job posting to identify exact skills ATS screeners look for',
+      'Highlights hard skills, software tools, and certifications you should add',
+      'One-click keyword injection to dramatically increase ATS match rate'
     ]
   },
   {
-    id: 'tailor',
-    title: 'Target Job ATS Keyword Matcher',
+    id: 'ats-export',
+    icon: FileCheck2,
+    title: 'One-Click ATS-Safe PDF Export',
+    tag: '100% Readable',
+    description: 'Generates clean, standardized A4 PDF resumes with flawless typography that candidate tracking systems read without errors.',
     bullets: [
-      'Paste any target job description or role requirements',
-      'Instantly uncover missing ATS keywords, tools, and skills',
-      'One-click injection into your resume bullets to maximize ATS match percentage'
+      'Standard single-column hierarchy guaranteed to pass Workday, Taleo, and Greenhouse',
+      'Clean typography and divider rules with zero unparseable text traps',
+      'Maintains exact formatting on screen, in print, and inside recruiter databases'
     ]
   }
 ];
 
 export default function AiFeaturesSection() {
   const [activeFeature, setActiveFeature] = useState(features[0].id);
-  const [isClient, setIsClient] = useState(false);
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const handleCopy = () => {
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <section className="py-20 lg:py-28 bg-white relative overflow-hidden">
+    <section className="py-20 lg:py-28 bg-[#FBFDFB] relative overflow-hidden border-t border-slate-100">
       
+      {/* Subtle ambient background glow */}
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[550px] bg-emerald-500/5 rounded-full blur-3xl pointer-events-none" />
+
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs font-bold shadow-2xs">
+            <Sparkles className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+            <span>Built-In AI Intelligence</span>
+          </div>
+
           <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-slate-900 leading-[1.15] tracking-tight">
-            Write an ATS-Winning Resume with the AI Assistant
+            How ResumAI Transforms Your Resume with AI
           </h2>
           <p className="text-base sm:text-lg text-slate-600 font-normal leading-relaxed max-w-2xl mx-auto">
-            Chat in plain language or trigger preset actions to optimize, edit, and tailor your resume for any job opening. Every suggestion improves your ATS score while showcasing your real accomplishments.
+            From real-time ATS scoring to instant bullet point rewrites, our built-in AI tools analyze your experience against employer hiring criteria and enhance every section.
           </p>
         </div>
 
-        {/* Main Card Container */}
-        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 lg:p-10 flex flex-col lg:flex-row gap-8 lg:gap-12 shadow-sm items-stretch">
+        {/* Main Content Grid: Left Interactive Tabs + Right High-Fidelity App Mockup */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-stretch">
           
-          {/* LEFT: Accordion Feature Tabs */}
-          <div className="w-full lg:w-[38%] flex flex-col justify-between">
-            <div className="flex flex-col divide-y divide-slate-200/80">
+          {/* LEFT: Interactive Feature Cards (Cols 1-5) */}
+          <div className="lg:col-span-5 flex flex-col justify-between space-y-3">
+            <div className="space-y-3">
               {features.map((feature) => {
                 const isActive = activeFeature === feature.id;
+                const Icon = feature.icon;
                 return (
-                  <div key={feature.id} className="py-4 first:pt-0 last:pb-0">
-                    <button
-                      onClick={() => setActiveFeature(feature.id)}
-                      className="w-full text-left flex items-center justify-between group py-1.5 focus:outline-none"
-                    >
-                      <span
-                        className={`text-lg sm:text-[19px] font-bold tracking-tight transition-colors ${
+                  <div
+                    key={feature.id}
+                    onClick={() => setActiveFeature(feature.id)}
+                    className={`p-4 sm:p-5 rounded-2xl border transition-all duration-200 cursor-pointer text-left ${
+                      isActive
+                        ? 'bg-white border-emerald-500/80 shadow-md ring-2 ring-emerald-500/15'
+                        : 'bg-white/80 border-slate-200/80 hover:bg-white hover:border-slate-300 shadow-2xs'
+                    }`}
+                  >
+                    <div className="flex items-start gap-3.5">
+                      <div
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-colors ${
                           isActive
-                            ? 'text-slate-900 pb-1.5 border-b-2 border-[#10b981] inline-block'
-                            : 'text-slate-700 hover:text-slate-900'
+                            ? 'bg-emerald-600 text-white shadow-sm'
+                            : 'bg-slate-100 text-slate-600'
                         }`}
                       >
-                        {feature.title}
-                      </span>
-                    </button>
-
-                    {isActive && (
-                      <div className="pt-5 pb-2 animate-in fade-in slide-in-from-top-1 duration-300">
-                        <ul className="space-y-3.5">
-                          {feature.bullets.map((bullet, i) => (
-                            <li key={i} className="flex items-start gap-3">
-                              <div className="w-5 h-5 rounded-full bg-[#10b981] flex items-center justify-center shrink-0 mt-0.5 shadow-xs">
-                                <Check className="w-3.5 h-3.5 text-white stroke-[3]" />
-                              </div>
-                              <span className="text-sm sm:text-[15px] text-slate-600 leading-snug font-medium">
-                                {bullet}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
+                        <Icon className="w-5 h-5" />
                       </div>
-                    )}
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 mb-1">
+                          <h3
+                            className={`text-base font-extrabold tracking-tight truncate ${
+                              isActive ? 'text-slate-900' : 'text-slate-800'
+                            }`}
+                          >
+                            {feature.title}
+                          </h3>
+                          <span
+                            className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-full shrink-0 border ${
+                              isActive
+                                ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                                : 'bg-slate-50 text-slate-600 border-slate-200'
+                            }`}
+                          >
+                            {feature.tag}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-slate-600 leading-relaxed font-normal">
+                          {feature.description}
+                        </p>
+
+                        {isActive && (
+                          <div className="mt-3.5 pt-3.5 border-t border-slate-100 animate-in fade-in slide-in-from-top-1 duration-200">
+                            <ul className="space-y-2">
+                              {feature.bullets.map((bullet, i) => (
+                                <li key={i} className="flex items-start gap-2.5">
+                                  <div className="w-4 h-4 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 mt-0.5">
+                                    <Check className="w-3 h-3 stroke-[3]" />
+                                  </div>
+                                  <span className="text-xs text-slate-700 leading-tight font-medium">
+                                    {bullet}
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 );
               })}
             </div>
-            
-            <div className="pt-8 mt-6">
+
+            <div className="pt-2">
               <Link
                 href="/builder"
-                className="group inline-flex items-center gap-1.5 text-emerald-600 font-extrabold text-[15px] hover:text-emerald-700 transition-colors"
+                className="group inline-flex items-center gap-2 text-emerald-700 font-extrabold text-sm hover:text-emerald-800 transition-colors"
               >
-                <span>Explore ResumAI AI</span>
+                <span>Try the AI Resume Builder in Action</span>
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
           </div>
 
-          {/* RIGHT: High-Fidelity Enhancv-Style Editor Mockup in Gradient Container */}
-          <div className="w-full lg:w-[62%] bg-gradient-to-tr from-slate-900 via-emerald-950 to-emerald-800 rounded-3xl overflow-hidden relative min-h-[460px] sm:min-h-[500px] flex items-center justify-center p-4 sm:p-8 shadow-inner">
+          {/* RIGHT: Authentic High-Fidelity Software Showcase (Cols 6-12) */}
+          <div className="lg:col-span-7 bg-slate-900 rounded-3xl border border-slate-800 p-5 sm:p-7 shadow-2xl flex flex-col justify-between relative overflow-hidden text-white min-h-[500px]">
             
-            {/* Ambient subtle light circles */}
-            <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-            <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-emerald-300/20 blur-2xl pointer-events-none" />
+            {/* Ambient subtle glow */}
+            <div className="absolute top-0 right-0 w-72 h-72 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+            <div className="absolute bottom-0 left-0 w-72 h-72 bg-teal-500/10 rounded-full blur-3xl pointer-events-none" />
 
-            {/* TAB 1: AI Content Generation (Exactly matching Enhancv Image 2) */}
-            {activeFeature === 'generate' && (
-              <div className="w-full max-w-xl relative flex items-center justify-center animate-in fade-in zoom-in-95 duration-400">
-                
-                {/* Background Editor Window Mockup */}
-                <div className="w-full bg-[#F3F6FA] rounded-2xl shadow-2xl border border-white/80 overflow-hidden flex flex-col pb-8">
-                  
-                  {/* Window Top Navbar */}
-                  <div className="bg-white px-4 py-2.5 border-b border-slate-200/80 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 rounded-md bg-emerald-100 flex items-center justify-center text-emerald-600">
-                        <Sparkles className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-black text-slate-800 tracking-tight">ResumAI Canvas</span>
-                    </div>
-
-                    {/* Window Controls / Undo */}
-                    <div className="flex items-center gap-3 text-slate-400">
-                      <RotateCcw className="w-3.5 h-3.5 hover:text-slate-600 cursor-pointer" />
-                      <RotateCw className="w-3.5 h-3.5 hover:text-slate-600 cursor-pointer" />
-                    </div>
-                  </div>
-
-                  {/* Editor Body: Left Toolbar + Paper Canvas */}
-                  <div className="flex items-stretch min-h-[300px]">
-                    
-                    {/* Left Vertical Tools Icon Bar */}
-                    <div className="w-11 bg-white border-r border-slate-200/80 py-4 flex flex-col items-center justify-between text-slate-400 shrink-0">
-                      <div className="space-y-3 flex flex-col items-center">
-                        <Type className="w-4 h-4 text-slate-600" />
-                        <LayoutGrid className="w-4 h-4 hover:text-slate-600" />
-                        <Palette className="w-4 h-4 hover:text-slate-600" />
-                        <CheckSquare className="w-4 h-4 hover:text-slate-600" />
-                        <span className="text-[9px] font-black px-1 rounded bg-emerald-100 text-emerald-700">ATS</span>
-                      </div>
-                      <div className="space-y-3 flex flex-col items-center">
-                        <Download className="w-4 h-4 hover:text-slate-600" />
-                        <Link2 className="w-4 h-4 hover:text-slate-600" />
-                        <Clock className="w-4 h-4 hover:text-slate-600" />
-                      </div>
-                    </div>
-
-                    {/* Editor Canvas Area with Background Skeleton Lines */}
-                    <div className="flex-1 p-5 relative overflow-hidden bg-white/70">
-                      
-                      {/* Floating Keyword / Skill Pills */}
-                      <div className="absolute top-2 left-6 z-10 animate-bounce duration-1000 shadow-md rounded-full bg-[#dcfce7] border border-[#86efac] text-[#15803d] text-[11px] font-bold px-3 py-1 flex items-center gap-1">
-                        <span>+</span> Venture Leads
-                      </div>
-
-                      <div className="absolute top-8 right-16 z-10 shadow-md rounded-full bg-[#a7f3d0] border border-[#6ee7b7] text-[#065f46] text-[11px] font-bold px-3 py-1 flex items-center gap-1">
-                        <span>+</span> Product
-                      </div>
-
-                      <div className="absolute top-18 left-14 z-10 shadow-md rounded-full bg-[#e0e7ff] border border-[#c7d2fe] text-[#4338ca] text-[11px] font-bold px-3 py-1 flex items-center gap-1">
-                        <span>+</span> User experience
-                      </div>
-
-                      {/* Skeleton Lines under the pills */}
-                      <div className="space-y-3 pt-28 opacity-40 max-w-[200px]">
-                        <div className="h-2.5 w-full bg-slate-300 rounded"></div>
-                        <div className="h-2.5 w-5/6 bg-slate-300 rounded"></div>
-                        <div className="h-2.5 w-4/6 bg-slate-300 rounded"></div>
-                      </div>
-                    </div>
-                  </div>
+            {/* Window Top Controls */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800 text-xs relative z-10">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1.5">
+                  <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80" />
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80" />
                 </div>
+                <span className="text-slate-400 font-mono text-[11px] ml-2 hidden sm:inline">
+                  resumai-engine // {activeFeature}
+                </span>
+              </div>
 
-                {/* Overlapping Prominent SUMMARY Paper Card */}
-                <div className="absolute top-6 right-[-10px] sm:right-[-16px] w-[300px] sm:w-[360px] bg-white rounded-xl shadow-[0_20px_50px_rgba(0,0,0,0.2)] border border-slate-200/90 p-4 sm:p-5 z-20">
-                  
-                  {/* Card Title */}
-                  <div className="border-b-2 border-slate-900 pb-1 mb-2.5">
-                    <span className="text-[13px] font-black text-slate-900 tracking-wider uppercase">
-                      SUMMARY
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  Active Model: Gemini 1.5 Pro
+                </span>
+              </div>
+            </div>
+
+            {/* DYNAMIC SCREEN CONTENT ACCORDING TO SELECTED TAB */}
+            <div className="py-5 flex-1 flex items-center justify-center relative z-10">
+              
+              {/* ──────────────────────────────────────────────────
+                  TAB 1: AI Bullet Point Optimizer
+                  ────────────────────────────────────────────────── */}
+              {activeFeature === 'bullet-optimizer' && (
+                <div className="w-full space-y-4 animate-in fade-in zoom-in-95 duration-250">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                      <Sparkles className="w-4 h-4 text-emerald-400" />
+                      <span>Experience Bullet Point Optimizer</span>
+                    </div>
+                    <span className="text-[11px] font-black text-emerald-400 px-2 py-0.5 bg-emerald-500/10 rounded-md border border-emerald-500/20">
+                      +18 ATS Score Boost
                     </span>
                   </div>
 
-                  {/* Highlighted text block */}
-                  <div className="relative">
-                    <p className="text-[11px] sm:text-xs text-slate-800 leading-relaxed font-medium">
-                      <mark className="bg-[#fed7aa] text-slate-900 rounded px-1 py-0.5">
-                        Product-orientated Chief Technology Officer with more than 10 years of deep technical experience developing, implementing and supporting complex infrastructures for fast growing startups in the Talent Acquisition industry. Acted as a strategic advisor for top growing startups and their clients that generated 50% growth in revenue for their business. Scaled one of the most used HR support users in 80+...
-                      </mark>
+                  {/* Before Box */}
+                  <div className="bg-slate-950/80 rounded-xl p-4 border border-rose-900/40 space-y-2">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-rose-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        Before (Weak &amp; Passive)
+                      </span>
+                      <span className="text-slate-500 text-[10px]">Lacks Metrics</span>
+                    </div>
+                    <p className="text-xs text-slate-300 font-mono leading-relaxed line-through decoration-rose-500/60">
+                      Responsible for managing project schedules and helping team members deliver software updates on time.
                     </p>
-
-                    {/* Mouse Cursor Hovering */}
-                    <div className="absolute -right-2 top-8 text-slate-900 drop-shadow-md">
-                      <MousePointer className="w-5 h-5 fill-slate-900 text-white" />
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      <span className="text-[10px] bg-rose-950/60 text-rose-300 px-2 py-0.5 rounded border border-rose-800/40">
+                        Passive phrasing: &quot;Responsible for&quot;
+                      </span>
+                      <span className="text-[10px] bg-rose-950/60 text-rose-300 px-2 py-0.5 rounded border border-rose-800/40">
+                        Zero quantified metrics
+                      </span>
                     </div>
                   </div>
-                </div>
 
-                {/* Floating "AI SUGGESTIONS" Popover Card */}
-                <div className="absolute bottom-[-16px] left-6 sm:left-12 bg-white rounded-xl p-4 sm:p-4.5 shadow-[0_25px_60px_rgba(0,0,0,0.25)] border border-slate-200/90 w-[290px] sm:w-[330px] z-30 animate-in slide-in-from-bottom-2 duration-500">
-                  
-                  {/* Header */}
-                  <div className="flex items-center gap-1.5 mb-2">
-                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                    <span className="text-[10px] font-black tracking-widest text-slate-700 uppercase">
-                      AI SUGGESTIONS
-                    </span>
+                  {/* After / Optimized Box */}
+                  <div className="bg-emerald-950/30 rounded-xl p-4 border border-emerald-500/40 space-y-2.5">
+                    <div className="flex items-center justify-between text-[11px]">
+                      <span className="text-emerald-400 font-bold uppercase tracking-wider flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                        Optimized ATS Version (Google X-Y-Z Formula)
+                      </span>
+                      <span className="text-emerald-300 text-[10px] font-bold">100% Recruiter Approved</span>
+                    </div>
+                    <p className="text-xs text-slate-100 font-medium leading-relaxed">
+                      Led cross-functional team of 8 to execute 4 critical platform releases ahead of schedule, reducing deployment cycle times by <strong className="text-emerald-300 font-bold underline decoration-emerald-400">28%</strong> and boosting user throughput.
+                    </p>
+                    
+                    {/* Achievement Metrics Tags */}
+                    <div className="flex flex-wrap gap-1.5 pt-1">
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-bold border border-emerald-500/30">
+                        ✓ Strong Action Verb (&quot;Led&quot;)
+                      </span>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-bold border border-emerald-500/30">
+                        ✓ Quantified Result (&quot;28%&quot;)
+                      </span>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded font-bold border border-emerald-500/30">
+                        ✓ High ATS Keyword Weight
+                      </span>
+                    </div>
                   </div>
 
-                  {/* Body Text */}
-                  <p className="text-[11px] sm:text-xs text-slate-700 leading-relaxed mb-3">
-                    <strong className="text-slate-900 font-extrabold">Replace:</strong> &quot;Product-orientated Chief Technology Officer with more than 10 years of deep technical experience developing....&quot;
-                  </p>
-
-                  {/* Action Buttons */}
-                  <div className="flex justify-between items-center pt-2 border-t border-slate-100 text-xs font-bold">
-                    <button className="text-slate-400 hover:text-slate-600 transition-colors">
-                      Restore
-                    </button>
-                    <button className="text-emerald-600 hover:text-emerald-700 font-black transition-colors">
-                      Approve
+                  {/* Action Bar */}
+                  <div className="flex items-center justify-between pt-1">
+                    <span className="text-[11px] text-slate-400">
+                      Proven formula: <em className="text-slate-300">&quot;Accomplished [X], measured by [Y], by doing [Z]&quot;</em>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>{copied ? 'Copied to Clipboard!' : 'Use This Bullet'}</span>
                     </button>
                   </div>
                 </div>
+              )}
 
-              </div>
-            )}
-
-            {/* TAB 2: AI Resume Parsing (Matching Enhancv Image 2) */}
-            {activeFeature === 'parse' && (
-              <div className="w-full max-w-xl relative flex items-center justify-center animate-in fade-in zoom-in-95 duration-400">
-                
-                {/* Left Background: LinkedIn Profile Window Mockup */}
-                <div className="w-[88%] sm:w-[84%] mr-auto bg-[#EEF5FA] rounded-2xl shadow-2xl border border-white/80 overflow-hidden flex flex-col pb-4">
-                  
-                  {/* LinkedIn Browser / Top Bar */}
-                  <div className="bg-white px-3 sm:px-4 py-2 border-b border-slate-200/80 flex items-center justify-between">
-                    <div className="flex items-center gap-2 sm:gap-3">
-                      {/* LinkedIn Logo */}
-                      <div className="w-5 h-5 rounded bg-[#0a66c2] text-white flex items-center justify-center font-black text-[11px]">
-                        in
-                      </div>
-                      {/* Search Bar Skeleton */}
-                      <div className="hidden sm:flex items-center gap-1.5 bg-[#EEF5FA] rounded-md px-2.5 py-1 text-slate-400 text-[10px] w-28">
-                        <Search className="w-3 h-3 text-slate-400" />
-                        <span>Search</span>
-                      </div>
+              {/* ──────────────────────────────────────────────────
+                  TAB 2: Real-Time ATS Compatibility Scoring
+                  ────────────────────────────────────────────────── */}
+              {activeFeature === 'ats-scoring' && (
+                <div className="w-full space-y-4 animate-in fade-in zoom-in-95 duration-250">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>Live ATS Compatibility Audit</span>
                     </div>
-
-                    {/* Nav Icons */}
-                    <div className="flex items-center gap-2 sm:gap-2.5 text-slate-400 text-[10px]">
-                      <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                      <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                      <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                      <div className="w-3 h-3 rounded-full bg-slate-300"></div>
-                    </div>
+                    <span className="text-[11px] font-black text-emerald-400 px-2.5 py-0.5 bg-emerald-500/10 rounded-full border border-emerald-500/30">
+                      Top 2% Candidate Pool
+                    </span>
                   </div>
 
-                  {/* LinkedIn Profile Card Container */}
-                  <div className="p-3 space-y-3">
-                    
-                    {/* Cover Photo Banner (Scenic Forest Mountain gradient) */}
-                    <div className="h-20 sm:h-24 rounded-lg bg-gradient-to-r from-emerald-800 via-teal-700 to-amber-700 relative overflow-hidden shadow-inner flex items-end justify-end p-2">
-                      <div className="absolute inset-0 bg-black/10"></div>
-                      <div className="w-full h-8 bg-gradient-to-t from-black/40 to-transparent absolute bottom-0 left-0"></div>
-                    </div>
-
-                    {/* Profile Header (Avatar + Details) */}
-                    <div className="relative pt-1 px-1">
-                      
-                      {/* Avatar */}
-                      <div className="absolute -top-10 left-2 w-14 h-14 rounded-full border-2 border-white bg-slate-100 shadow-md overflow-hidden flex items-center justify-center">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80"
-                          alt="Taylor Foster Profile"
-                          className="w-full h-full object-cover"
-                        />
+                  {/* Main Score Hero Card */}
+                  <div className="bg-slate-950/80 rounded-2xl p-5 border border-slate-800 grid grid-cols-1 sm:grid-cols-12 gap-4 items-center">
+                    <div className="sm:col-span-5 text-center sm:text-left sm:border-r sm:border-slate-800 sm:pr-4">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Overall ATS Score
+                      </span>
+                      <div className="flex items-baseline justify-center sm:justify-start gap-1 mt-1">
+                        <span className="text-4xl font-black text-emerald-400">94</span>
+                        <span className="text-slate-500 text-base font-bold">/ 100</span>
                       </div>
-
-                      {/* Name & Headline skeleton */}
-                      <div className="pt-5 space-y-1.5">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-black text-slate-900">Taylor Foster</span>
-                          <span className="w-3 h-3 rounded-full bg-[#0a66c2] text-white flex items-center justify-center text-[8px] font-black">in</span>
-                        </div>
-                        <div className="h-2 w-44 bg-slate-300 rounded"></div>
-                        <div className="h-2 w-32 bg-slate-200 rounded"></div>
-
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2 pt-1">
-                          <span className="px-3 py-0.5 rounded-full bg-[#0a66c2] text-white text-[9px] font-bold">
-                            Open to work
-                          </span>
-                          <span className="px-2.5 py-0.5 rounded-full border border-slate-300 text-slate-600 text-[9px] font-semibold">
-                            More
-                          </span>
-                        </div>
-                      </div>
-
+                      <span className="text-[11px] text-emerald-400 font-bold block mt-1">
+                        ✓ Ready to Submit
+                      </span>
                     </div>
 
-                    {/* Profile Body Skeleton */}
-                    <div className="pt-2 border-t border-slate-200 space-y-2">
-                      <div className="h-2 w-16 bg-[#0a66c2]/80 rounded"></div>
-                      <div className="space-y-1">
-                        <div className="h-1.5 w-full bg-slate-200 rounded"></div>
-                        <div className="h-1.5 w-5/6 bg-slate-200 rounded"></div>
-                      </div>
-                    </div>
-
-                  </div>
-
-                </div>
-
-                {/* Right Overlapping: Complete Formatted Resume Sheet */}
-                <div className="absolute top-2 right-[-10px] sm:right-[-16px] w-[290px] sm:w-[340px] bg-white rounded-xl shadow-[0_25px_60px_rgba(0,0,0,0.3)] border border-slate-200 p-4 sm:p-4.5 z-20 text-left space-y-2.5">
-                  
-                  {/* Resume Top Header */}
-                  <div className="border-b border-slate-900 pb-1.5 space-y-0.5">
-                    <h3 className="text-sm font-black text-slate-900 tracking-tight leading-none uppercase">
-                      TAYLOR FOSTER
-                    </h3>
-                    <p className="text-[10px] font-bold text-slate-600">
-                      Certified Project Management Professional
-                    </p>
-                    <div className="text-[8px] text-slate-400 flex flex-wrap gap-1">
-                      <span>Los Angeles, CA</span> • <span>taylor@example.com</span>
-                    </div>
-                  </div>
-
-                  {/* Resume Grid: Experience & Skills */}
-                  <div className="grid grid-cols-12 gap-2 text-[9px]">
-                    
-                    {/* Left: Summary & Experience */}
-                    <div className="col-span-7 space-y-2">
+                    <div className="sm:col-span-7 space-y-2.5">
                       <div>
-                        <span className="font-black text-slate-800 text-[8px] uppercase tracking-wider block border-b border-slate-200 pb-0.5">
-                          Summary
-                        </span>
-                        <p className="text-[8px] text-slate-600 leading-tight pt-0.5">
-                          Results-driven IT Project Leader with 8+ years executing complex digital transformations.
-                        </p>
-                      </div>
-
-                      <div className="space-y-1">
-                        <span className="font-black text-slate-800 text-[8px] uppercase tracking-wider block border-b border-slate-200 pb-0.5">
-                          Experience
-                        </span>
-                        <div>
-                          <span className="font-bold text-slate-900 block text-[8.5px]">Senior IT Project Manager</span>
-                          <span className="text-[7.5px] text-slate-500 block">Tech Solutions • 2021 — Present</span>
-                          <p className="text-[8px] text-slate-600 leading-tight">
-                            • Led agile squad of 14 engineers delivering $3.2M enterprise SaaS upgrade.
-                          </p>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-slate-300 font-medium">Layout &amp; Structure</span>
+                          <span className="text-emerald-400 font-bold">98%</span>
                         </div>
-                        <div>
-                          <span className="font-bold text-slate-900 block text-[8.5px]">Project Manager</span>
-                          <span className="text-[7.5px] text-slate-500 block">Innovate Lab • 2018 — 2021</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Right: Technical Skills & Achievements */}
-                    <div className="col-span-5 space-y-2 border-l border-slate-100 pl-2">
-                      <div>
-                        <span className="font-black text-slate-800 text-[8px] uppercase tracking-wider block border-b border-slate-200 pb-0.5">
-                          Technical Skills
-                        </span>
-                        <div className="space-y-0.5 pt-0.5 text-[8px] text-slate-700">
-                          <p>• Scrum & Agile</p>
-                          <p>• SQL & Tableau</p>
-                          <p>• JIRA / Confluence</p>
-                          <p>• Python & APIs</p>
+                        <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-emerald-400 h-full rounded-full" style={{ width: '98%' }} />
                         </div>
                       </div>
 
                       <div>
-                        <span className="font-black text-slate-800 text-[8px] uppercase tracking-wider block border-b border-slate-200 pb-0.5">
-                          Achievements
-                        </span>
-                        <div className="space-y-0.5 pt-0.5 text-[7.5px] text-slate-600">
-                          <p className="font-bold text-emerald-700">$450k Cost Savings</p>
-                          <p className="font-bold text-blue-700">35% Faster Delivery</p>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-slate-300 font-medium">ATS Keyword Coverage</span>
+                          <span className="text-teal-400 font-bold">92%</span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-teal-400 h-full rounded-full" style={{ width: '92%' }} />
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className="text-slate-300 font-medium">Quantified Bullet Ratio</span>
+                          <span className="text-emerald-400 font-bold">88%</span>
+                        </div>
+                        <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                          <div className="bg-emerald-400 h-full rounded-full" style={{ width: '88%' }} />
                         </div>
                       </div>
                     </div>
-
                   </div>
 
-                </div>
-
-                {/* Center Action Badge: "Parsing" with Upload / Arrow Icon */}
-                <div className="absolute top-[48%] right-[32%] sm:right-[35%] bg-[#0a66c2] text-white text-[11px] font-black px-4 py-2 rounded-full shadow-[0_10px_25px_rgba(10,102,194,0.4)] flex items-center gap-1.5 z-30 animate-pulse border border-white/40">
-                  <Download className="w-3.5 h-3.5 rotate-180" />
-                  <span>Parsing</span>
-                </div>
-
-              </div>
-            )}
-
-            {/* TAB 3: AI Skills Finder */}
-            {activeFeature === 'skills' && (
-              <div className="w-full max-w-xl relative flex items-center justify-center animate-in fade-in zoom-in-95 duration-400">
-                <div className="w-full bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-4">
-                  
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <Target className="w-5 h-5 text-emerald-600" />
-                      <span className="text-xs font-bold text-slate-800">Target Role Core Competencies</span>
-                    </div>
-                    <span className="text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                      High Match
-                    </span>
-                  </div>
-
-                  <div className="space-y-3">
-                    <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                      Recommended skills from job description:
-                    </span>
-                    <div className="flex flex-wrap gap-2">
-                      {['Project Management', 'Data Analysis', 'Cross-Functional Leadership', 'Strategic Planning', 'Process Optimization', 'Client Relations'].map((skill) => (
-                        <div
-                          key={skill}
-                          className="px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-colors"
-                        >
-                          <span>+ {skill}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            )}
-
-            {/* TAB 4: Target Job Keyword Matcher */}
-            {activeFeature === 'tailor' && (
-              <div className="w-full max-w-xl relative flex items-center justify-center animate-in fade-in zoom-in-95 duration-400">
-                <div className="w-full bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-4">
-                  
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <Target className="w-5 h-5 text-emerald-600" />
-                      <span className="text-xs font-bold text-slate-800">Target Job Keyword Match</span>
-                    </div>
-                    <span className="text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
-                      94% Match Potential
-                    </span>
-                  </div>
-
-                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="font-extrabold text-slate-900">Project &amp; Operations Manager</span>
-                      <span className="text-[11px] font-bold text-emerald-600">Screening System Standard</span>
-                    </div>
-                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                      <div className="bg-emerald-500 h-full rounded-full transition-all" style={{ width: '84%' }}></div>
-                    </div>
-                  </div>
-
+                  {/* Actionable Findings Checklist */}
                   <div className="space-y-2">
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
-                      Recommended Keywords to Highlight:
+                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
+                      Screening Systems Verified:
                     </span>
-                    <div className="flex flex-wrap gap-2">
-                      {['Process Optimization', 'Resource Allocation', 'Team Leadership', 'Risk Mitigation', 'Budget Management'].map((kw) => (
-                        <div
-                          key={kw}
-                          className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-[11px] font-bold flex items-center gap-1.5 hover:bg-amber-100 transition-colors cursor-pointer"
-                        >
-                          <span className="text-amber-600 font-extrabold">+</span>
-                          <span>{kw}</span>
-                        </div>
-                      ))}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span className="text-slate-200">Workday &amp; Taleo OCR Safe</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span className="text-slate-200">Contact Information Extracted</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span className="text-slate-200">Standard Section Headers</span>
+                      </div>
+                      <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/60 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                        <span className="text-slate-200">Zero Multi-Column Traps</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ──────────────────────────────────────────────────
+                  TAB 3: Target Job Keyword Gap Matcher
+                  ────────────────────────────────────────────────── */}
+              {activeFeature === 'keyword-matcher' && (
+                <div className="w-full space-y-4 animate-in fade-in zoom-in-95 duration-250">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                      <Target className="w-4 h-4 text-emerald-400" />
+                      <span>Job Description Keyword Gap Matcher</span>
+                    </div>
+                    <span className="text-[11px] font-black text-emerald-400 px-2.5 py-0.5 bg-emerald-500/10 rounded-full border border-emerald-500/30">
+                      Target Role: Senior Manager
+                    </span>
+                  </div>
+
+                  {/* Match Progress Bar Card */}
+                  <div className="bg-slate-950/80 rounded-xl p-4 border border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-300 font-bold">Match Score: 84% &rarr; 96% with recommendations</span>
+                      <span className="text-emerald-400 font-bold">+12% Potential</span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                      <div className="bg-emerald-500 h-full rounded-full transition-all duration-500" style={{ width: '84%' }} />
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-slate-500 leading-relaxed border-t border-slate-100 pt-2 font-medium">
-                    Adding these essential keywords directly into your experience bullet points helps you rank in the top 5% of candidate searches.
-                  </p>
+                  {/* Comparative Skills Matrix */}
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider block mb-1.5">
+                        ✓ Detected In Your Resume (24 Skills Matched):
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {['Project Planning', 'Team Leadership', 'Budget Management', 'Agile / Scrum', 'Stakeholder Reporting'].map((s) => (
+                          <span
+                            key={s}
+                            className="px-2.5 py-1 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-medium"
+                          >
+                            ✓ {s}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
 
+                    <div>
+                      <span className="text-[11px] font-bold text-amber-400 uppercase tracking-wider block mb-1.5">
+                        + Missing High-Priority Keywords (Click to Inject):
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {[
+                          'Process Optimization',
+                          'Cross-Functional Collaboration',
+                          'Risk Mitigation',
+                          'Resource Allocation'
+                        ].map((s) => (
+                          <button
+                            key={s}
+                            type="button"
+                            className="px-2.5 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold hover:bg-amber-500/25 transition-colors flex items-center gap-1"
+                          >
+                            <span className="text-amber-400 font-black">+</span>
+                            <span>{s}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-slate-400 pt-1 border-t border-slate-800">
+                    Adding these 4 missing skills into your experience bullet points raises your ranking into the top 5% of candidate pools.
+                  </p>
                 </div>
-              </div>
-            )}
+              )}
+
+              {/* ──────────────────────────────────────────────────
+                  TAB 4: One-Click ATS Formatting & Export
+                  ────────────────────────────────────────────────── */}
+              {activeFeature === 'ats-export' && (
+                <div className="w-full space-y-4 animate-in fade-in zoom-in-95 duration-250">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-300">
+                      <FileCheck2 className="w-4 h-4 text-emerald-400" />
+                      <span>Standardized A4 ATS Document Stream</span>
+                    </div>
+                    <span className="text-[11px] font-black text-emerald-400 px-2 py-0.5 bg-emerald-500/10 rounded-md border border-emerald-500/20">
+                      100% Machine-Readable
+                    </span>
+                  </div>
+
+                  {/* Clean Mini-Document Preview */}
+                  <div className="bg-white rounded-xl p-4.5 text-slate-900 shadow-lg space-y-2.5 text-left border border-slate-200">
+                    <div className="border-b border-slate-900 pb-1.5">
+                      <h4 className="text-xs font-black uppercase tracking-wider text-slate-900">
+                        DANIRU DE SILVA
+                      </h4>
+                      <p className="text-[10px] text-slate-600 font-semibold">
+                        Software Engineering Intern • Sri Lanka • daniru.desilva2023@gmail.com
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <span className="text-[9px] font-black uppercase tracking-widest text-slate-800 block border-b border-slate-300 pb-0.5">
+                        PROFESSIONAL SUMMARY
+                      </span>
+                      <p className="text-[9.5px] text-slate-700 leading-snug">
+                        Dedicated technologist with proven experience architecting full-stack web applications, SaaS platforms, and REST APIs using Next.js, Node.js, and Supabase.
+                      </p>
+                    </div>
+
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between border-b border-slate-300 pb-0.5">
+                        <span className="text-[9px] font-black uppercase tracking-widest text-slate-800">
+                          EXPERIENCE
+                        </span>
+                        <span className="text-[8.5px] text-slate-500 font-bold">2024 — Present</span>
+                      </div>
+                      <p className="text-[9.5px] text-slate-800 font-bold">
+                        Director &amp; Co-Founder • Delight Consumer Products
+                      </p>
+                      <p className="text-[9px] text-slate-600 leading-tight">
+                        • Engineered full-stack e-commerce system delivering 35% faster checkout throughput.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Bar */}
+                  <div className="flex items-center justify-between pt-1">
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Zero tables • Guaranteed OCR pass rate</span>
+                    </div>
+
+                    <Link
+                      href="/builder"
+                      className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition-colors shadow-sm"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Export ATS PDF</span>
+                    </Link>
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            {/* Window Bottom Status Bar */}
+            <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+              <span className="flex items-center gap-1.5">
+                <TrendingUp className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Validated against Workday, Taleo, Greenhouse &amp; Lever</span>
+              </span>
+              <span className="text-slate-500 hidden sm:inline">
+                Instant Cloud Sync
+              </span>
+            </div>
 
           </div>
 
@@ -537,4 +562,3 @@ export default function AiFeaturesSection() {
     </section>
   );
 }
-
