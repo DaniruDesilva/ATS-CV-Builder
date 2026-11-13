@@ -4,12 +4,12 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
-  title: "ATS Resume Builder & AI CV Checker | Professional ATS Resumes",
-  description: "Build ATS-compliant resumes with native vector PDF exports and check your resume against target job descriptions using Google Gemini AI.",
-  keywords: ["ATS Resume Builder", "ATS CV Checker", "Resume AI Optimizer", "Free ATS Resume", "Vector PDF Resume"],
+  title: "ResumAI | AI Resume Builder & Job-Winning ATS CV Maker",
+  description: "Build job-winning, recruiter-approved resumes in minutes and score your CV against any job description with intelligent AI suggestions.",
+  keywords: ["AI Resume Builder", "ATS Resume Checker", "Professional CV Maker", "Free Resume Builder", "Job Winning Resume"],
   openGraph: {
-    title: "ATS Resume Builder & AI CV Checker",
-    description: "Create vector ATS-safe resumes and score your CV instantly against enterprise ATS rules.",
+    title: "ResumAI | AI Resume Builder & Job-Winning ATS CV Maker",
+    description: "Create professional, recruiter-approved resumes and check your ATS compatibility score instantly.",
     type: "website",
   },
 };

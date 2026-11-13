@@ -451,20 +451,20 @@ export default function AiFeaturesSection() {
                   
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-2">
-                      <Target className="w-5 h-5 text-indigo-600" />
-                      <span className="text-xs font-bold text-slate-800">Target Role Skills Gap</span>
+                      <Target className="w-5 h-5 text-emerald-600" />
+                      <span className="text-xs font-bold text-slate-800">Target Role Core Competencies</span>
                     </div>
-                    <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">
+                    <span className="text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
                       High Match
                     </span>
                   </div>
 
                   <div className="space-y-3">
                     <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">
-                      Recommended keywords from job description:
+                      Recommended skills from job description:
                     </span>
                     <div className="flex flex-wrap gap-2">
-                      {['Microservices Architecture', 'System Design', 'Redis Caching', 'CI/CD Pipelines', 'Team Mentorship'].map((skill) => (
+                      {['Project Management', 'Data Analysis', 'Cross-Functional Leadership', 'Strategic Planning', 'Process Optimization', 'Client Relations'].map((skill) => (
                         <div
                           key={skill}
                           className="px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold flex items-center gap-1.5 cursor-pointer hover:bg-emerald-100 transition-colors"
@@ -487,7 +487,7 @@ export default function AiFeaturesSection() {
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-2">
                       <Target className="w-5 h-5 text-emerald-600" />
-                      <span className="text-xs font-bold text-slate-800">Target Job ATS Keyword Gap</span>
+                      <span className="text-xs font-bold text-slate-800">Target Job Keyword Match</span>
                     </div>
                     <span className="text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
                       94% Match Potential
@@ -496,20 +496,20 @@ export default function AiFeaturesSection() {
 
                   <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-extrabold text-slate-900">Senior Full-Stack Engineer</span>
-                      <span className="text-[11px] font-bold text-emerald-600">Workday ATS Standard</span>
+                      <span className="font-extrabold text-slate-900">Project &amp; Operations Manager</span>
+                      <span className="text-[11px] font-bold text-emerald-600">Screening System Standard</span>
                     </div>
                     <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
-                      <div className="bg-emerald-500 h-full rounded-full transition-all" style={{ width: '82%' }}></div>
+                      <div className="bg-emerald-500 h-full rounded-full transition-all" style={{ width: '84%' }}></div>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
-                      Missing Critical Keywords (Click to Inject):
+                      Recommended Keywords to Highlight:
                     </span>
                     <div className="flex flex-wrap gap-2">
-                      {['Distributed Caching', 'Kubernetes Deployment', 'GraphQL APIs', 'CI/CD Pipelines'].map((kw) => (
+                      {['Process Optimization', 'Resource Allocation', 'Team Leadership', 'Risk Mitigation', 'Budget Management'].map((kw) => (
                         <div
                           key={kw}
                           className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-[11px] font-bold flex items-center gap-1.5 hover:bg-amber-100 transition-colors cursor-pointer"
@@ -522,7 +522,7 @@ export default function AiFeaturesSection() {
                   </div>
 
                   <p className="text-[11px] text-slate-500 leading-relaxed border-t border-slate-100 pt-2 font-medium">
-                    Adding these 4 missing keywords directly into your experience bullet points raises your ATS ranking into the top 5% of applicant pools.
+                    Adding these essential keywords directly into your experience bullet points helps you rank in the top 5% of candidate searches.
                   </p>
 
                 </div>

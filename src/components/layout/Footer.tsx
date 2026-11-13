@@ -53,12 +53,12 @@ export function Footer() {
             <ul className="space-y-2 font-medium">
               <li>
                 <Link href="/builder" className="hover:text-emerald-600 transition-colors">
-                  Google X-Y-Z Rewriter
+                  Smart Bullet Rewriter
                 </Link>
               </li>
               <li>
                 <Link href="/checker" className="hover:text-emerald-600 transition-colors">
-                  Real-Time ATS Scoring
+                  Resume Compatibility Score
                 </Link>
               </li>
               <li>
@@ -68,29 +68,29 @@ export function Footer() {
               </li>
               <li>
                 <Link href="/builder" className="hover:text-emerald-600 transition-colors">
-                  Vector PDF Exporter
+                  Print-Ready PDF Export
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Col 3: ATS Compatibility */}
+          {/* Col 3: Career Resources */}
           <div className="space-y-3">
             <h4 className="font-extrabold text-sm text-slate-900 uppercase tracking-wider">
-              ATS Compliance
+              Career Guide
             </h4>
             <ul className="space-y-2 font-medium">
               <li>
-                <span className="text-slate-700 font-semibold block">Taleo Optimization</span>
+                <span className="text-slate-700 font-semibold block">Screening System Guide</span>
               </li>
               <li>
-                <span className="text-slate-700 font-semibold block">Workday Parsing</span>
+                <span className="text-slate-700 font-semibold block">Job Keyword Tips</span>
               </li>
               <li>
-                <span className="text-slate-700 font-semibold block">Greenhouse ATS</span>
+                <span className="text-slate-700 font-semibold block">Formatting Best Practices</span>
               </li>
               <li>
-                <span className="text-slate-700 font-semibold block">Lever Parse Testing</span>
+                <span className="text-slate-700 font-semibold block">Interview Preparation</span>
               </li>
             </ul>
           </div>
@@ -103,22 +103,22 @@ export function Footer() {
             <ul className="space-y-2 font-medium">
               <li>
                 <Link href="/builder?template=classic-ats" className="hover:text-emerald-600 transition-colors">
-                  Classic ATS Template
+                  Classic Professional
                 </Link>
               </li>
               <li>
                 <Link href="/builder?template=modern-executive" className="hover:text-emerald-600 transition-colors">
-                  Modern Executive
+                  Executive &amp; Leadership
                 </Link>
               </li>
               <li>
                 <Link href="/builder?template=technical-clean" className="hover:text-emerald-600 transition-colors">
-                  Technical Stack
+                  Skills &amp; Experience
                 </Link>
               </li>
               <li>
-                <Link href="/builder?template=compact-minimal" className="hover:text-emerald-600 transition-colors">
-                  Compact 1-Page
+                <Link href="/builder?template=traditional-ats" className="hover:text-emerald-600 transition-colors">
+                  Traditional Corporate
                 </Link>
               </li>
             </ul>

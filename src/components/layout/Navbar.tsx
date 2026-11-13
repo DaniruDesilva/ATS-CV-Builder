@@ -123,7 +123,7 @@ export function Navbar() {
                 </Link>
 
                 <Link
-                  href="/builder?step=6"
+                  href="/builder?step=9"
                   onClick={() => setResumeDropdownOpen(false)}
                   className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
                 >
@@ -176,7 +176,7 @@ export function Navbar() {
                   </div>
                   <div>
                     <span className="text-xs font-bold text-slate-900 block">AI Bullet Optimizer</span>
-                    <span className="text-[11px] text-slate-500">Google X-Y-Z formula</span>
+                    <span className="text-[11px] text-slate-500">Action &amp; metrics rewriter</span>
                   </div>
                 </Link>
               </div>
