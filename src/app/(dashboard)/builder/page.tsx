@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { TemplateId } from '@/types/resume';
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { FormStepper, STEPS } from '@/components/builder/FormStepper';
 import { ContactForm } from '@/components/builder/forms/ContactForm';
@@ -31,7 +33,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-export default function BuilderPage() {
+function BuilderPageContent() {
+  const searchParams = useSearchParams();
   const {
     title,
     setTitle,
@@ -43,6 +46,20 @@ export default function BuilderPage() {
     setTemplateId,
     content
   } = useResumeStore();
+
+  useEffect(() => {
+    const tpl = searchParams.get('template');
+    if (tpl && ['traditional-ats', 'classic-ats', 'modern-executive', 'technical-clean'].includes(tpl)) {
+      setTemplateId(tpl as TemplateId);
+    }
+    const step = searchParams.get('step');
+    if (step !== null) {
+      const stepNum = parseInt(step, 10);
+      if (!isNaN(stepNum) && stepNum >= 0 && stepNum < STEPS.length) {
+        setActiveStep(stepNum);
+      }
+    }
+  }, [searchParams, setTemplateId, setActiveStep]);
 
   const [showScoreModal, setShowScoreModal] = useState(false);
   const [showResetModal, setShowResetModal] = useState(false);
@@ -592,5 +609,13 @@ export default function BuilderPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function BuilderPage() {
+  return (
+    <Suspense fallback={<div className="p-12 text-center text-xs font-semibold text-slate-400">Loading CV Builder...</div>}>
+      <BuilderPageContent />
+    </Suspense>
   );
 }

@@ -1,16 +1,19 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import {
-  ChevronDown, 
-  Star, 
+  Star,
   MessageSquareQuote,
   ArrowRight,
   ShieldCheck,
-  FileCheck,
-  Code,
-  Sparkles
+  FileCheck2,
+  Sparkles,
+  CheckCircle2,
+  Layers,
+  Zap,
+  Cpu,
+  Target
 } from 'lucide-react';
 import { ClassicAtsDom, ModernExecutiveDom, TechnicalCleanDom, TraditionalAtsDom } from '@/components/builder/DomTemplates';
 import { mockResume1, mockResume2, mockResume3 } from '@/lib/mockResumes';
@@ -19,53 +22,57 @@ import AiFeaturesSection from '@/components/layout/AiFeaturesSection';
 export default function LandingPage() {
   const templateScrollRef = useRef<HTMLDivElement>(null);
   const [carouselActiveDot, setCarouselActiveDot] = useState(0);
-  
-  // Hero Section Rotation State
-  const [heroIndex, setHeroIndex] = useState(0);
-  const [flipState, setFlipState] = useState<'idle' | 'flipping-out' | 'flipping-in'>('idle');
+  const [activeHeroTab, setActiveHeroTab] = useState<'classic' | 'traditional' | 'technical' | 'executive'>('classic');
 
-  const templateList = [
-    { id: 'traditional-ats-1', templateId: 'traditional-ats', name: 'Traditional ATS', mock: mockResume1, Component: TraditionalAtsDom },
-    { id: 'modern-executive-1', templateId: 'modern-executive', name: 'Modern Executive', mock: mockResume2, Component: ModernExecutiveDom },
-    { id: 'technical-clean-1', templateId: 'technical-clean', name: 'Technical Clean', mock: mockResume3, Component: TechnicalCleanDom },
-    { id: 'classic-ats-1', templateId: 'classic-ats', name: 'Classic ATS', mock: mockResume1, Component: ClassicAtsDom },
-    { id: 'traditional-ats-2', templateId: 'traditional-ats', name: 'Traditional ATS (Var)', mock: mockResume3, Component: TraditionalAtsDom },
-    { id: 'modern-executive-2', templateId: 'modern-executive', name: 'Modern Executive (Var)', mock: mockResume1, Component: ModernExecutiveDom },
-    { id: 'technical-clean-2', templateId: 'technical-clean', name: 'Technical Clean (Var)', mock: mockResume2, Component: TechnicalCleanDom },
-    { id: 'classic-ats-2', templateId: 'classic-ats', name: 'Classic ATS (Var)', mock: mockResume3, Component: ClassicAtsDom },
+  const templates = [
+    {
+      id: 'classic-ats',
+      templateId: 'classic-ats',
+      name: 'Classic ATS',
+      tag: 'Top Tech Pick',
+      description: 'Modern typography with clean two-column technical skills. Optimized for 100% OCR parseability.',
+      mock: mockResume1,
+      Component: ClassicAtsDom,
+      badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    },
+    {
+      id: 'traditional-ats',
+      templateId: 'traditional-ats',
+      name: 'Traditional ATS',
+      tag: 'Gold Standard',
+      description: 'The quintessential Ivy League & Big Tech standard. Single-column format with clean divider rules.',
+      mock: mockResume1,
+      Component: TraditionalAtsDom,
+      badgeColor: 'bg-slate-100 text-slate-800 border-slate-200',
+    },
+    {
+      id: 'technical-clean',
+      templateId: 'technical-clean',
+      name: 'Technical Clean',
+      tag: 'Developer Stack',
+      description: 'Sidebar layout prioritizing programming languages, cloud tools, frameworks, and project links.',
+      mock: mockResume3,
+      Component: TechnicalCleanDom,
+      badgeColor: 'bg-teal-100 text-teal-800 border-teal-200',
+    },
+    {
+      id: 'modern-executive',
+      templateId: 'modern-executive',
+      name: 'Modern Executive',
+      tag: 'Leadership',
+      description: 'High-impact two-column layout with dark sidebar. Designed for senior leads, managers, and directors.',
+      mock: mockResume2,
+      Component: ModernExecutiveDom,
+      badgeColor: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    },
   ];
-
-  const heroTemplates = templateList.slice(0, 4);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // 1. Start flipping out
-      setFlipState('flipping-out');
-      
-      setTimeout(() => {
-        // 2. Halfway through (500ms), swap the component and instantly snap to the flipping-in starting position
-        setHeroIndex((prev) => (prev + 1) % heroTemplates.length);
-        setFlipState('flipping-in');
-        
-        // 3. One frame later, transition back to idle so it animates fully in
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            setFlipState('idle');
-          });
-        });
-      }, 500); 
-
-    }, 4500);
-
-    return () => clearInterval(interval);
-  }, [heroTemplates.length]);
 
   const scrollToIndex = (index: number) => {
     if (templateScrollRef.current) {
-      const cardWidth = 392; // 360 + 32 gap
+      const cardWidth = 360;
       templateScrollRef.current.scrollTo({
         left: index * cardWidth,
-        behavior: 'smooth'
+        behavior: 'smooth',
       });
       setCarouselActiveDot(index);
     }
@@ -77,303 +84,477 @@ export default function LandingPage() {
       const totalScrollable = scrollWidth - clientWidth;
       if (totalScrollable > 0) {
         const progress = scrollLeft / totalScrollable;
-        const dotIndex = Math.min(Math.round(progress * 7), 7);
+        const dotIndex = Math.min(Math.round(progress * (templates.length - 1)), templates.length - 1);
         setCarouselActiveDot(dotIndex);
       }
     }
   };
 
-  return (
-    <div className="min-h-screen bg-[#F9FAFB] font-sans overflow-x-hidden selection:bg-[#5B4BE0]/20 text-slate-800">
-      {/* HERO SECTION */}
-      <section className="relative pt-12 pb-24 lg:pt-20 lg:pb-32 px-4 lg:px-12 overflow-hidden bg-gradient-to-br from-[#dcfcf2] via-[#eaf0fc] to-[#f4f2ff]">
-        {/* Subtle decorative elements can go here if needed, but the beautiful gradient acts as the main background */}
+  const getHeroComponent = () => {
+    switch (activeHeroTab) {
+      case 'traditional':
+        return <TraditionalAtsDom content={mockResume1} />;
+      case 'technical':
+        return <TechnicalCleanDom content={mockResume3} />;
+      case 'executive':
+        return <ModernExecutiveDom content={mockResume2} />;
+      case 'classic':
+      default:
+        return <ClassicAtsDom content={mockResume1} />;
+    }
+  };
 
-        <div className="max-w-[1400px] mx-auto grid grid-cols-1 lg:grid-cols-[1.1fr_0.9fr] gap-12 lg:gap-8 items-center relative z-10">
+  return (
+    <div className="min-h-screen bg-[#F9FAFB] font-sans overflow-x-hidden selection:bg-emerald-500/20 text-slate-800">
+      
+      {/* ═══════════════════════════════════════════════════════
+          HERO SECTION
+          ═══════════════════════════════════════════════════════ */}
+      <section className="relative pt-10 pb-20 lg:pt-18 lg:pb-28 px-4 sm:px-6 lg:px-12 overflow-hidden bg-gradient-to-br from-[#dcfcf2] via-[#eaf0fc] to-[#f0fdf4]">
+        
+        {/* Subtle background glow */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-emerald-400/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-[1360px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center relative z-10">
           
-          {/* Left: Text & CTA */}
-          <div className="max-w-2xl text-center lg:text-left mx-auto lg:mx-0">
-            <h1 className="text-[3.5rem] sm:text-[4rem] lg:text-[4.75rem] leading-[1.02] font-black text-slate-900 tracking-tighter mb-6 text-balance">
-              Land more <span className="text-slate-800">interviews with</span><br className="hidden lg:block" />
-              ResumAI's <span className="text-[#5B4BE0]">Resume Builder</span>
+          {/* Left Column: Heading, Subtitle & CTAs */}
+          <div className="lg:col-span-6 text-center lg:text-left mx-auto lg:mx-0 max-w-2xl space-y-6">
+            
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs font-bold shadow-2xs">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
+              <span>Next-Gen ATS Optimization • Taleo &amp; Workday Certified</span>
+            </div>
+
+            <h1 className="text-[2.75rem] sm:text-[3.5rem] lg:text-[4.25rem] leading-[1.04] font-black text-slate-900 tracking-tight text-balance">
+              Land more <span className="text-slate-800">interviews with</span><br className="hidden sm:block" />
+              ResumAI&apos;s <span className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 bg-clip-text text-transparent">Resume Builder</span>
             </h1>
             
-            <p className="text-lg lg:text-[1.35rem] text-slate-500 mb-10 leading-relaxed max-w-[90%] mx-auto lg:mx-0 font-medium">
-              Create a beautiful, ATS-friendly resume with the help of features like AI Resume Writer, ATS Check, and One-Click Job Tailoring. It's the best way to make an impression.
+            <p className="text-base sm:text-lg lg:text-xl text-slate-600 leading-relaxed font-normal max-w-xl mx-auto lg:mx-0">
+              Create a recruiter-ready resume with real-time ATS compatibility scoring, Google X-Y-Z bullet rewrites, and 100% vector single-column PDF export.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 mb-14">
-              <Link href="/builder" className="w-full sm:w-auto px-8 py-4 bg-[#10b981] hover:bg-[#0ea5e9] hover:bg-[#0f976a] text-white text-[17px] font-bold rounded-lg shadow-[0_8px_20px_rgba(16,185,129,0.3)] hover:shadow-[0_8px_25px_rgba(16,185,129,0.4)] hover:-translate-y-0.5 transition-all text-center">
-                Build Your Resume
+            {/* CTA Buttons */}
+            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-3.5 pt-2">
+              <Link
+                href="/builder"
+                className="w-full sm:w-auto px-7 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-extrabold rounded-xl shadow-lg shadow-emerald-600/25 hover:shadow-emerald-600/35 hover:-translate-y-0.5 transition-all text-center flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>Build Your Resume</span>
               </Link>
-              <Link href="/builder?mode=ats" className="w-full sm:w-auto px-8 py-4 bg-transparent border-2 border-slate-900 text-slate-900 hover:bg-slate-50 text-[17px] font-bold rounded-lg transition-all text-center hover:-translate-y-0.5">
-                Get Your Resume Score
+              
+              <Link
+                href="/checker"
+                className="w-full sm:w-auto px-7 py-3.5 bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white text-base font-bold rounded-xl transition-all text-center hover:-translate-y-0.5 flex items-center justify-center gap-2 shadow-2xs"
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Get Your Resume Score</span>
               </Link>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 lg:gap-8">
-              <div className="flex items-center gap-2">
-                <div className="flex text-[#10b981] gap-1">
+            {/* Social Proof & Trust Badges */}
+            <div className="pt-6 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-6 border-t border-slate-200/60">
+              <div className="flex items-center gap-2.5">
+                <div className="flex text-emerald-500 gap-1">
                   {[...Array(5)].map((_, i) => (
-                    <div key={i} className="w-6 h-6 bg-[#10b981] text-white rounded-[3px] flex items-center justify-center shadow-sm">
-                       <Star className="w-4 h-4 fill-current" />
+                    <div key={i} className="w-5 h-5 bg-emerald-600 text-white rounded-xs flex items-center justify-center shadow-2xs">
+                      <Star className="w-3.5 h-3.5 fill-current" />
                     </div>
                   ))}
                 </div>
-                <span className="text-slate-800 font-extrabold text-[15px] ml-1">5,321 Reviews</span>
+                <div className="text-left">
+                  <span className="text-slate-900 font-extrabold text-xs block leading-tight">5,320+ Reviews</span>
+                  <span className="text-[11px] text-slate-500">4.9 / 5 Rating</span>
+                </div>
               </div>
               
-              <div className="hidden sm:block w-[1.5px] h-10 bg-slate-200"></div>
+              <div className="hidden sm:block w-px h-8 bg-slate-300/80" />
               
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 flex items-center justify-center shrink-0">
-                  <MessageSquareQuote className="w-5 h-5 text-slate-500" />
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200/80 flex items-center justify-center shrink-0">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 </div>
-                <p className="text-slate-500 text-[14px] font-medium leading-snug text-left max-w-[150px]">
-                  <strong className="text-slate-900 font-extrabold block">28,452 users</strong> landed interviews last month
+                <p className="text-slate-600 text-xs font-semibold text-left leading-tight">
+                  <strong className="text-slate-900 font-extrabold">28,400+ candidates</strong> passed ATS screening
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Right: Floating Isometric Resume */}
-          <div className="relative h-[650px] hidden lg:block perspective-[1200px]">
-            <div 
-              className={`absolute right-[20px] top-[20px] w-[480px] h-[675px] bg-white rounded-lg shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)] border border-slate-200/50 overflow-hidden z-10 transform origin-center 
-              ${flipState === 'idle' ? 'transition-all duration-700 ease-out rotate-[-2deg] rotate-x-[4deg] rotate-y-[-12deg] translate-y-0 scale-100 opacity-100 hover:rotate-y-[-8deg] hover:rotate-x-[2deg] hover:-translate-y-2' : ''}
-              ${flipState === 'flipping-out' ? 'transition-all duration-500 ease-in rotate-[-1deg] rotate-x-[8deg] rotate-y-[-8deg] translate-y-[-15px] scale-[0.98] opacity-0' : ''}
-              ${flipState === 'flipping-in' ? 'transition-none rotate-[-3deg] rotate-x-[0deg] rotate-y-[-16deg] translate-y-[15px] scale-[0.98] opacity-0' : ''}
-              `}
-              style={{ transformStyle: 'preserve-3d', maskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to bottom, black 65%, transparent 100%)' }}
-            >
-              <div className="origin-top-left scale-[0.60] w-[794px] h-[1123px] pointer-events-none bg-white">
-                {(() => {
-                   const ActiveHeroTemplate = heroTemplates[heroIndex].Component;
-                   const activeMock = heroTemplates[heroIndex].mock;
-                   return <ActiveHeroTemplate content={activeMock} />;
-                })()}
-              </div>
+          {/* Right Column: Interactive Real-Time Resume Preview Showcase */}
+          <div className="lg:col-span-6 flex flex-col items-center justify-center relative w-full">
+            
+            {/* Interactive Template Switcher Pills */}
+            <div className="flex items-center gap-1.5 p-1 bg-white/90 backdrop-blur-xs border border-slate-200/80 rounded-2xl shadow-sm mb-4 z-20 max-w-full overflow-x-auto">
+              <button
+                type="button"
+                onClick={() => setActiveHeroTab('classic')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  activeHeroTab === 'classic'
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                Classic ATS
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveHeroTab('traditional')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  activeHeroTab === 'traditional'
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                Traditional
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveHeroTab('technical')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  activeHeroTab === 'technical'
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                Technical Stack
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveHeroTab('executive')}
+                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+                  activeHeroTab === 'executive'
+                    ? 'bg-emerald-600 text-white shadow-2xs'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                Executive
+              </button>
             </div>
 
+            {/* Floating A4 Card Showcase */}
+            <div className="relative w-full max-w-[460px] sm:max-w-[480px]">
+              
+              {/* Floating Top Badge: ATS Score */}
+              <div className="absolute -top-3.5 left-4 z-20 flex items-center gap-2 bg-white/95 backdrop-blur-xs border border-emerald-200 rounded-full px-3.5 py-1.5 shadow-lg shadow-emerald-900/10">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-black text-slate-900">ATS Score: 98/100</span>
+                <span className="text-[10px] font-extrabold px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800">
+                  Top 2%
+                </span>
+              </div>
 
+              {/* Floating Bottom Badge: Vector Safety */}
+              <div className="absolute -bottom-3.5 right-4 z-20 flex items-center gap-2 bg-slate-900/95 backdrop-blur-xs text-white rounded-full px-3.5 py-1.5 shadow-xl border border-slate-800 text-[11px] font-bold">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>100% Vector PDF • Single-Column Safe</span>
+              </div>
 
-            {/* Decorative Dot */}
-            <div className="absolute right-[-10px] top-[140px] w-4 h-4 rounded-full bg-[#10b981]/30 shadow-sm animate-bounce" style={{ animationDuration: '3s' }}></div>
+              {/* The Styled A4 Preview Window */}
+              <div className="w-full h-[580px] sm:h-[620px] bg-white rounded-2xl shadow-2xl border border-slate-200/80 overflow-hidden relative group transition-transform duration-300 hover:-translate-y-1">
+                
+                {/* Window Bar */}
+                <div className="bg-slate-50 border-b border-slate-200 px-3.5 py-2 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-red-400/80" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+                  </div>
+                  <span className="text-[11px] font-bold text-slate-500">
+                    A4 Print Standard • 794 × 1123
+                  </span>
+                  <Link
+                    href={`/builder?template=${activeHeroTab === 'classic' ? 'classic-ats' : activeHeroTab === 'traditional' ? 'traditional-ats' : activeHeroTab === 'technical' ? 'technical-clean' : 'modern-executive'}&step=9`}
+                    className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
+                  >
+                    Edit <ArrowRight className="w-3 h-3" />
+                  </Link>
+                </div>
+
+                {/* Scaled A4 Sheet Container */}
+                <div className="w-full h-full overflow-hidden bg-slate-100/60 flex justify-center p-3">
+                  <div
+                    className="origin-top transition-all duration-300"
+                    style={{
+                      transform: 'scale(0.56)',
+                      width: '794px',
+                    }}
+                  >
+                    {getHeroComponent()}
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
           </div>
+
         </div>
       </section>
 
-      {/* CAROUSEL SECTION */}
-      <section className="py-24 bg-white border-t border-slate-100">
-        <div className="max-w-[1400px] mx-auto px-4 lg:px-12">
+      {/* ═══════════════════════════════════════════════════════
+          TEMPLATE CAROUSEL SECTION
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-20 lg:py-24 bg-white border-t border-slate-100">
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-12">
           
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-[2.5rem] font-bold text-slate-900 mb-10">Pick a template and build your resume in minutes!</h2>
+          <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
+            <h2 className="text-3xl lg:text-[2.5rem] font-black text-slate-900 tracking-tight">
+              Pick an ATS-Certified Template
+            </h2>
+            <p className="text-base text-slate-600 font-normal leading-relaxed">
+              Every template is built with clean single-column structure and verified against Taleo, Workday, and Greenhouse OCR scanners.
+            </p>
           </div>
 
-          <div className="relative -mx-4 lg:mx-0 px-4 lg:px-0">
+          {/* Carousel Scroll Container */}
+          <div className="relative">
             <div 
               ref={templateScrollRef}
               onScroll={handleScroll}
-              className="flex gap-8 overflow-x-auto pb-16 snap-x snap-mandatory pt-8"
-              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 pb-6"
             >
-              {templateList.map((tpl, i) => (
+              {templates.map((tpl) => (
                 <div 
                   key={tpl.id} 
-                  className="snap-center shrink-0 w-[320px] sm:w-[360px] h-[450px] sm:h-[510px] relative rounded-xl bg-white border border-slate-200/60 shadow-[0_8px_30px_rgba(0,0,0,0.06)] overflow-hidden group/card cursor-pointer transition-all duration-300 hover:shadow-[0_20px_40px_rgba(0,0,0,0.12)] hover:-translate-y-2"
+                  className="rounded-2xl bg-white border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-emerald-300 hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden group"
                 >
-                  <div 
-                    className="absolute top-0 left-0 origin-top-left pointer-events-none"
-                    style={{ 
-                      width: '794px', 
-                      height: '1123px', 
-                      transform: 'scale(0.40)', // Scaled slightly smaller for mobile
-                    }}
-                  >
-                    <div className="sm:hidden">
-                       <tpl.Component content={tpl.mock} />
+                  {/* Card Header Info */}
+                  <div className="p-4 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
+                    <div>
+                      <h3 className="text-sm font-extrabold text-slate-900 group-hover:text-emerald-700 transition-colors">
+                        {tpl.name}
+                      </h3>
+                      <p className="text-[11px] text-slate-500 line-clamp-1">{tpl.tag}</p>
                     </div>
-                  </div>
-                  <div 
-                    className="absolute top-0 left-0 origin-top-left pointer-events-none hidden sm:block"
-                    style={{ 
-                      width: '794px', 
-                      height: '1123px', 
-                      transform: 'scale(0.453)',
-                    }}
-                  >
-                    <tpl.Component content={tpl.mock} />
+                    <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md border ${tpl.badgeColor}`}>
+                      ATS Ready
+                    </span>
                   </div>
 
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-white/20 backdrop-blur-[1px] opacity-0 group-hover/card:opacity-100 transition-all duration-300 z-20 flex flex-col items-center justify-center">
-                    <Link href={`/builder?template=${tpl.templateId}`} className="w-16 h-16 rounded-full bg-slate-900/80 flex items-center justify-center transform scale-75 group-hover/card:scale-100 transition-transform duration-300 shadow-xl">
-                      <ArrowRight className="w-8 h-8 text-white" />
+                  {/* Scaled Preview Frame */}
+                  <div className="h-[340px] bg-slate-100/60 overflow-hidden relative flex justify-center p-2.5">
+                    <div 
+                      className="origin-top pointer-events-none"
+                      style={{ 
+                        width: '794px',
+                        transform: 'scale(0.38)',
+                      }}
+                    >
+                      <tpl.Component content={tpl.mock} />
+                    </div>
+
+                    {/* Hover Action Overlay */}
+                    <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-2xs opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center p-4">
+                      <Link
+                        href={`/builder?template=${tpl.templateId}&step=9`}
+                        className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-lg transition-transform hover:scale-105 flex items-center gap-1.5"
+                      >
+                        <span>Use This Template</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Card Bottom Description */}
+                  <div className="p-4 border-t border-slate-100 space-y-2">
+                    <p className="text-xs text-slate-600 leading-snug line-clamp-2">
+                      {tpl.description}
+                    </p>
+                    <Link
+                      href={`/builder?template=${tpl.templateId}&step=9`}
+                      className="text-xs font-bold text-emerald-600 group-hover:text-emerald-700 flex items-center gap-1 pt-1"
+                    >
+                      Customize Template <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 </div>
               ))}
             </div>
-            
-            <div className="flex items-center justify-center gap-3 -mt-6 mb-12">
-              {[...Array(8)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => scrollToIndex(i)}
-                  className={`transition-all duration-300 rounded-full ${
-                    carouselActiveDot === i
-                      ? 'w-3 h-3 bg-[#5B4BE0]'
-                      : 'w-2.5 h-2.5 bg-slate-200 hover:bg-slate-300'
-                  }`}
-                  aria-label={`Go to slide ${i + 1}`}
-                />
-              ))}
-            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 max-w-5xl mx-auto text-slate-600 text-lg font-normal text-center mt-8">
-            <p className="leading-relaxed">ATS-friendly professionally<br/>designed resumes</p>
-            <p className="leading-relaxed">Customizable sections,<br/>fonts, colors, and backgrounds</p>
-            <p className="leading-relaxed">Single-column, double-column,<br/>and multiple-page layouts</p>
+          {/* Value Props Row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-4xl mx-auto text-slate-600 text-sm font-medium text-center mt-12 pt-8 border-t border-slate-100">
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>100% Single-Column OCR Safe</span>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Native Vector PDF Text Streams</span>
+            </div>
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>Instant AI Bullet Point Rewrites</span>
+            </div>
           </div>
           
-          <div className="mt-10 text-center">
-            <Link href="/templates" className="text-[#5B4BE0] font-bold text-[17px] hover:underline underline-offset-4 flex items-center justify-center gap-1.5 transition-all hover:gap-2">
-              Browse Resume Templates <ArrowRight className="w-4 h-4" />
+          <div className="mt-8 text-center">
+            <Link
+              href="/builder?step=9"
+              className="text-emerald-700 font-extrabold text-sm hover:text-emerald-800 flex items-center justify-center gap-1.5 transition-all hover:gap-2"
+            >
+              Browse All Templates in Builder <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 
         </div>
       </section>
 
-      {/* STATS SECTION */}
-      <section className="py-24 bg-white overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+      {/* ═══════════════════════════════════════════════════════
+          STATS SECTION (Fully Responsive Bento Grid)
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-20 lg:py-24 bg-white border-t border-slate-100">
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-12">
           
-          <div className="relative h-[600px] sm:h-[600px] w-full max-w-[550px] mx-auto lg:mx-0">
-             {/* Beautiful thin curved connecting line */}
-             <svg className="absolute top-[100px] left-[100px] w-[300px] h-[350px] text-slate-200 pointer-events-none opacity-60 z-0" viewBox="0 0 300 350" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                <path d="M50 0 C 250 0, 250 100, 200 100 C 50 100, 50 300, 100 300 C 250 300, 250 350, 200 350" />
-             </svg>
-             
-             {/* Dynamic flex/grid fallback for mobile, absolute for desktop */}
-             <div className="grid grid-cols-2 gap-4 sm:hidden h-full content-center relative z-10">
-                <div className="bg-[#f4f2fa] rounded-2xl p-6 shadow-sm">
-                  <div className="text-[2.5rem] font-bold text-[#664de5] leading-none mb-2">98%</div>
-                  <div className="text-slate-800 text-sm font-medium">ATS match rate</div>
-                </div>
-                <div className="bg-[#f4f2fa] rounded-2xl p-6 shadow-sm">
-                  <div className="text-[2.5rem] font-bold text-[#664de5] leading-none mb-2">2M+</div>
-                  <div className="text-slate-800 text-sm font-medium">AI resumes built</div>
-                </div>
-                <div className="bg-[#f4f2fa] rounded-2xl p-6 shadow-sm col-span-2">
-                  <div className="text-[3rem] font-bold text-[#664de5] leading-none mb-2">50k+</div>
-                  <div className="text-slate-800 text-sm font-medium">interviews landed</div>
-                </div>
-                <div className="bg-[#f4f2fa] rounded-2xl p-6 shadow-sm col-span-2">
-                  <div className="text-[2.5rem] font-bold text-[#664de5] leading-none mb-2">10x</div>
-                  <div className="text-slate-800 text-sm font-medium">faster creation</div>
-                </div>
-             </div>
-
-             <div className="hidden sm:block relative z-10">
-               <div className="absolute top-4 left-[20px] bg-[#f4f2fa] rounded-xl p-8 w-[250px] shadow-sm">
-                 <div className="text-[3rem] font-black text-[#664de5] tracking-tight leading-none mb-2">98%</div>
-                 <div className="text-slate-700 text-base font-semibold">ATS match rate</div>
-               </div>
-               
-               <div className="absolute top-32 left-[280px] bg-[#f4f2fa] rounded-xl p-8 w-[260px] shadow-sm">
-                 <div className="text-[3rem] font-black text-[#664de5] tracking-tight leading-none mb-2">2M+</div>
-                 <div className="text-slate-700 text-base font-semibold">AI resumes built</div>
-               </div>
-               
-               <div className="absolute top-[230px] left-[0px] bg-[#f4f2fa] rounded-xl p-8 w-[280px] shadow-sm z-10">
-                 <div className="text-[3.25rem] font-black text-[#664de5] tracking-tight leading-none mb-2">50k+</div>
-                 <div className="text-slate-700 text-base font-semibold">interviews landed</div>
-               </div>
-
-               <div className="absolute top-[400px] left-[260px] bg-[#f4f2fa] rounded-xl p-8 w-[220px] shadow-sm">
-                 <div className="text-[2.5rem] font-black text-[#664de5] tracking-tight leading-none mb-2">10x</div>
-                 <div className="text-slate-700 text-base font-semibold">faster creation</div>
-               </div>
-             </div>
-          </div>
-
-          <div className="lg:pl-20 text-center lg:text-left z-10 max-w-xl mx-auto lg:mx-0">
-             <h2 className="text-[3rem] lg:text-[3.75rem] font-black text-[#0f172a] leading-[1.05] mb-8 tracking-tight">
-               Trusted by over <span className="text-[#664de5]">50,000</span> job seekers to land their dream roles
-             </h2>
-             <p className="text-[17px] text-slate-600 leading-[1.7] font-medium mb-8">
-               ResumAI leverages advanced AI to write, format, and optimize your resume perfectly for Applicant Tracking Systems (ATS). Stop guessing what recruiters want, and let our intelligent engine tailor your application for maximum impact.
-             </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ATS SECTION */}
-      <section className="relative py-24 lg:py-32 overflow-hidden bg-[#242636]">
-        {/* Dark smooth gradient matching the screenshot */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#242636] via-[#2d2942] to-[#3a2f50]"></div>
-        
-        {/* Abstract arcs */}
-        <svg className="absolute right-[-10%] bottom-[-20%] w-[120%] lg:w-[70%] h-[120%] opacity-20 pointer-events-none" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="1000" cy="1000" r="400" stroke="white" strokeWidth="1" strokeDasharray="4 4" opacity="0.3"/>
-          <circle cx="1000" cy="1000" r="600" stroke="white" strokeWidth="1"/>
-          <circle cx="1000" cy="1000" r="800" stroke="white" strokeWidth="1"/>
-          <circle cx="1000" cy="1000" r="1000" stroke="white" strokeWidth="1"/>
-        </svg>
-
-        <div className="max-w-[1300px] mx-auto px-4 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center relative z-10">
-          <div className="max-w-xl">
-            <h2 className="text-[2.5rem] lg:text-[3.25rem] font-black text-white leading-[1.1] mb-6 tracking-tight">
-              Beat the ATS with<br/>
-              AI-Optimized<br/>
-              Resumes
+          <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
+            <h2 className="text-3xl lg:text-[2.5rem] font-black text-slate-900 tracking-tight">
+              Trusted by 50,000+ Job Seekers
             </h2>
-            <p className="text-[15px] text-slate-300/80 leading-[1.8] font-normal mb-10 max-w-lg">
-              Our proprietary AI engine continuously learns from thousands of successful hires to optimize your resume's structure, keywords, and formatting. We ensure your application passes through any Applicant Tracking System flawlessly, so your true potential reaches human eyes every single time.
+            <p className="text-base text-slate-600 font-normal leading-relaxed">
+              Stop guessing what corporate recruiters want. Our intelligent system formats, scores, and tailors your application for maximum impact.
             </p>
-            <Link href="/builder" className="inline-flex px-8 py-3.5 bg-[#10b981] hover:bg-[#0ea5e9] text-white text-[15px] font-bold rounded shadow-[0_4px_14px_rgba(16,185,129,0.2)] transition-colors tracking-wide">
-              Create ATS-friendly Resume
-            </Link>
           </div>
 
-          <div className="relative h-[400px] flex flex-col gap-6 items-center lg:items-end justify-center pt-8 lg:pt-0">
-            
-            <div className="bg-[#484065] rounded-lg p-4 pr-10 flex items-center gap-4 transform lg:-translate-x-12 hover:-translate-y-1 transition-all shadow-lg w-full max-w-[360px]">
-              <div className="w-10 h-10 bg-white rounded flex items-center justify-center text-[#664de5]">
-                <Sparkles className="w-5 h-5" />
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <div className="bg-emerald-50/60 border border-emerald-100 rounded-2xl p-6 sm:p-8 space-y-2 shadow-2xs hover:shadow-sm transition-all text-center sm:text-left">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-emerald-700 tracking-tight">
+                98%
               </div>
-              <span className="text-white font-bold text-[15px]">AI-Powered Keyword Matching</span>
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">ATS Pass Rate</h3>
+              <p className="text-xs text-slate-600">Tested across Taleo, Workday, and Greenhouse tracking systems.</p>
             </div>
 
-            <div className="bg-[#484065] rounded-lg p-4 pr-10 flex items-center gap-4 transform lg:translate-x-8 hover:-translate-y-1 transition-all shadow-lg w-full max-w-[360px]">
-              <div className="w-10 h-10 bg-white rounded flex items-center justify-center text-[#664de5]">
-                 <ShieldCheck className="w-5 h-5" />
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 sm:p-8 space-y-2 shadow-2xs hover:shadow-sm transition-all text-center sm:text-left">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight">
+                50,000+
               </div>
-              <span className="text-white font-bold text-[15px]">Flawless System Parsing</span>
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">Resumes Created</h3>
+              <p className="text-xs text-slate-600">Built by engineers and professionals landing interviews.</p>
             </div>
 
-            <div className="bg-[#484065] rounded-lg p-4 pr-10 flex items-center gap-4 transform lg:-translate-x-20 hover:-translate-y-1 transition-all shadow-lg w-full max-w-[360px]">
-              <div className="w-10 h-10 bg-white rounded flex items-center justify-center text-[#664de5]">
-                <FileCheck className="w-5 h-5" />
+            <div className="bg-teal-50/60 border border-teal-100 rounded-2xl p-6 sm:p-8 space-y-2 shadow-2xs hover:shadow-sm transition-all text-center sm:text-left">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-teal-700 tracking-tight">
+                10x
               </div>
-              <span className="text-white font-bold text-[15px]">Smart Layout Optimization</span>
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">Faster Creation</h3>
+              <p className="text-xs text-slate-600">Instant AI bullet formatting and real-time live preview.</p>
             </div>
 
+            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 sm:p-8 space-y-2 shadow-2xs hover:shadow-sm transition-all text-center sm:text-left">
+              <div className="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 tracking-tight">
+                0%
+              </div>
+              <h3 className="text-sm sm:text-base font-extrabold text-slate-900">OCR Parse Errors</h3>
+              <p className="text-xs text-slate-600">Guaranteed clean vector font glyphs without broken tables.</p>
+            </div>
           </div>
+
         </div>
       </section>
 
+      {/* ═══════════════════════════════════════════════════════
+          DARK "BEAT THE ATS" SECTION (Cohesive Slate & Emerald)
+          ═══════════════════════════════════════════════════════ */}
+      <section className="relative py-20 lg:py-28 overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-emerald-950 text-white">
+        
+        {/* Subtle background glow */}
+        <div className="absolute right-0 top-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-12 grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center relative z-10">
+          
+          <div className="space-y-6 max-w-xl text-center lg:text-left mx-auto lg:mx-0">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Enterprise ATS Compliance Engine</span>
+            </div>
+
+            <h2 className="text-3xl sm:text-4xl lg:text-[42px] font-black text-white leading-[1.1] tracking-tight">
+              Beat the ATS with AI-Optimized Resumes
+            </h2>
+            
+            <p className="text-sm sm:text-base text-slate-300 leading-relaxed font-normal">
+              75% of candidate resumes are rejected by applicant tracking algorithms before a human recruiter ever sees them. ResumAI standardizes your structure, extracts core keywords, and enforces Google&apos;s X-Y-Z achievement formulas.
+            </p>
+
+            <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+              <Link
+                href="/builder"
+                className="w-full sm:w-auto px-8 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-extrabold rounded-xl shadow-lg shadow-emerald-950/40 transition-all text-center"
+              >
+                Create ATS-Friendly Resume
+              </Link>
+              <Link
+                href="/checker"
+                className="w-full sm:w-auto px-6 py-3.5 bg-white/10 hover:bg-white/20 text-white border border-white/20 text-sm font-bold rounded-xl transition-all text-center"
+              >
+                Scan Existing Resume
+              </Link>
+            </div>
+          </div>
+
+          <div className="flex flex-col gap-4 w-full max-w-md mx-auto lg:mx-0">
+            <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 flex items-center gap-4 shadow-lg hover:border-emerald-500/40 transition-colors">
+              <div className="w-12 h-12 bg-emerald-500/15 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 shrink-0">
+                <Sparkles className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-white font-extrabold text-sm">Smart Keyword Matching</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Identifies critical skills and qualifications missing from your CV.</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 flex items-center gap-4 shadow-lg hover:border-emerald-500/40 transition-colors">
+              <div className="w-12 h-12 bg-teal-500/15 border border-teal-500/30 rounded-xl flex items-center justify-center text-teal-400 shrink-0">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-white font-extrabold text-sm">Flawless System Parsing</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Single-column hierarchy guaranteed to pass Workday &amp; Taleo OCR.</p>
+              </div>
+            </div>
+
+            <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl p-5 flex items-center gap-4 shadow-lg hover:border-emerald-500/40 transition-colors">
+              <div className="w-12 h-12 bg-emerald-500/15 border border-emerald-500/30 rounded-xl flex items-center justify-center text-emerald-400 shrink-0">
+                <FileCheck2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="text-white font-extrabold text-sm">Google X-Y-Z Optimization</h4>
+                <p className="text-xs text-slate-400 mt-0.5">Rewrites weak bullets into quantified accomplishments with metrics.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ═══════════════════════════════════════════════════════
+          AI FEATURES ACCORDION SECTION
+          ═══════════════════════════════════════════════════════ */}
       <AiFeaturesSection />
 
-      {/* FOOTER CTA */}
-      <section className="py-24 bg-white text-center border-t border-slate-100">
-        <h2 className="text-4xl lg:text-[3rem] font-bold text-slate-900 mb-10 tracking-tight">Ready to build your resume?</h2>
-        <Link href="/builder" className="inline-block px-10 py-5 bg-[#10b981] hover:bg-[#0f976a] text-white text-lg font-bold rounded-md shadow-[0_4px_20px_rgba(16,185,129,0.3)] transition-transform hover:-translate-y-1">
-          Build Your Resume
-        </Link>
+      {/* ═══════════════════════════════════════════════════════
+          FINAL FOOTER CALL-TO-ACTION
+          ═══════════════════════════════════════════════════════ */}
+      <section className="py-20 lg:py-24 bg-white text-center border-t border-slate-100">
+        <div className="max-w-3xl mx-auto px-4 space-y-6">
+          <h2 className="text-3xl sm:text-4xl lg:text-[40px] font-black text-slate-900 tracking-tight">
+            Ready to Build Your Winning Resume?
+          </h2>
+          <p className="text-base text-slate-600 font-normal max-w-xl mx-auto">
+            Join thousands of candidates who landed software engineering, product, and leadership roles.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/builder"
+              className="inline-flex items-center gap-2 px-9 py-4 bg-emerald-600 hover:bg-emerald-700 text-white text-base font-extrabold rounded-xl shadow-lg shadow-emerald-600/25 transition-transform hover:-translate-y-1"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span>Build Your Free ATS Resume</span>
+            </Link>
+          </div>
+        </div>
       </section>
 
     </div>

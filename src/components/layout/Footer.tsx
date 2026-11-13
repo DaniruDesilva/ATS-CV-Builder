@@ -33,7 +33,7 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/builder?step=6" className="hover:text-emerald-600 transition-colors">
+                <Link href="/builder?step=9" className="hover:text-emerald-600 transition-colors">
                   Resume Templates
                 </Link>
               </li>

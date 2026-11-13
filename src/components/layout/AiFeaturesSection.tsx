@@ -52,11 +52,11 @@ const features = [
   },
   {
     id: 'tailor',
-    title: 'Translate your resume with AI',
+    title: 'Target Job Keyword Matcher',
     bullets: [
-      'Translate your resume instantly with one click',
-      'Preserve the original formatting perfectly',
-      'Choose from 30+ available languages'
+      'Paste any target job description or role requirements',
+      'Instantly uncover missing ATS keywords, tools, and skills',
+      'One-click injection into your resume bullets to boost recruiter match'
     ]
   }
 ];
@@ -133,7 +133,7 @@ export default function AiFeaturesSection() {
             <div className="pt-8 mt-6">
               <Link
                 href="/builder"
-                className="group inline-flex items-center gap-1.5 text-[#5B4BE0] font-extrabold text-[15px] hover:text-[#4335bd] transition-colors"
+                className="group inline-flex items-center gap-1.5 text-emerald-600 font-extrabold text-[15px] hover:text-emerald-700 transition-colors"
               >
                 <span>Explore ResumAI AI</span>
                 <ArrowRight className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" />
@@ -142,7 +142,7 @@ export default function AiFeaturesSection() {
           </div>
 
           {/* RIGHT: High-Fidelity Enhancv-Style Editor Mockup in Gradient Container */}
-          <div className="w-full lg:w-[62%] bg-gradient-to-tr from-[#3b52d4] via-[#4d66e8] to-[#10b981] rounded-3xl overflow-hidden relative min-h-[460px] sm:min-h-[500px] flex items-center justify-center p-4 sm:p-8 shadow-inner">
+          <div className="w-full lg:w-[62%] bg-gradient-to-tr from-slate-900 via-emerald-950 to-emerald-800 rounded-3xl overflow-hidden relative min-h-[460px] sm:min-h-[500px] flex items-center justify-center p-4 sm:p-8 shadow-inner">
             
             {/* Ambient subtle light circles */}
             <div className="absolute top-0 right-0 w-80 h-80 rounded-full bg-white/10 blur-2xl pointer-events-none" />
@@ -479,35 +479,50 @@ export default function AiFeaturesSection() {
               </div>
             )}
 
-            {/* TAB 4: Translate with AI */}
+            {/* TAB 4: Target Job Keyword Matcher */}
             {activeFeature === 'tailor' && (
               <div className="w-full max-w-xl relative flex items-center justify-center animate-in fade-in zoom-in-95 duration-400">
                 <div className="w-full bg-white rounded-2xl shadow-2xl border border-slate-200 p-6 space-y-4">
                   
                   <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                     <div className="flex items-center gap-2">
-                      <Languages className="w-5 h-5 text-teal-600" />
-                      <span className="text-xs font-bold text-slate-800">One-Click Resume Translation</span>
+                      <Target className="w-5 h-5 text-emerald-600" />
+                      <span className="text-xs font-bold text-slate-800">Target Job ATS Keyword Gap</span>
                     </div>
-                    <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded bg-teal-100 text-teal-800">
-                      30+ Languages
+                    <span className="text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+                      94% Match Potential
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200">
-                    <div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Source</span>
-                      <span className="text-sm font-bold text-slate-800">🇺🇸 English (US)</span>
+                  <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-extrabold text-slate-900">Senior Full-Stack Engineer</span>
+                      <span className="text-[11px] font-bold text-emerald-600">Workday ATS Standard</span>
                     </div>
-                    <ArrowRight className="w-5 h-5 text-slate-400" />
-                    <div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase block">Target</span>
-                      <span className="text-sm font-bold text-emerald-700">🇩🇪 German (Deutsch)</span>
+                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden">
+                      <div className="bg-emerald-500 h-full rounded-full transition-all" style={{ width: '82%' }}></div>
                     </div>
                   </div>
 
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    Maintains exact section formatting, dates, action verbs, and layout geometry seamlessly.
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-wider block">
+                      Missing Critical Keywords (Click to Inject):
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {['Distributed Caching', 'Kubernetes Deployment', 'GraphQL APIs', 'CI/CD Pipelines'].map((kw) => (
+                        <div
+                          key={kw}
+                          className="px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200 rounded-lg text-[11px] font-bold flex items-center gap-1.5 hover:bg-amber-100 transition-colors cursor-pointer"
+                        >
+                          <span className="text-amber-600 font-extrabold">+</span>
+                          <span>{kw}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <p className="text-[11px] text-slate-500 leading-relaxed border-t border-slate-100 pt-2 font-medium">
+                    Adding these 4 missing keywords directly into your experience bullet points raises your ATS ranking into the top 5% of applicant pools.
                   </p>
 
                 </div>
