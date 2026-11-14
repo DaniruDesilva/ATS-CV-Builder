@@ -46,12 +46,12 @@ export default function CheckerPage() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 w-full animate-fade-in">
       {/* Header */}
       <div className="text-center space-y-3 max-w-2xl mx-auto">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold">
-          <Shield className="w-3.5 h-3.5" />
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs font-bold shadow-2xs">
+          <Shield className="w-3.5 h-3.5 text-emerald-600" />
           <span>AI-Powered ATS Analyzer</span>
         </div>
         <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-          Check Your Resume&apos;s <span className="text-blue-600">ATS Score</span>
+          Check Your Resume&apos;s <span className="text-emerald-700">ATS Score</span>
         </h1>
         <p className="text-sm text-slate-500 leading-relaxed">
           Upload your PDF or DOCX resume. Our AI will extract your text, score parseability, and optimize your bullet points.
@@ -74,7 +74,7 @@ export default function CheckerPage() {
           {/* Action Bar */}
           <div className="flex items-center justify-between bg-white border border-slate-200 p-4 rounded-xl shadow-sm">
             <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200/60 flex items-center justify-center">
                 <FileSearch className="w-4 h-4" />
               </div>
               <div>
@@ -86,14 +86,14 @@ export default function CheckerPage() {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setScanResult(null)}
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Scan Another
               </button>
 
               <Link
                 href="/builder"
-                className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-md shadow-emerald-600/20 transition-all"
               >
                 Fix in Builder →
               </Link>
@@ -109,7 +109,7 @@ export default function CheckerPage() {
           {/* Actionable Suggestions & Rewrites */}
           <div className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 space-y-6 shadow-sm">
             <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-blue-600" /> Actionable Findings
+              <CheckCircle2 className="w-5 h-5 text-emerald-600" /> Actionable Findings
             </h3>
             <SuggestionList report={scanResult.reportData} parsedText={scanResult.parsedText} />
           </div>

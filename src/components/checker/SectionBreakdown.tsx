@@ -37,7 +37,7 @@ export function SectionBreakdown({ report }: SectionBreakdownProps) {
       <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-            <Layout className="w-4 h-4 text-blue-600" /> Format
+            <Layout className="w-4 h-4 text-emerald-600" /> Format
           </span>
           <span className={`text-sm font-bold ${getScoreColor(formatScore)}`}>{formatScore}/100</span>
         </div>
@@ -53,7 +53,7 @@ export function SectionBreakdown({ report }: SectionBreakdownProps) {
       <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-            <FileText className="w-4 h-4 text-indigo-600" /> Content
+            <FileText className="w-4 h-4 text-teal-600" /> Content
           </span>
           <span className={`text-sm font-bold ${getScoreColor(contentScore)}`}>{contentScore}/100</span>
         </div>
@@ -69,7 +69,7 @@ export function SectionBreakdown({ report }: SectionBreakdownProps) {
       <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-3 shadow-sm">
         <div className="flex items-center justify-between">
           <span className="text-xs font-bold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
-            <Target className="w-4 h-4 text-violet-600" /> Keywords
+            <Target className="w-4 h-4 text-emerald-700" /> Keywords
           </span>
           <span className={`text-sm font-bold ${getScoreColor(skillsScore)}`}>{skillsScore}/100</span>
         </div>
@@ -105,7 +105,7 @@ export function SectionBreakdown({ report }: SectionBreakdownProps) {
         {actionVerbStats && (
           <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
                 <Zap className="w-4 h-4" />
               </div>
               <div>
@@ -145,7 +145,7 @@ export function SectionBreakdown({ report }: SectionBreakdownProps) {
         {/* ATS Headings */}
         <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
           <div className="flex items-center gap-2.5 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
               <BookOpen className="w-4 h-4" />
             </div>
             <span className="text-xs text-slate-500 font-medium">

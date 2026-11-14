@@ -30,11 +30,11 @@ export function SuggestionList({ report, parsedText }: SuggestionListProps) {
   return (
     <div className="space-y-6">
       {/* AI / ATS Summary */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-5 space-y-2">
-        <h4 className="text-sm font-bold text-blue-900 flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-blue-600" /> ATS Compatibility Assessment
+      <div className="bg-emerald-50/70 border border-emerald-200/90 rounded-2xl p-5 sm:p-6 space-y-2.5 shadow-2xs">
+        <h4 className="text-sm font-extrabold text-emerald-950 flex items-center gap-2">
+          <Sparkles className="w-4 h-4 text-emerald-600" /> ATS Compatibility Assessment
         </h4>
-        <p className="text-sm text-blue-800 leading-relaxed">{summary}</p>
+        <p className="text-sm text-slate-700 leading-relaxed font-normal">{summary}</p>
       </div>
 
       {/* Bullet Improvements (Google X-Y-Z formula) */}
@@ -143,7 +143,7 @@ export function SuggestionList({ report, parsedText }: SuggestionListProps) {
                         ? 'bg-red-100 text-red-700 border border-red-200'
                         : issue.severity === 'medium'
                         ? 'bg-amber-100 text-amber-800 border border-amber-200'
-                        : 'bg-blue-100 text-blue-700 border border-blue-200'
+                        : 'bg-slate-100 text-slate-700 border border-slate-200'
                     }`}
                   >
                     {issue.severity} priority

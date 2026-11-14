@@ -371,7 +371,7 @@ function BuilderPageContent() {
               >
                 <div className="flex items-center justify-between">
                   <span className="font-bold text-sm text-slate-900">Modern Executive</span>
-                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-100 text-blue-700 font-semibold">
+                  <span className="text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md bg-teal-100 text-teal-800 font-bold">
                     Leadership
                   </span>
                 </div>

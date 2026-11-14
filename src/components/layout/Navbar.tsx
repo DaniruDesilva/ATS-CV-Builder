@@ -235,11 +235,11 @@ export function Navbar() {
                     onClick={() => setToolsDropdownOpen(false)}
                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
                   >
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
                       <FileSearch className="w-4 h-4" />
                     </div>
                     <div>
-                      <span className="text-xs font-bold text-slate-900 block group-hover:text-blue-700 transition-colors">
+                      <span className="text-xs font-bold text-slate-900 block group-hover:text-emerald-700 transition-colors">
                         ATS Resume Checker
                       </span>
                       <span className="text-[11px] text-slate-500">
@@ -366,7 +366,7 @@ export function Navbar() {
                       onClick={() => setUserDropdownOpen(false)}
                       className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-emerald-700 transition-colors"
                     >
-                      <FileText className="w-3.5 h-3.5 text-blue-600" /> Resume Builder
+                      <FileText className="w-3.5 h-3.5 text-emerald-600" /> Resume Builder
                     </Link>
 
                     <Link
@@ -374,7 +374,7 @@ export function Navbar() {
                       onClick={() => setUserDropdownOpen(false)}
                       className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-emerald-700 transition-colors"
                     >
-                      <FileSearch className="w-3.5 h-3.5 text-purple-600" /> ATS Checker
+                      <FileSearch className="w-3.5 h-3.5 text-emerald-600" /> ATS Checker
                     </Link>
 
                     <Link
@@ -464,7 +464,7 @@ export function Navbar() {
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-900 bg-slate-50"
           >
-            <FileSearch className="w-4 h-4 text-blue-600" /> ATS Resume Checker
+            <FileSearch className="w-4 h-4 text-emerald-600" /> ATS Resume Checker
           </Link>
 
           <Link

@@ -57,12 +57,12 @@ export function Dropzone({ onAnalyze, isLoading }: DropzoneProps) {
         onDragLeave={() => setIsDragOver(false)}
         onDrop={handleFileDrop}
         onClick={() => fileInputRef.current?.click()}
-        className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 ${
+        className={`relative border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all duration-300 ${
           isDragOver
-            ? 'border-blue-400 bg-blue-50 scale-[1.01]'
+            ? 'border-emerald-500 bg-emerald-50 scale-[1.01]'
             : file
-            ? 'border-emerald-400 bg-emerald-50'
-            : 'border-slate-300 hover:border-blue-400 bg-slate-50 hover:bg-blue-50/50'
+            ? 'border-emerald-400 bg-emerald-50/70'
+            : 'border-slate-300 hover:border-emerald-400 bg-slate-50 hover:bg-emerald-50/30'
         }`}
       >
         <input
@@ -75,7 +75,7 @@ export function Dropzone({ onAnalyze, isLoading }: DropzoneProps) {
 
         {file ? (
           <div className="flex flex-col items-center justify-center space-y-2">
-            <div className="w-14 h-14 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
               <FileCheck className="w-7 h-7" />
             </div>
             <div>
@@ -97,12 +97,12 @@ export function Dropzone({ onAnalyze, isLoading }: DropzoneProps) {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center space-y-3">
-            <div className="w-14 h-14 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
               <UploadCloud className="w-7 h-7" />
             </div>
             <div>
               <p className="text-base font-semibold text-slate-800">
-                Drag & drop your resume or <span className="text-blue-600 underline underline-offset-2">browse</span>
+                Drag & drop your resume or <span className="text-emerald-700 font-bold underline underline-offset-2">browse</span>
               </p>
               <p className="text-sm text-slate-500 mt-1">
                 PDF or DOCX files up to 10MB
@@ -121,7 +121,7 @@ export function Dropzone({ onAnalyze, isLoading }: DropzoneProps) {
       {/* Target Job Description */}
       <div className="space-y-2">
         <label className="block text-sm font-semibold text-slate-700 flex items-center gap-1.5">
-          <Sparkles className="w-3.5 h-3.5 text-blue-600" /> Target Job Description
+          <Sparkles className="w-3.5 h-3.5 text-emerald-600" /> Target Job Description
           <span className="text-xs font-normal text-slate-400 ml-1">(optional)</span>
         </label>
         <textarea
@@ -129,7 +129,7 @@ export function Dropzone({ onAnalyze, isLoading }: DropzoneProps) {
           value={jobDescription}
           onChange={(e) => setJobDescription(e.target.value)}
           placeholder="Paste the job posting text here for keyword gap analysis..."
-          className="w-full bg-white border border-slate-200 rounded-lg p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+          className="w-full bg-white border border-slate-200 rounded-xl p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
         />
       </div>
 
@@ -137,7 +137,7 @@ export function Dropzone({ onAnalyze, isLoading }: DropzoneProps) {
       <button
         type="submit"
         disabled={isLoading || !file}
-        className="w-full py-3 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-sm disabled:opacity-50 disabled:hover:bg-blue-600 transition-all flex items-center justify-center gap-2"
+        className="w-full py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md shadow-emerald-600/20 disabled:opacity-50 disabled:hover:bg-emerald-600 transition-all flex items-center justify-center gap-2 hover:scale-101"
       >
         <Sparkles className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
         {isLoading ? 'Analyzing with AI...' : 'Scan & Check ATS Compatibility'}
