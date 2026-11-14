@@ -20,16 +20,18 @@ import {
   ChevronDown,
   Layers,
   FileText,
-  Star,
+  Clock,
+  Award,
 } from 'lucide-react';
 import { useAuthStore, PlanTier } from '@/lib/store/useAuthStore';
 
 interface PlanPricing {
-  id: 'free' | 'pro_monthly' | 'lifetime';
+  id: 'free' | 'pro_monthly' | 'pro_quarterly' | 'lifetime' | 'lifetime_executive';
   name: string;
   tagline: string;
   price: string;
   period: string;
+  billingDetail?: string;
   badge?: string;
   badgeColor?: string;
   aiCreditsText: string;
@@ -41,41 +43,45 @@ interface PlanPricing {
   popular?: boolean;
 }
 
-const plans: PlanPricing[] = [
-  {
-    id: 'free',
-    name: 'Free Starter',
-    tagline: 'Essential ATS resume drafting',
-    price: '$0',
-    period: 'forever',
-    aiCreditsText: '5 AI Trial Credits',
-    aiCreditsBadge: 'One-Time Trial',
-    description: 'Perfect for drafting an ATS-compliant single-column resume and testing our scoring engine.',
-    featuresTitle: "WHAT'S INCLUDED:",
-    features: [
-      '1 ATS Single-Column Vector PDF Export',
-      '5 AI Bullet Rewriting & Summary Credits',
-      'Classic ATS Template (Workday Certified)',
-      'Real-Time Live Document & A4 Scale Preview',
-      'Browser Cloud Auto-Save Drafts',
-      'Deterministic ATS Header & Formatting Audit',
-      'Full Job Description Comparison Scan',
-      'Standard Community Support',
-    ],
-    ctaText: 'Get Started Free',
-    popular: false,
-  },
+const freePlan: PlanPricing = {
+  id: 'free',
+  name: 'Free Starter',
+  tagline: 'Essential ATS resume drafting',
+  price: '$0',
+  period: 'forever',
+  billingDetail: 'No credit card required',
+  aiCreditsText: '5 AI Trial Credits',
+  aiCreditsBadge: 'One-Time Trial',
+  description: 'Perfect for drafting an ATS-compliant single-column resume and testing our scoring engine.',
+  featuresTitle: "WHAT'S INCLUDED:",
+  features: [
+    '1 ATS Single-Column Vector PDF Export',
+    '5 AI Bullet Rewriting & Summary Credits',
+    'Classic ATS Template (Workday Certified)',
+    'Real-Time Live Document & A4 Scale Preview',
+    'Browser Cloud Auto-Save Drafts',
+    'Deterministic ATS Header & Formatting Audit',
+    'Full Job Description Comparison Scan',
+    'Standard Community Support',
+  ],
+  ctaText: 'Get Started Free',
+  popular: false,
+};
+
+const monthlyPlans: PlanPricing[] = [
+  freePlan,
   {
     id: 'pro_monthly',
     name: 'Pro Monthly',
     tagline: 'For active job seekers',
     price: '$9',
     period: '/ month',
+    billingDetail: 'Billed monthly • Cancel anytime',
     badge: '🔥 Most Popular',
     badgeColor: 'bg-emerald-600 text-white font-black shadow-md shadow-emerald-600/25',
     aiCreditsText: '150 AI Credits / Month',
     aiCreditsBadge: 'Refreshes Monthly',
-    description: 'Everything you need to optimize multiple job applications and beat enterprise ATS filters.',
+    description: 'Complete ATS optimization suite with monthly refreshing AI credits. Cancel anytime.',
     featuresTitle: 'EVERYTHING IN FREE, PLUS:',
     features: [
       'Unlimited ATS-Friendly PDF & JSON Exports',
@@ -85,17 +91,48 @@ const plans: PlanPricing[] = [
       'Target Job Description Keyword Gap Matcher',
       'All 4 ATS Templates (Classic, Traditional, Tech, Executive)',
       'Priority Cloud Document Rendering',
-      'Cancel Anytime in 1-Click with Zero Fees',
+      '1-Click Cancellation with Zero Fees',
     ],
     ctaText: 'Upgrade to Pro Monthly',
     popular: true,
   },
   {
+    id: 'pro_quarterly',
+    name: '3-Month Search Pass',
+    tagline: 'Full recruitment campaign',
+    price: '$19',
+    period: 'for 3 months',
+    billingDetail: 'Only $6.33/mo • Save 30%',
+    badge: '🚀 Best for Active Search',
+    badgeColor: 'bg-indigo-600 text-white font-black shadow-md shadow-indigo-600/25',
+    aiCreditsText: '450 AI Credits Total',
+    aiCreditsBadge: '150 / Month',
+    description: 'Designed for a standard 90-day hiring cycle. All Pro tools with no recurring monthly surprise.',
+    featuresTitle: 'EVERYTHING IN PRO, PLUS:',
+    features: [
+      'Full 90-Day Unlimited Access Window',
+      '450 AI Bullet Rewriting & Summary Credits',
+      'Unlimited PDF & JSON Resume Exports',
+      'Google X-Y-Z Achievement Bullet Optimizer',
+      'Target Job Description Keyword Gap Matcher',
+      'All 4 ATS Templates Unlocked',
+      'Priority Cloud Document Rendering',
+      'No Monthly Renewal Charges',
+    ],
+    ctaText: 'Get 3-Month Pass ($19)',
+    popular: false,
+  },
+];
+
+const lifetimePlans: PlanPricing[] = [
+  freePlan,
+  {
     id: 'lifetime',
-    name: 'Lifetime Access',
+    name: 'Lifetime Access Pass',
     tagline: 'Permanent access, zero subscriptions',
     price: '$29',
     period: 'one-time payment',
+    billingDetail: 'Pay once, own forever • Save 70%',
     badge: '⚡ Best Value • Save 70%',
     badgeColor: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black shadow-md shadow-amber-500/25',
     aiCreditsText: '300 AI Credits Starter Pack',
@@ -113,6 +150,32 @@ const plans: PlanPricing[] = [
       'Affordable AI Credit Top-Ups Available Anytime',
     ],
     ctaText: 'Get Lifetime Access ($29)',
+    popular: true,
+  },
+  {
+    id: 'lifetime_executive',
+    name: 'Lifetime Executive Pack',
+    tagline: 'For senior leaders & career switchers',
+    price: '$49',
+    period: 'one-time payment',
+    billingDetail: 'Includes 1,000 AI Credits',
+    badge: '👑 Executive Bundle',
+    badgeColor: 'bg-slate-900 text-white font-black shadow-md shadow-slate-900/25',
+    aiCreditsText: '1,000 AI Credits Starter Pack',
+    aiCreditsBadge: 'Heavy AI Rewrites',
+    description: 'Permanent lifetime access paired with a massive 1,000 AI credit pack for multiple executive resumes.',
+    featuresTitle: 'EVERYTHING IN LIFETIME, PLUS:',
+    features: [
+      '1,000 AI Bullet Rewriting & Summary Credits',
+      'Permanent Access to All 4 ATS Templates Forever',
+      'Unlimited ATS PDF, JSON & Plain Text Exports',
+      'Executive Priority Cloud Rendering Queue',
+      'Early Access to All Upcoming ATS Templates',
+      'Multiple Resume Variation Management',
+      'Zero Recurring Fees Forever',
+      'VIP Dedicated Email Support Channel',
+    ],
+    ctaText: 'Get Executive Bundle ($49)',
     popular: false,
   },
 ];
@@ -120,7 +183,9 @@ const plans: PlanPricing[] = [
 export default function PricingPage() {
   const [mounted, setMounted] = useState(false);
   const [billingInterval, setBillingInterval] = useState<'monthly' | 'lifetime'>('monthly');
-  const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<'pro_monthly' | 'lifetime' | null>(null);
+  const [selectedPlanForCheckout, setSelectedPlanForCheckout] = useState<
+    'pro_monthly' | 'pro_quarterly' | 'lifetime' | 'lifetime_executive' | null
+  >(null);
   const [checkoutEmail, setCheckoutEmail] = useState('');
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
   const [checkoutSuccessPlan, setCheckoutSuccessPlan] = useState<string | null>(null);
@@ -137,7 +202,12 @@ export default function PricingPage() {
 
   const currentPlanId = user?.plan || 'free';
 
-  const handleOpenCheckout = (planId: 'pro_monthly' | 'lifetime') => {
+  // Active plans based on toggle selection
+  const currentDisplayPlans = billingInterval === 'monthly' ? monthlyPlans : lifetimePlans;
+
+  const handleOpenCheckout = (
+    planId: 'pro_monthly' | 'pro_quarterly' | 'lifetime' | 'lifetime_executive'
+  ) => {
     setSelectedPlanForCheckout(planId);
   };
 
@@ -160,7 +230,13 @@ export default function PricingPage() {
       }
 
       setIsProcessingCheckout(false);
-      setCheckoutSuccessPlan(selectedPlanForCheckout === 'lifetime' ? 'Lifetime Access' : 'Pro Monthly');
+      const planNames: Record<string, string> = {
+        pro_monthly: 'Pro Monthly',
+        pro_quarterly: '3-Month Search Pass',
+        lifetime: 'Lifetime Access Pass',
+        lifetime_executive: 'Lifetime Executive Pack',
+      };
+      setCheckoutSuccessPlan(planNames[selectedPlanForCheckout] || 'Pro Plan');
       setSelectedPlanForCheckout(null);
     }, 1200);
   };
@@ -171,12 +247,12 @@ export default function PricingPage() {
       a: 'High-speed LLM processing (Google Gemini 1.5 & OpenRouter) incurs real cloud computing costs on every single bullet rewrite and resume scan. Providing a generous starter pack (300 credits on Lifetime, 150/mo on Pro) rather than an unsustainable "free forever" claim ensures lightning-fast response times, top-tier model quality, and a reliable platform that never cuts corners on quality.',
     },
     {
-      q: 'Can I cancel my Pro Monthly subscription at any time?',
-      a: 'Yes, absolutely. You can cancel with a single click from your User Dashboard or billing receipt. There are zero cancellation fees, and you will retain full Pro access until the end of your prepaid monthly billing cycle.',
+      q: 'What is the difference between Monthly Subscriptions and Lifetime Passes?',
+      a: 'Monthly subscriptions ($9/mo or $19 for 3 months) provide ongoing access with refreshing AI credits every month. Lifetime passes ($29 or $49) are one-time payments: you pay once and own permanent lifetime access to all 4 ATS templates and unlimited deterministic PDF exports forever with no recurring billing.',
     },
     {
-      q: 'Is the Lifetime plan really a one-time payment?',
-      a: 'Yes! You pay $29 once and receive permanent access to all 4 ATS templates, future template updates, and unlimited single-column PDF exports forever. There are zero recurring monthly or annual fees.',
+      q: 'Can I cancel my Pro Monthly subscription at any time?',
+      a: 'Yes, absolutely. You can cancel with a single click from your User Dashboard or billing receipt. There are zero cancellation fees, and you will retain full Pro access until the end of your prepaid monthly billing cycle.',
     },
     {
       q: 'What happens when my AI credits run out on Lifetime?',
@@ -189,39 +265,42 @@ export default function PricingPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 space-y-20 w-full animate-fade-in relative">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 sm:pt-7 pb-16 lg:pb-24 space-y-12 sm:space-y-16 w-full animate-fade-in relative">
       
       {/* Ambient background subtle lighting */}
-      <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-emerald-500/10 via-teal-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-6 left-1/2 -translate-x-1/2 w-[700px] h-[300px] bg-gradient-to-tr from-emerald-500/10 via-teal-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-      {/* ── HEADER ── */}
-      <div className="text-center space-y-4 max-w-3xl mx-auto relative z-10">
-        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs font-bold shadow-2xs">
+      {/* ── COMPACT HEADER (Clean gap from navbar) ── */}
+      <div className="text-center space-y-3.5 max-w-3xl mx-auto relative z-10 pt-1">
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs font-bold shadow-2xs">
           <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
           <span>Simple, Transparent ATS Pricing</span>
         </div>
 
-        <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-[1.15]">
+        <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-900 tracking-tight leading-[1.18]">
           Invest in Your Next <span className="text-emerald-700">Career Breakthrough</span>
         </h1>
 
-        <p className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-2xl mx-auto">
+        <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-xl mx-auto">
           Pass applicant tracking screening bots with confidence. Unlock high-impact Google X-Y-Z bullet rewrites, real-time scoring audits, and verified ATS templates.
         </p>
 
-        {/* Billing Interval Toggle Pill */}
-        <div className="pt-4 flex items-center justify-center">
-          <div className="inline-flex items-center p-1 rounded-2xl bg-slate-100 border border-slate-200/80 shadow-inner">
+        {/* Dynamic Billing Mode Toggle Pill */}
+        <div className="pt-2 flex flex-col items-center justify-center gap-2">
+          <div className="inline-flex items-center p-1 rounded-2xl bg-slate-100 border border-slate-200/90 shadow-inner">
             <button
               type="button"
               onClick={() => setBillingInterval('monthly')}
-              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
                 billingInterval === 'monthly'
                   ? 'bg-white text-slate-900 shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              Monthly Subscription
+              <span>Monthly Subscriptions</span>
+              <span className="text-[10px] font-bold text-emerald-700 px-1.5 py-0.2 rounded bg-emerald-50 border border-emerald-200">
+                Cancel Anytime
+              </span>
             </button>
             <button
               type="button"
@@ -232,35 +311,36 @@ export default function PricingPage() {
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
-              <span>Lifetime One-Time Pass</span>
+              <span>Lifetime One-Time Passes</span>
               <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 whitespace-nowrap">
                 Save 70%
               </span>
             </button>
           </div>
+
+          <span className="text-[11px] text-slate-500 font-medium">
+            {billingInterval === 'monthly'
+              ? 'Showing recurring monthly subscriptions. Refreshes AI credits every 30 days.'
+              : 'Showing permanent one-time payment passes. Pay once, own forever with zero recurring fees.'}
+          </span>
         </div>
 
       </div>
 
-      {/* ── 3 PRICING CARDS GRID ── */}
+      {/* ── DYNAMIC 3 PRICING CARDS GRID ── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch relative z-10">
-        {plans.map((plan) => {
+        {currentDisplayPlans.map((plan) => {
           const isCurrent =
             mounted &&
             (currentPlanId === plan.id ||
               (currentPlanId === 'pro' && plan.id === 'pro_monthly'));
-          const isHighlighted =
-            (billingInterval === 'monthly' && plan.id === 'pro_monthly') ||
-            (billingInterval === 'lifetime' && plan.id === 'lifetime');
 
           return (
             <div
               key={plan.id}
               className={`relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 bg-white border ${
-                plan.id === 'pro_monthly'
+                plan.popular
                   ? 'border-2 border-emerald-500 shadow-xl shadow-emerald-500/10 ring-2 ring-emerald-500/15 md:-translate-y-2'
-                  : isHighlighted
-                  ? 'border-2 border-amber-500 shadow-xl shadow-amber-500/10 ring-2 ring-amber-500/15 md:-translate-y-2'
                   : 'border-slate-200/90 shadow-sm hover:border-slate-300 hover:shadow-md'
               }`}
             >
@@ -275,7 +355,7 @@ export default function PricingPage() {
                 </div>
               )}
 
-              <div className="space-y-6 flex-1 flex flex-col">
+              <div className="space-y-5 flex-1 flex flex-col">
                 
                 {/* Header & Tagline */}
                 <div>
@@ -283,7 +363,7 @@ export default function PricingPage() {
                     <h3 className="text-xl font-extrabold text-slate-900">
                       {plan.name}
                     </h3>
-                    {plan.id === 'lifetime' && (
+                    {plan.id.includes('lifetime') && (
                       <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center">
                         <Zap className="w-4 h-4 fill-amber-500 text-amber-600" />
                       </div>
@@ -293,13 +373,18 @@ export default function PricingPage() {
                 </div>
 
                 {/* Price Display */}
-                <div className="space-y-1 pb-2 border-b border-slate-100 min-h-[90px] flex flex-col justify-center">
+                <div className="space-y-1 pb-3 border-b border-slate-100 min-h-[92px] flex flex-col justify-center">
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">
                       {plan.price}
                     </span>
                     <span className="text-xs text-slate-500 font-semibold">{plan.period}</span>
                   </div>
+                  {plan.billingDetail && (
+                    <span className="text-[11px] text-emerald-700 font-bold block pt-0.5">
+                      ✓ {plan.billingDetail}
+                    </span>
+                  )}
                   <p className="text-xs text-slate-600 leading-relaxed pt-1">
                     {plan.description}
                   </p>
@@ -355,7 +440,11 @@ export default function PricingPage() {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => handleOpenCheckout(plan.id as 'pro_monthly' | 'lifetime')}
+                    onClick={() =>
+                      handleOpenCheckout(
+                        plan.id as 'pro_monthly' | 'pro_quarterly' | 'lifetime' | 'lifetime_executive'
+                      )
+                    }
                     className={`w-full py-3.5 rounded-2xl text-xs font-extrabold flex items-center justify-center gap-2 transition-all shadow-md ${
                       plan.popular
                         ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20 hover:scale-102'
@@ -413,7 +502,7 @@ export default function PricingPage() {
             Compare All Features Side-by-Side
           </h2>
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
-            Transparent breakdown of every single capability across our three pricing tiers.
+            Transparent breakdown of every single capability across our subscription and lifetime pricing tiers.
           </p>
         </div>
 
@@ -599,7 +688,13 @@ export default function PricingPage() {
                 </div>
                 <div>
                   <h3 className="text-base sm:text-lg font-extrabold text-slate-900">
-                    Activate {selectedPlanForCheckout === 'lifetime' ? 'Lifetime Access' : 'Pro Monthly'}
+                    {selectedPlanForCheckout === 'lifetime'
+                      ? 'Activate Lifetime Access Pass'
+                      : selectedPlanForCheckout === 'lifetime_executive'
+                      ? 'Activate Lifetime Executive Bundle'
+                      : selectedPlanForCheckout === 'pro_quarterly'
+                      ? 'Activate 3-Month Search Pass'
+                      : 'Activate Pro Monthly Subscription'}
                   </h3>
                   <span className="text-xs text-slate-500">
                     Instant Activation • Secure Checkout
@@ -621,21 +716,39 @@ export default function PricingPage() {
               <div className="flex items-center justify-between font-bold text-slate-800">
                 <span>Plan Selected:</span>
                 <span className="text-slate-900 font-extrabold text-sm">
-                  {selectedPlanForCheckout === 'lifetime' ? 'Lifetime Access Pass' : 'Pro Monthly Subscription'}
+                  {selectedPlanForCheckout === 'lifetime'
+                    ? 'Lifetime Access Pass'
+                    : selectedPlanForCheckout === 'lifetime_executive'
+                    ? 'Lifetime Executive Pack'
+                    : selectedPlanForCheckout === 'pro_quarterly'
+                    ? '3-Month Search Pass'
+                    : 'Pro Monthly'}
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-slate-600">
                 <span>Total Due Today:</span>
                 <span className="text-base font-black text-emerald-700">
-                  {selectedPlanForCheckout === 'lifetime' ? '$29.00 (One-Time)' : '$9.00 / month'}
+                  {selectedPlanForCheckout === 'lifetime'
+                    ? '$29.00 (One-Time)'
+                    : selectedPlanForCheckout === 'lifetime_executive'
+                    ? '$49.00 (One-Time)'
+                    : selectedPlanForCheckout === 'pro_quarterly'
+                    ? '$19.00 (For 3 Months)'
+                    : '$9.00 / month'}
                 </span>
               </div>
 
               <div className="flex items-center justify-between text-slate-600 border-t border-slate-200 pt-2">
                 <span>AI Credits Allocated:</span>
                 <span className="font-extrabold text-slate-900">
-                  {selectedPlanForCheckout === 'lifetime' ? '300 Starter Credits' : '150 Credits / month'}
+                  {selectedPlanForCheckout === 'lifetime'
+                    ? '300 Starter Credits'
+                    : selectedPlanForCheckout === 'lifetime_executive'
+                    ? '1,000 Starter Credits'
+                    : selectedPlanForCheckout === 'pro_quarterly'
+                    ? '450 Credits Total'
+                    : '150 Credits / month'}
                 </span>
               </div>
             </div>
@@ -693,7 +806,13 @@ export default function PricingPage() {
                     <CheckCircle2 className="w-4 h-4" />
                     <span>
                       Confirm &amp; Activate{' '}
-                      {selectedPlanForCheckout === 'lifetime' ? 'Lifetime ($29)' : 'Pro ($9/mo)'}
+                      {selectedPlanForCheckout === 'lifetime'
+                        ? 'Lifetime ($29)'
+                        : selectedPlanForCheckout === 'lifetime_executive'
+                        ? 'Executive Pack ($49)'
+                        : selectedPlanForCheckout === 'pro_quarterly'
+                        ? '3-Month Pass ($19)'
+                        : 'Pro ($9/mo)'}
                     </span>
                   </>
                 )}
@@ -736,7 +855,15 @@ export default function PricingPage() {
               <ul className="text-[11px] text-emerald-800 space-y-1 pl-5 list-disc">
                 <li>All 4 ATS Templates (Classic, Traditional, Tech, Executive)</li>
                 <li>Unlimited Single-Column PDF Exports</li>
-                <li>{checkoutSuccessPlan.includes('Lifetime') ? '300 AI Credits Starter Pack' : '150 AI Credits / Month'}</li>
+                <li>
+                  {checkoutSuccessPlan.includes('Executive')
+                    ? '1,000 AI Credits Starter Pack'
+                    : checkoutSuccessPlan.includes('Lifetime')
+                    ? '300 AI Credits Starter Pack'
+                    : checkoutSuccessPlan.includes('3-Month')
+                    ? '450 AI Credits (90-Day Window)'
+                    : '150 AI Credits / Month'}
+                </li>
               </ul>
             </div>
 

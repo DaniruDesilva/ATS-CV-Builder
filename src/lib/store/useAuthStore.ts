@@ -3,7 +3,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type PlanTier = 'free' | 'pro_monthly' | 'lifetime' | 'pro';
+export type PlanTier =
+  | 'free'
+  | 'pro_monthly'
+  | 'pro_quarterly'
+  | 'lifetime'
+  | 'lifetime_executive'
+  | 'pro';
 
 export interface User {
   id: string;
@@ -23,7 +29,9 @@ interface AuthState {
   login: (userData: { email: string; name?: string; plan?: PlanTier }) => void;
   logout: () => void;
   updateUser: (data: Partial<User>) => void;
-  upgradePlan: (tier: 'pro_monthly' | 'lifetime') => void;
+  upgradePlan: (
+    tier: 'pro_monthly' | 'pro_quarterly' | 'lifetime' | 'lifetime_executive'
+  ) => void;
   useAiCredit: () => boolean;
 }
 
@@ -41,7 +49,11 @@ export const useAuthStore = create<AuthState>()(
           .join(' ');
 
         const chosenPlan: PlanTier = plan || 'free';
-        const initialCredits = chosenPlan === 'lifetime' ? 300 : chosenPlan === 'pro_monthly' || chosenPlan === 'pro' ? 150 : 5;
+        let initialCredits = 5;
+        if (chosenPlan === 'lifetime_executive') initialCredits = 1000;
+        else if (chosenPlan === 'lifetime') initialCredits = 300;
+        else if (chosenPlan === 'pro_quarterly') initialCredits = 450;
+        else if (chosenPlan === 'pro_monthly' || chosenPlan === 'pro') initialCredits = 150;
 
         const user: User = {
           id: `usr_${Date.now()}`,
@@ -73,11 +85,14 @@ export const useAuthStore = create<AuthState>()(
         }));
       },
 
-      upgradePlan: (tier: 'pro_monthly' | 'lifetime') => {
+      upgradePlan: (tier) => {
         set((state) => {
-          const credits = tier === 'lifetime' ? 300 : 150;
+          let credits = 150;
+          if (tier === 'pro_quarterly') credits = 450;
+          if (tier === 'lifetime') credits = 300;
+          if (tier === 'lifetime_executive') credits = 1000;
+
           if (!state.user) {
-            // If anonymous user upgrades, create user session
             const newUser: User = {
               id: `usr_${Date.now()}`,
               email: 'subscriber@resumai.pro',
