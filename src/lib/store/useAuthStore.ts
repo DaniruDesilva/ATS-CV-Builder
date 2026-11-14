@@ -2,6 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { createClient } from '@/lib/supabase/client';
 
 export type PlanTier =
   | 'free'
@@ -26,8 +27,17 @@ export interface User {
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
+  
+  // Real Supabase Actions
+  initAuth: () => Promise<void>;
+  signInWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
+  signUpWithEmail: (email: string, password: string, name?: string) => Promise<{ error?: string }>;
+  signInWithGoogle: () => Promise<{ error?: string }>;
+  logout: () => Promise<void>;
+
+  // Legacy/Store compatibility helpers
   login: (userData: { email: string; name?: string; plan?: PlanTier }) => void;
-  logout: () => void;
   updateUser: (data: Partial<User>) => void;
   upgradePlan: (
     tier: 'pro_monthly' | 'pro_quarterly' | 'lifetime' | 'lifetime_executive'
@@ -37,10 +47,182 @@ interface AuthState {
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       isAuthenticated: false,
+      isLoading: true,
 
+      initAuth: async () => {
+        try {
+          const res = await fetch('/api/auth/me');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.isAuthenticated && data.user) {
+              set({
+                user: data.user,
+                isAuthenticated: true,
+                isLoading: false,
+              });
+              return;
+            }
+          }
+          // If no active server session
+          const supabase = createClient();
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) {
+            set({ user: null, isAuthenticated: false, isLoading: false });
+          }
+        } catch {
+          set({ isLoading: false });
+        }
+      },
+
+      signInWithEmail: async (email: string, password: string) => {
+        try {
+          const supabase = createClient();
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (error) {
+            return { error: error.message };
+          }
+
+          if (data.user) {
+            // Sync with backend Prisma
+            const syncRes = await fetch('/api/auth/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: data.user.user_metadata?.full_name }),
+            });
+
+            if (syncRes.ok) {
+              const syncData = await syncRes.json();
+              set({
+                user: syncData.user,
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            } else {
+              set({
+                user: {
+                  id: data.user.id,
+                  email: data.user.email!,
+                  name: data.user.user_metadata?.full_name || email.split('@')[0],
+                  plan: 'free',
+                  aiCredits: 5,
+                  maxAiCredits: 5,
+                  pdfExportsUsed: 0,
+                  createdAt: new Date().toISOString(),
+                },
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            }
+          }
+
+          return {};
+        } catch (err: any) {
+          return { error: err?.message || 'Failed to sign in' };
+        }
+      },
+
+      signUpWithEmail: async (email: string, password: string, name?: string) => {
+        try {
+          const supabase = createClient();
+          const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+              data: {
+                full_name: name || email.split('@')[0],
+              },
+            },
+          });
+
+          if (error) {
+            return { error: error.message };
+          }
+
+          if (data.user) {
+            // Sync with backend Prisma
+            const syncRes = await fetch('/api/auth/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name }),
+            });
+
+            if (syncRes.ok) {
+              const syncData = await syncRes.json();
+              set({
+                user: syncData.user,
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            } else {
+              set({
+                user: {
+                  id: data.user.id,
+                  email: data.user.email!,
+                  name: name || email.split('@')[0],
+                  plan: 'free',
+                  aiCredits: 5,
+                  maxAiCredits: 5,
+                  pdfExportsUsed: 0,
+                  createdAt: new Date().toISOString(),
+                },
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            }
+          }
+
+          return {};
+        } catch (err: any) {
+          return { error: err?.message || 'Failed to create account' };
+        }
+      },
+
+      signInWithGoogle: async () => {
+        try {
+          const supabase = createClient();
+          const origin = typeof window !== 'undefined' ? window.location.origin : '';
+          const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+              redirectTo: `${origin}/auth/callback`,
+            },
+          });
+
+          if (error) {
+            return { error: error.message };
+          }
+          return {};
+        } catch (err: any) {
+          return { error: err?.message || 'Failed to initialize Google login' };
+        }
+      },
+
+      logout: async () => {
+        try {
+          const supabase = createClient();
+          await supabase.auth.signOut();
+        } catch (err) {
+          console.error('Error signing out of Supabase:', err);
+        } finally {
+          set({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+          if (typeof window !== 'undefined') {
+            window.location.href = '/';
+          }
+        }
+      },
+
+      // Fallback compatibility for UI code
       login: ({ email, name, plan }) => {
         const fallbackName = name || email.split('@')[0] || 'User';
         const formattedName = fallbackName
@@ -69,13 +251,7 @@ export const useAuthStore = create<AuthState>()(
         set({
           user,
           isAuthenticated: true,
-        });
-      },
-
-      logout: () => {
-        set({
-          user: null,
-          isAuthenticated: false,
+          isLoading: false,
         });
       },
 
@@ -139,7 +315,7 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'resumai-auth-storage',
+      name: 'resumai_auth_storage',
     }
   )
 );

@@ -25,11 +25,12 @@ import { useAuthStore } from '@/lib/store/useAuthStore';
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
   const { title, content, templateId } = useResumeStore();
-  const { user, isAuthenticated, login } = useAuthStore();
+  const { user, isAuthenticated, login, initAuth } = useAuthStore();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    initAuth();
+  }, [initAuth]);
 
   if (!mounted) {
     return (

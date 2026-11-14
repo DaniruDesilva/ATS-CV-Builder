@@ -23,7 +23,7 @@ import { useAuthStore } from '@/lib/store/useAuthStore';
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, isAuthenticated, logout } = useAuthStore();
+  const { user, isAuthenticated, logout, initAuth } = useAuthStore();
 
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -37,7 +37,8 @@ export function Navbar() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+    initAuth();
+  }, [initAuth]);
 
   // Smooth hover handlers with small grace delay to prevent flicker/disappearing gap
   const handleResumeEnter = () => {
@@ -70,8 +71,8 @@ export function Navbar() {
     }, 120);
   };
 
-  const handleSignOut = () => {
-    logout();
+  const handleSignOut = async () => {
+    await logout();
     setUserDropdownOpen(false);
     setMobileMenuOpen(false);
     router.push('/');
@@ -316,9 +317,17 @@ export function Navbar() {
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                 className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full border border-slate-200 hover:border-emerald-300 bg-white hover:bg-emerald-50/40 transition-all shadow-2xs group"
               >
-                <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-extrabold text-xs flex items-center justify-center shadow-2xs">
-                  {getInitials(user?.name)}
-                </div>
+                {user?.avatarUrl ? (
+                  <img
+                    src={user.avatarUrl}
+                    alt={user.name || 'User avatar'}
+                    className="w-7 h-7 rounded-full object-cover border border-emerald-300 shadow-2xs"
+                  />
+                ) : (
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-emerald-600 to-teal-500 text-white font-extrabold text-xs flex items-center justify-center shadow-2xs">
+                    {getInitials(user?.name)}
+                  </div>
+                )}
                 <span className="text-xs font-bold text-slate-800 max-w-[120px] truncate">
                   {user?.name || 'Account'}
                 </span>
