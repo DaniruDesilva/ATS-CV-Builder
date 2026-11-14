@@ -20,6 +20,7 @@ import {
   ChevronDown,
   Layers,
   FileText,
+  Star,
 } from 'lucide-react';
 import { useAuthStore, PlanTier } from '@/lib/store/useAuthStore';
 
@@ -34,6 +35,7 @@ interface PlanPricing {
   aiCreditsText: string;
   aiCreditsBadge: string;
   description: string;
+  featuresTitle: string;
   features: string[];
   ctaText: string;
   popular?: boolean;
@@ -48,14 +50,17 @@ const plans: PlanPricing[] = [
     period: 'forever',
     aiCreditsText: '5 AI Trial Credits',
     aiCreditsBadge: 'One-Time Trial',
-    description: 'Perfect for drafting an ATS-compliant resume and testing our scoring engine.',
+    description: 'Perfect for drafting an ATS-compliant single-column resume and testing our scoring engine.',
+    featuresTitle: "WHAT'S INCLUDED:",
     features: [
-      '1 ATS Single-Column PDF Export',
+      '1 ATS Single-Column Vector PDF Export',
       '5 AI Bullet Rewriting & Summary Credits',
       'Classic ATS Template (Workday Certified)',
-      'Real-Time Live Document & A4 Preview',
+      'Real-Time Live Document & A4 Scale Preview',
       'Browser Cloud Auto-Save Drafts',
       'Deterministic ATS Header & Formatting Audit',
+      'Full Job Description Comparison Scan',
+      'Standard Community Support',
     ],
     ctaText: 'Get Started Free',
     popular: false,
@@ -67,18 +72,19 @@ const plans: PlanPricing[] = [
     price: '$9',
     period: '/ month',
     badge: '🔥 Most Popular',
-    badgeColor: 'bg-emerald-600 text-white',
+    badgeColor: 'bg-emerald-600 text-white font-black shadow-md shadow-emerald-600/25',
     aiCreditsText: '150 AI Credits / Month',
     aiCreditsBadge: 'Refreshes Monthly',
-    description: 'Everything you need to optimize multiple job applications and beat ATS filters.',
+    description: 'Everything you need to optimize multiple job applications and beat enterprise ATS filters.',
+    featuresTitle: 'EVERYTHING IN FREE, PLUS:',
     features: [
       'Unlimited ATS-Friendly PDF & JSON Exports',
       '150 AI Bullet Rewriting Credits / Month',
       'Unlimited Real-Time ATS Compatibility Audits',
       'Google X-Y-Z Achievement Bullet Optimizer',
       'Target Job Description Keyword Gap Matcher',
-      'All 4 ATS Templates Unlocked (Classic, Traditional, Tech, Executive)',
-      'Priority Cloud Rendering & Email Support',
+      'All 4 ATS Templates (Classic, Traditional, Tech, Executive)',
+      'Priority Cloud Document Rendering',
       'Cancel Anytime in 1-Click with Zero Fees',
     ],
     ctaText: 'Upgrade to Pro Monthly',
@@ -91,10 +97,11 @@ const plans: PlanPricing[] = [
     price: '$29',
     period: 'one-time payment',
     badge: '⚡ Best Value • Save 70%',
-    badgeColor: 'bg-amber-500 text-slate-950 font-black',
+    badgeColor: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black shadow-md shadow-amber-500/25',
     aiCreditsText: '300 AI Credits Starter Pack',
     aiCreditsBadge: 'Included Upfront',
     description: 'Pay once, use forever. Permanent access to all 4 ATS templates and export engines.',
+    featuresTitle: 'EVERYTHING IN PRO FOREVER, PLUS:',
     features: [
       'Permanent Access to All 4 ATS Templates Forever',
       'Unlimited ATS Single-Column PDF Exports Forever',
@@ -161,7 +168,7 @@ export default function PricingPage() {
   const faqs = [
     {
       q: 'Why are AI credits metered instead of unlimited lifetime?',
-      a: 'High-speed LLM processing (Google Gemini 1.5 & OpenRouter) costs real cloud computation on every single bullet rewrite and resume scan. Providing a generous starter pack (300 credits on Lifetime, 150/mo on Pro) rather than an unsustainable "free forever" claim ensures lightning-fast response times, top-tier model quality, and a reliable service that never cuts corners on quality.',
+      a: 'High-speed LLM processing (Google Gemini 1.5 & OpenRouter) incurs real cloud computing costs on every single bullet rewrite and resume scan. Providing a generous starter pack (300 credits on Lifetime, 150/mo on Pro) rather than an unsustainable "free forever" claim ensures lightning-fast response times, top-tier model quality, and a reliable platform that never cuts corners on quality.',
     },
     {
       q: 'Can I cancel my Pro Monthly subscription at any time?',
@@ -182,9 +189,9 @@ export default function PricingPage() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 space-y-16 w-full animate-fade-in relative">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 space-y-20 w-full animate-fade-in relative">
       
-      {/* Ambient background glow */}
+      {/* Ambient background subtle lighting */}
       <div className="absolute top-12 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-tr from-emerald-500/10 via-teal-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
       {/* ── HEADER ── */}
@@ -208,7 +215,7 @@ export default function PricingPage() {
             <button
               type="button"
               onClick={() => setBillingInterval('monthly')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all ${
                 billingInterval === 'monthly'
                   ? 'bg-white text-slate-900 shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
@@ -219,14 +226,14 @@ export default function PricingPage() {
             <button
               type="button"
               onClick={() => setBillingInterval('lifetime')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+              className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                 billingInterval === 'lifetime'
                   ? 'bg-white text-slate-900 shadow-sm'
                   : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               <span>Lifetime One-Time Pass</span>
-              <span className="text-[10px] font-black uppercase px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300">
+              <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-100 text-amber-900 border border-amber-300 whitespace-nowrap">
                 Save 70%
               </span>
             </button>
@@ -250,17 +257,17 @@ export default function PricingPage() {
             <div
               key={plan.id}
               className={`relative rounded-3xl p-6 sm:p-8 flex flex-col justify-between transition-all duration-300 bg-white border ${
-                plan.popular
+                plan.id === 'pro_monthly'
                   ? 'border-2 border-emerald-500 shadow-xl shadow-emerald-500/10 ring-2 ring-emerald-500/15 md:-translate-y-2'
                   : isHighlighted
-                  ? 'border-2 border-slate-800 shadow-lg md:-translate-y-1'
+                  ? 'border-2 border-amber-500 shadow-xl shadow-amber-500/10 ring-2 ring-amber-500/15 md:-translate-y-2'
                   : 'border-slate-200/90 shadow-sm hover:border-slate-300 hover:shadow-md'
               }`}
             >
-              {/* Badge for Popular or Lifetime */}
+              {/* Badge with whitespace-nowrap guaranteed */}
               {plan.badge && (
                 <div
-                  className={`absolute -top-3.5 left-1/2 transform -translate-x-1/2 px-4 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1 ${
+                  className={`absolute -top-3.5 left-1/2 transform -translate-x-1/2 px-4 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm flex items-center gap-1.5 whitespace-nowrap z-20 ${
                     plan.badgeColor || 'bg-slate-900 text-white'
                   }`}
                 >
@@ -268,7 +275,7 @@ export default function PricingPage() {
                 </div>
               )}
 
-              <div className="space-y-6">
+              <div className="space-y-6 flex-1 flex flex-col">
                 
                 {/* Header & Tagline */}
                 <div>
@@ -286,7 +293,7 @@ export default function PricingPage() {
                 </div>
 
                 {/* Price Display */}
-                <div className="space-y-1 pb-2 border-b border-slate-100">
+                <div className="space-y-1 pb-2 border-b border-slate-100 min-h-[90px] flex flex-col justify-center">
                   <div className="flex items-baseline gap-1.5">
                     <span className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">
                       {plan.price}
@@ -306,15 +313,15 @@ export default function PricingPage() {
                       {plan.aiCreditsText}
                     </span>
                   </div>
-                  <span className="text-[10px] font-bold text-emerald-800 uppercase px-2 py-0.5 rounded-full bg-white border border-emerald-200">
+                  <span className="text-[10px] font-bold text-emerald-800 uppercase px-2 py-0.5 rounded-full bg-white border border-emerald-200 whitespace-nowrap">
                     {plan.aiCreditsBadge}
                   </span>
                 </div>
 
-                {/* Features List */}
-                <div className="space-y-3">
-                  <span className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block">
-                    What&apos;s Included:
+                {/* Features List with Hierarchical Subhead */}
+                <div className="space-y-3 flex-1">
+                  <span className="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider block">
+                    {plan.featuresTitle}
                   </span>
                   <ul className="space-y-2.5">
                     {plan.features.map((feature, idx) => (
@@ -330,8 +337,8 @@ export default function PricingPage() {
 
               </div>
 
-              {/* Action Button */}
-              <div className="pt-8">
+              {/* Action Button - Aligned across all cards */}
+              <div className="pt-8 mt-auto">
                 {isCurrent ? (
                   <div className="w-full py-3.5 rounded-2xl bg-emerald-50 border-2 border-emerald-500 text-emerald-800 text-xs font-extrabold flex items-center justify-center gap-2 text-center shadow-xs">
                     <CheckCircle2 className="w-4 h-4 text-emerald-600" />
@@ -340,7 +347,7 @@ export default function PricingPage() {
                 ) : plan.id === 'free' ? (
                   <Link
                     href={isAuthenticated ? '/builder' : '/register?redirect=/pricing'}
-                    className="w-full py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold flex items-center justify-center gap-2 text-center transition-colors"
+                    className="w-full py-3.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold flex items-center justify-center gap-2 text-center transition-colors shadow-2xs"
                   >
                     <span>{plan.ctaText}</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -367,29 +374,46 @@ export default function PricingPage() {
       </div>
 
       {/* ── GUARANTEE & TRUST BAR ── */}
-      <div className="max-w-3xl mx-auto rounded-2xl p-4 sm:p-5 bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-around gap-4 text-xs text-slate-600 text-center">
-        <div className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span className="font-semibold">7-Day Money-Back Guarantee</span>
+      <div className="max-w-4xl mx-auto rounded-3xl p-5 sm:p-6 bg-slate-50/90 border border-slate-200/90 flex flex-wrap items-center justify-around gap-6 text-xs text-slate-700 text-center shadow-2xs">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <ShieldCheck className="w-4 h-4" />
+          </div>
+          <div className="text-left">
+            <span className="font-extrabold text-slate-900 block leading-tight">7-Day Guarantee</span>
+            <span className="text-[11px] text-slate-500">100% money-back refund</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Lock className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span className="font-semibold">256-Bit SSL Encrypted Checkout</span>
+
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <Lock className="w-4 h-4" />
+          </div>
+          <div className="text-left">
+            <span className="font-extrabold text-slate-900 block leading-tight">256-Bit SSL Encrypted</span>
+            <span className="text-[11px] text-slate-500">Safe, compliant checkout</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <RefreshCw className="w-4 h-4 text-emerald-600 shrink-0" />
-          <span className="font-semibold">Cancel Anytime • No Hidden Fees</span>
+
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+            <RefreshCw className="w-4 h-4" />
+          </div>
+          <div className="text-left">
+            <span className="font-extrabold text-slate-900 block leading-tight">Cancel Anytime</span>
+            <span className="text-[11px] text-slate-500">Zero fees or lock-ins</span>
+          </div>
         </div>
       </div>
 
       {/* ── SIDE-BY-SIDE FEATURE COMPARISON MATRIX ── */}
-      <div className="space-y-6 pt-6">
+      <div className="space-y-6 pt-4">
         <div className="text-center space-y-2">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
             Compare All Features Side-by-Side
           </h2>
-          <p className="text-xs sm:text-sm text-slate-500">
-            Transparent breakdown of every single feature across our pricing tiers.
+          <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
+            Transparent breakdown of every single capability across our three pricing tiers.
           </p>
         </div>
 
@@ -400,10 +424,16 @@ export default function PricingPage() {
                 <th className="p-4 sm:p-5 font-extrabold text-slate-900 w-2/5">Capability</th>
                 <th className="p-4 sm:p-5 font-bold text-slate-700 text-center w-1/5">Free Starter</th>
                 <th className="p-4 sm:p-5 font-extrabold text-emerald-800 text-center w-1/5 bg-emerald-50/60">
-                  Pro Monthly ($9)
+                  <span className="inline-block px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase mb-1">
+                    Popular
+                  </span>
+                  <div>Pro Monthly ($9)</div>
                 </th>
                 <th className="p-4 sm:p-5 font-extrabold text-amber-900 text-center w-1/5 bg-amber-50/40">
-                  Lifetime ($29)
+                  <span className="inline-block px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black uppercase mb-1">
+                    Best Value
+                  </span>
+                  <div>Lifetime ($29)</div>
                 </th>
               </tr>
             </thead>
@@ -465,12 +495,12 @@ export default function PricingPage() {
                 <td className="p-4 sm:p-5 font-semibold text-slate-900">
                   Target Job Description Keyword Gap Matcher
                 </td>
-                <td className="p-4 sm:p-5 text-center text-slate-400">—</td>
-                <td className="p-4 sm:p-5 text-center font-bold text-emerald-700 bg-emerald-50/20">
-                  ✓ Included
+                <td className="p-4 sm:p-5 text-center text-slate-300 font-bold text-base">—</td>
+                <td className="p-4 sm:p-5 text-center bg-emerald-50/20">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 mx-auto" />
                 </td>
-                <td className="p-4 sm:p-5 text-center font-bold text-slate-900 bg-amber-50/10">
-                  ✓ Included
+                <td className="p-4 sm:p-5 text-center bg-amber-50/10">
+                  <CheckCircle2 className="w-5 h-5 text-emerald-600 mx-auto" />
                 </td>
               </tr>
 
@@ -506,7 +536,7 @@ export default function PricingPage() {
       </div>
 
       {/* ── FREQUENTLY ASKED QUESTIONS (FAQ) ── */}
-      <div className="max-w-3xl mx-auto space-y-6 pt-4">
+      <div className="max-w-3xl mx-auto space-y-6 pt-4 pb-6">
         <div className="text-center space-y-2">
           <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">
             Frequently Asked Questions
@@ -522,14 +552,21 @@ export default function PricingPage() {
             return (
               <div
                 key={index}
-                className="rounded-2xl border border-slate-200/90 bg-white p-4 sm:p-5 transition-all shadow-2xs"
+                className={`rounded-2xl border transition-all shadow-2xs ${
+                  isOpen
+                    ? 'border-emerald-500/80 bg-white ring-2 ring-emerald-500/10'
+                    : 'border-slate-200/90 bg-white hover:border-slate-300'
+                } p-4 sm:p-5`}
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(isOpen ? null : index)}
                   className="w-full flex items-center justify-between text-left gap-4 font-bold text-slate-900 text-sm"
                 >
-                  <span>{faq.q}</span>
+                  <span className="flex items-center gap-2">
+                    <HelpCircle className={`w-4 h-4 ${isOpen ? 'text-emerald-600' : 'text-slate-400'}`} />
+                    <span>{faq.q}</span>
+                  </span>
                   <ChevronDown
                     className={`w-4 h-4 text-slate-400 shrink-0 transition-transform duration-200 ${
                       isOpen ? 'transform rotate-180 text-emerald-600' : ''
@@ -537,7 +574,7 @@ export default function PricingPage() {
                   />
                 </button>
                 {isOpen && (
-                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-3 pt-3 border-t border-slate-100 animate-in fade-in duration-200">
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed mt-3 pt-3 border-t border-slate-100 animate-in fade-in duration-200 pl-6">
                     {faq.a}
                   </p>
                 )}
@@ -552,7 +589,7 @@ export default function PricingPage() {
           ═══════════════════════════════════════════════════════════ */}
       {selectedPlanForCheckout && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-in zoom-in-95 duration-200 space-y-6">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl border border-slate-200 relative animate-in zoom-in-95 duration-200 space-y-6 max-h-[90vh] overflow-y-auto">
             
             {/* Modal Header */}
             <div className="flex items-center justify-between pb-4 border-b border-slate-200">
