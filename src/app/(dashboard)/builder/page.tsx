@@ -29,23 +29,70 @@ import {
   ArrowRight,
   Check,
   TrendingUp,
-  HelpCircle
+  HelpCircle,
+  Loader2,
+  Cloud,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useAuthStore } from '@/lib/store/useAuthStore';
 
 function BuilderPageContent() {
   const searchParams = useSearchParams();
+  const { user, isAuthenticated } = useAuthStore();
   const {
+    currentResumeId,
+    setCurrentResumeId,
     title,
     setTitle,
     activeStep,
     setActiveStep,
     loadSampleData,
     resetToEmpty,
+    resetToEmptyWithUser,
     templateId,
     setTemplateId,
-    content
+    content,
   } = useResumeStore();
+
+  const [savingCloud, setSavingCloud] = useState(false);
+  const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
+
+  // Cloud Auto-Save for Authenticated Users (debounced 1.5s)
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const timer = setTimeout(async () => {
+      setSavingCloud(true);
+      try {
+        const res = await fetch('/api/resumes', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: currentResumeId || undefined,
+            title,
+            templateId,
+            content,
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.resume?.id && !currentResumeId) {
+            setCurrentResumeId(data.resume.id);
+          }
+          setLastSavedTime(
+            new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          );
+        }
+      } catch (err) {
+        console.error('Cloud auto-save error:', err);
+      } finally {
+        setSavingCloud(false);
+      }
+    }, 1500);
+
+    return () => clearTimeout(timer);
+  }, [title, templateId, content, isAuthenticated, currentResumeId, setCurrentResumeId]);
 
   useEffect(() => {
     const tpl = searchParams.get('template');
@@ -372,9 +419,16 @@ function BuilderPageContent() {
             onChange={(e) => setTitle(e.target.value)}
             className="bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-1.5 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 min-w-[240px] transition-colors"
           />
-          <span className="text-xs text-slate-500 flex items-center gap-1">
-            <FileCheck2 className="w-3.5 h-3.5 text-emerald-500" /> Auto-Saved
-          </span>
+          {savingCloud ? (
+            <span className="text-xs text-slate-500 flex items-center gap-1.5 animate-pulse">
+              <Loader2 className="w-3.5 h-3.5 text-emerald-600 animate-spin" /> Saving...
+            </span>
+          ) : (
+            <span className="text-xs text-emerald-700 font-medium flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+              <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
+              <span>{lastSavedTime ? `Cloud Saved (${lastSavedTime})` : 'Cloud Synced'}</span>
+            </span>
+          )}
         </div>
 
         {/* Live ATS Score Indicator Meter - Clickable for details modal */}
@@ -597,7 +651,7 @@ function BuilderPageContent() {
               <button
                 type="button"
                 onClick={() => {
-                  resetToEmpty();
+                  resetToEmptyWithUser(user?.name || '', user?.email || '');
                   setShowResetModal(false);
                 }}
                 className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold transition-colors shadow-sm"

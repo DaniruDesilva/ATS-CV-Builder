@@ -270,6 +270,12 @@ interface ResumeState {
   updateReference: (id: string, ref: Partial<ReferenceItem>) => void;
   removeReference: (id: string) => void;
   
+  // Current active resume ID in database
+  currentResumeId: string | null;
+  setCurrentResumeId: (id: string | null) => void;
+  loadResumeData: (data: { id: string; title: string; templateId: TemplateId; content: ResumeContent }) => void;
+  resetToEmptyWithUser: (name?: string, email?: string) => void;
+
   // Reset / Load Sample
   loadSampleData: () => void;
   resetToEmpty: () => void;
@@ -278,11 +284,13 @@ interface ResumeState {
 export const useResumeStore = create<ResumeState>()(
   persist(
     (set) => ({
+      currentResumeId: null,
       title: "Software Engineering Resume",
       templateId: "traditional-ats",
       content: INITIAL_RESUME_CONTENT,
       activeStep: 0,
 
+      setCurrentResumeId: (currentResumeId) => set({ currentResumeId }),
       setTitle: (title) => set({ title }),
       setTemplateId: (templateId) => set({ templateId }),
       setActiveStep: (activeStep) => set({ activeStep }),
@@ -597,6 +605,43 @@ export const useResumeStore = create<ResumeState>()(
         })),
 
       loadSampleData: () => set({ content: DANIRU_SAMPLE_RESUME }),
+
+      loadResumeData: (data) =>
+        set({
+          currentResumeId: data.id,
+          title: data.title || "My ATS Resume",
+          templateId: data.templateId || "classic-ats",
+          content: data.content,
+          activeStep: 0,
+        }),
+
+      resetToEmptyWithUser: (name = '', email = '') =>
+        set({
+          currentResumeId: null,
+          title: name ? `${name}'s ATS Resume` : "My ATS Resume",
+          templateId: "classic-ats",
+          activeStep: 0,
+          content: {
+            personalInfo: {
+              fullName: name,
+              jobTitle: "",
+              email: email,
+              phone: "",
+              location: "",
+              website: "",
+              linkedin: "",
+              github: "",
+            },
+            summary: "",
+            experience: [],
+            education: [],
+            skills: [],
+            projects: [],
+            achievements: [],
+            certifications: [],
+            references: [],
+          },
+        }),
 
       resetToEmpty: () =>
         set({
