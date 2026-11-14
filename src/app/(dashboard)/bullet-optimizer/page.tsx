@@ -45,7 +45,9 @@ export default function BulletOptimizerPage() {
 
   const [inputBullet, setInputBullet] = useState(sampleBullets[0].raw);
   const [isOptimizing, setIsOptimizing] = useState(false);
-  const [optimizedResult, setOptimizedResult] = useState<string | null>(null);
+  const [optimizedResult, setOptimizedResult] = useState<string | null>(
+    'Spearheaded sprint planning and agile deliverables for cross-functional engineering teams, accelerating release cycles by 28% and achieving 99.4% on-time milestone delivery.'
+  );
   const [copied, setCopied] = useState(false);
   const [insertedToBuilder, setInsertedToBuilder] = useState(false);
 
