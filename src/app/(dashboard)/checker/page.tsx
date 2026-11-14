@@ -1,15 +1,18 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useResumeStore } from '@/lib/store/useResumeStore';
 import { Dropzone } from '@/components/checker/Dropzone';
 import { ScoreGauge } from '@/components/checker/ScoreGauge';
 import { SectionBreakdown } from '@/components/checker/SectionBreakdown';
 import { SuggestionList } from '@/components/checker/SuggestionList';
 import { ScanResultData } from '@/types/checker';
-import { CheckCircle2, FileSearch, RefreshCw, AlertCircle, Shield } from 'lucide-react';
-import Link from 'next/link';
+import { CheckCircle2, FileSearch, RefreshCw, AlertCircle, Shield, ArrowRight } from 'lucide-react';
 
 export default function CheckerPage() {
+  const router = useRouter();
+  const { importScannedResume } = useResumeStore();
   const [isLoading, setIsLoading] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResultData | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -40,6 +43,18 @@ export default function CheckerPage() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleFixInBuilder = () => {
+    if (!scanResult) {
+      router.push('/builder');
+      return;
+    }
+
+    if (scanResult.extractedResume) {
+      importScannedResume(scanResult.extractedResume, scanResult.fileName);
+    }
+    router.push('/builder');
   };
 
   return (
@@ -91,12 +106,14 @@ export default function CheckerPage() {
                 <RefreshCw className="w-3.5 h-3.5" /> Scan Another
               </button>
 
-              <Link
-                href="/builder"
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-md shadow-emerald-600/20 transition-all"
+              <button
+                type="button"
+                onClick={handleFixInBuilder}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
               >
-                Fix in Builder →
-              </Link>
+                <span>Fix in Builder</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
 

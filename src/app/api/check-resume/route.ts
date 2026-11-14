@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parseDocument } from '@/lib/checker/pdfParser';
 import { evaluateDeterministicRules } from '@/lib/checker/ruleEngine';
-import { analyzeResumeWithGemini } from '@/lib/ai/gemini';
+import { analyzeResumeWithGemini, fallbackStructuredResume } from '@/lib/ai/gemini';
 import { ScanReportData, ScanResultData } from '@/types/checker';
 
 export const dynamic = 'force-dynamic';
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
     let aiEnhanced = false;
     let aiResult: any = null;
     try {
-      aiResult = await analyzeResumeWithGemini(extracted.text, jobDescription);
+      aiResult = await analyzeResumeWithGemini(extracted.text, jobDescription, fileName);
       // Check if this is a real AI result (not fallback) by checking if it has non-default values
       if (aiResult && aiResult._isAiGenerated) {
         aiEnhanced = true;
@@ -93,6 +93,8 @@ export async function POST(req: NextRequest) {
       missingStandardHeadings: deterministic.missingStandardHeadings
     };
 
+    const extractedResume = aiResult?.extractedResume || fallbackStructuredResume(extracted.text, fileName);
+
     const scanResult: ScanResultData = {
       fileName,
       overallScore,
@@ -102,6 +104,7 @@ export async function POST(req: NextRequest) {
       parsedText: extracted.text,
       reportData,
       jobDescription,
+      extractedResume,
       createdAt: new Date().toISOString()
     };
 

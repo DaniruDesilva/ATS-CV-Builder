@@ -41,7 +41,7 @@ const sampleBullets = [
 
 export default function BulletOptimizerPage() {
   const router = useRouter();
-  const { content, addExperienceHighlight } = useResumeStore();
+  const { content, addExperience, addExperienceHighlight } = useResumeStore();
 
   const [inputBullet, setInputBullet] = useState(sampleBullets[0].raw);
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -103,6 +103,17 @@ export default function BulletOptimizerPage() {
       // Add highlight to first experience entry
       const firstExpId = content.experience[0].id;
       addExperienceHighlight(firstExpId, optimizedResult);
+    } else {
+      addExperience({
+        id: 'exp-' + Date.now(),
+        position: 'Role / Position',
+        company: 'Company Name',
+        location: '',
+        startDate: '',
+        endDate: 'Present',
+        current: true,
+        highlights: [optimizedResult],
+      });
     }
 
     setInsertedToBuilder(true);

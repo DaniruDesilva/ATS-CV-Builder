@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { useAuthStore } from '@/lib/store/useAuthStore';
+import { calculateResumeAtsScore } from '@/lib/checker/atsScorer';
 
 interface SavedResumeItem {
   id: string;
@@ -150,6 +151,7 @@ export default function DashboardPage() {
   // ── 2. DYNAMIC USER DATA COMPUTATION ──
   const activeResume = resumes.length > 0 ? resumes[0] : null;
   const activeContent = activeResume?.content || {};
+  const activeAtsScore = activeResume ? calculateResumeAtsScore(activeContent) : null;
   const activeSkillsCount =
     activeContent.skills?.reduce(
       (acc: number, cat: any) => acc + (cat.skills?.length || 0),
@@ -239,12 +241,20 @@ export default function DashboardPage() {
           </div>
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-black text-slate-900">
-              {activeResume ? '78' : '—'}
+              {activeAtsScore !== null ? activeAtsScore : '—'}
             </span>
             <span className="text-xs font-bold text-slate-400">/ 100</span>
           </div>
           <div className="text-[11px] text-teal-700 font-semibold flex items-center gap-1 pt-1">
-            <span>{activeResume ? 'Top 15% ATS Parsed' : 'Scan existing resume'}</span>
+            <span>
+              {activeAtsScore !== null
+                ? activeAtsScore >= 80
+                  ? 'Top 10% ATS Parsed'
+                  : activeAtsScore >= 70
+                  ? 'Top 25% ATS Parsed'
+                  : 'Needs Optimization'
+                : 'Scan existing resume'}
+            </span>
           </div>
         </div>
 
@@ -392,6 +402,12 @@ export default function DashboardPage() {
                     </div>
 
                     <div className="space-y-2 pt-2 border-t border-slate-100 text-xs text-slate-600">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-400">Live ATS Score</span>
+                        <span className="font-extrabold text-emerald-700">
+                          {calculateResumeAtsScore(resume.content)} / 100
+                        </span>
+                      </div>
                       <div className="flex items-center justify-between">
                         <span className="text-slate-400">Template</span>
                         <span className="font-semibold text-slate-800 truncate max-w-[150px]">

@@ -211,7 +211,28 @@ export const DANIRU_SAMPLE_RESUME: ResumeContent = {
   ]
 };
 
-export const INITIAL_RESUME_CONTENT: ResumeContent = DANIRU_SAMPLE_RESUME;
+export const EMPTY_RESUME_CONTENT: ResumeContent = {
+  personalInfo: {
+    fullName: "",
+    jobTitle: "",
+    email: "",
+    phone: "",
+    location: "",
+    website: "",
+    linkedin: "",
+    github: ""
+  },
+  summary: "",
+  education: [],
+  skills: [],
+  experience: [],
+  projects: [],
+  certifications: [],
+  achievements: [],
+  references: []
+};
+
+export const INITIAL_RESUME_CONTENT: ResumeContent = EMPTY_RESUME_CONTENT;
 
 interface ResumeState {
   title: string;
@@ -270,10 +291,13 @@ interface ResumeState {
   updateReference: (id: string, ref: Partial<ReferenceItem>) => void;
   removeReference: (id: string) => void;
   
-  // Current active resume ID in database
+  // User ownership & database synchronization
+  userId: string | null;
+  setUserId: (userId: string | null) => void;
   currentResumeId: string | null;
   setCurrentResumeId: (id: string | null) => void;
   loadResumeData: (data: { id: string; title: string; templateId: TemplateId; content: ResumeContent }) => void;
+  importScannedResume: (scannedContent: ResumeContent, fileName: string) => void;
   resetToEmptyWithUser: (name?: string, email?: string) => void;
 
   // Reset / Load Sample
@@ -284,12 +308,14 @@ interface ResumeState {
 export const useResumeStore = create<ResumeState>()(
   persist(
     (set) => ({
+      userId: null,
       currentResumeId: null,
-      title: "Software Engineering Resume",
-      templateId: "traditional-ats",
-      content: INITIAL_RESUME_CONTENT,
+      title: "My ATS Resume",
+      templateId: "classic-ats",
+      content: EMPTY_RESUME_CONTENT,
       activeStep: 0,
 
+      setUserId: (userId) => set({ userId }),
       setCurrentResumeId: (currentResumeId) => set({ currentResumeId }),
       setTitle: (title) => set({ title }),
       setTemplateId: (templateId) => set({ templateId }),
@@ -604,7 +630,40 @@ export const useResumeStore = create<ResumeState>()(
           }
         })),
 
-      loadSampleData: () => set({ content: DANIRU_SAMPLE_RESUME }),
+      loadSampleData: () =>
+        set({
+          currentResumeId: null,
+          title: "Senior Software Engineer Resume",
+          templateId: "classic-ats",
+          content: DANIRU_SAMPLE_RESUME,
+          activeStep: 0,
+        }),
+
+      importScannedResume: (scannedContent, fileName) => {
+        const baseName = fileName ? fileName.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ').trim() : 'Imported Resume';
+        const cleanTitle = `${baseName} (Imported)`;
+        set({
+          currentResumeId: null,
+          title: cleanTitle,
+          templateId: 'classic-ats',
+          content: {
+            ...EMPTY_RESUME_CONTENT,
+            ...scannedContent,
+            personalInfo: {
+              ...EMPTY_RESUME_CONTENT.personalInfo,
+              ...(scannedContent.personalInfo || {}),
+            },
+            experience: scannedContent.experience || [],
+            education: scannedContent.education || [],
+            skills: scannedContent.skills || [],
+            projects: scannedContent.projects || [],
+            certifications: scannedContent.certifications || [],
+            achievements: scannedContent.achievements || [],
+            references: scannedContent.references || [],
+          },
+          activeStep: 0,
+        });
+      },
 
       loadResumeData: (data) =>
         set({
@@ -659,7 +718,7 @@ export const useResumeStore = create<ResumeState>()(
         })
     }),
     {
-      name: 'ats-resume-builder-store'
+      name: 'ats-resume-builder-store-v2'
     }
   )
 );

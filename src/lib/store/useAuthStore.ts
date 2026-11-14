@@ -78,6 +78,12 @@ export const useAuthStore = create<AuthState>()(
             supabase.auth.onAuthStateChange(async (event, session) => {
               if (event === 'SIGNED_OUT' || !session) {
                 set({ user: null, isAuthenticated: false, isLoading: false });
+                if (typeof window !== 'undefined') {
+                  try {
+                    localStorage.removeItem('ats-resume-builder-store');
+                    localStorage.removeItem('ats-resume-builder-store-v2');
+                  } catch (_) {}
+                }
               } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
                 const refreshedRes = await fetch('/api/auth/me');
                 if (refreshedRes.ok) {
@@ -291,6 +297,10 @@ export const useAuthStore = create<AuthState>()(
             isLoading: false,
           });
           if (typeof window !== 'undefined') {
+            try {
+              localStorage.removeItem('ats-resume-builder-store');
+              localStorage.removeItem('ats-resume-builder-store-v2');
+            } catch (_) {}
             window.location.href = '/';
           }
         }

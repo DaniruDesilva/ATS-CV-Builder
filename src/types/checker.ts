@@ -1,3 +1,5 @@
+import { ResumeContent } from './resume';
+
 export interface BulletImprovement {
   original: string;
   improved: string;
@@ -57,5 +59,6 @@ export interface ScanResultData {
   parsedText: string;
   reportData: ScanReportData;
   jobDescription?: string;
+  extractedResume?: ResumeContent;
   createdAt?: string;
 }
