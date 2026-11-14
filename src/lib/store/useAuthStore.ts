@@ -34,6 +34,7 @@ interface AuthState {
   signInWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
   signUpWithEmail: (email: string, password: string, name?: string) => Promise<{ error?: string }>;
   signInWithGoogle: (safeRedirect?: string) => Promise<{ error?: string }>;
+  signInWithGoogleIdToken: (idToken: string, nonce?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
 
   // Legacy/Store compatibility helpers
@@ -222,6 +223,58 @@ export const useAuthStore = create<AuthState>()(
           return {};
         } catch (err: any) {
           return { error: err?.message || 'Failed to initialize Google login' };
+        }
+      },
+
+      signInWithGoogleIdToken: async (idToken: string, nonce?: string) => {
+        try {
+          const supabase = createClient();
+          const { data, error } = await supabase.auth.signInWithIdToken({
+            provider: 'google',
+            token: idToken,
+            nonce,
+          });
+
+          if (error) {
+            return { error: error.message };
+          }
+
+          if (data.user) {
+            const syncRes = await fetch('/api/auth/sync', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: data.user.user_metadata?.full_name }),
+            });
+
+            if (syncRes.ok) {
+              const syncData = await syncRes.json();
+              set({
+                user: syncData.user,
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            } else {
+              set({
+                user: {
+                  id: data.user.id,
+                  email: data.user.email!,
+                  name: data.user.user_metadata?.full_name || data.user.email!.split('@')[0],
+                  avatarUrl: data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture,
+                  plan: 'free',
+                  aiCredits: 5,
+                  maxAiCredits: 5,
+                  pdfExportsUsed: 0,
+                  createdAt: new Date().toISOString(),
+                },
+                isAuthenticated: true,
+                isLoading: false,
+              });
+            }
+          }
+
+          return {};
+        } catch (err: any) {
+          return { error: err?.message || 'Failed to sign in with Google' };
         }
       },
 
