@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { optimizeBulletPointWithOpenRouter } from '@/lib/ai/openrouter';
+import { optimizeBulletPointWithGemini } from '@/lib/ai/gemini';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,7 +11,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Text content is required.' }, { status: 400 });
     }
 
-    const improved = await optimizeBulletPointWithOpenRouter(bulletText, Boolean(isSummary));
+    const improved = await optimizeBulletPointWithGemini(bulletText, Boolean(isSummary));
 
     return NextResponse.json({ original: bulletText, improved });
   } catch (error) {
@@ -17,3 +19,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Failed to optimize bullet text.' }, { status: 500 });
   }
 }
+

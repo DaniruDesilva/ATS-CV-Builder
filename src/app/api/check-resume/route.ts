@@ -4,6 +4,8 @@ import { evaluateDeterministicRules } from '@/lib/checker/ruleEngine';
 import { analyzeResumeWithGemini } from '@/lib/ai/gemini';
 import { ScanReportData, ScanResultData } from '@/types/checker';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
