@@ -1,13 +1,15 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db/prisma';
+import { sanitizeRedirect } from '@/lib/validation/auth';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get('code');
-  const next = searchParams.get('next') ?? '/dashboard';
+  const rawNext = searchParams.get('next');
+  const safeNext = sanitizeRedirect(rawNext, '/dashboard');
 
   if (code) {
     const supabase = createClient();
@@ -15,29 +17,35 @@ export async function GET(request: Request) {
 
     if (!error && data?.user) {
       const user = data.user;
-      const email = user.email;
+      const email = user.email?.trim().toLowerCase();
 
       if (email) {
         try {
-          const name =
+          const rawName =
             user.user_metadata?.full_name ||
             user.user_metadata?.name ||
             email.split('@')[0];
-          const avatarUrl =
+          const sanitizedName = String(rawName).trim().slice(0, 60);
+
+          const rawAvatar =
             user.user_metadata?.avatar_url || user.user_metadata?.picture || null;
+          const sanitizedAvatar =
+            typeof rawAvatar === 'string' && rawAvatar.startsWith('http')
+              ? rawAvatar.slice(0, 500)
+              : null;
 
           await prisma.user.upsert({
             where: { email },
             create: {
               id: user.id,
               email,
-              name,
-              avatarUrl,
+              name: sanitizedName,
+              avatarUrl: sanitizedAvatar,
               tier: 'FREE',
             },
             update: {
-              name: name || undefined,
-              avatarUrl: avatarUrl || undefined,
+              name: sanitizedName || undefined,
+              avatarUrl: sanitizedAvatar || undefined,
             },
           });
         } catch (dbErr) {
@@ -49,15 +57,15 @@ export async function GET(request: Request) {
       const isLocalEnv = process.env.NODE_ENV === 'development';
 
       if (isLocalEnv) {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${origin}${safeNext}`);
       } else if (forwardedHost) {
-        return NextResponse.redirect(`https://${forwardedHost}${next}`);
+        return NextResponse.redirect(`https://${forwardedHost}${safeNext}`);
       } else {
-        return NextResponse.redirect(`${origin}${next}`);
+        return NextResponse.redirect(`${origin}${safeNext}`);
       }
     }
   }
 
-  // Return the user to an error page with instructions
+  // Return the user to login with a sanitized error indicator
   return NextResponse.redirect(`${origin}/login?error=auth-code-error`);
 }

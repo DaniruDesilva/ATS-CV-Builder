@@ -16,9 +16,11 @@ export async function GET() {
       return NextResponse.json({ user: null, isAuthenticated: false });
     }
 
+    const email = authUser.email.trim().toLowerCase();
+
     // Find or create in Prisma database
     let dbUser = await prisma.user.findUnique({
-      where: { email: authUser.email },
+      where: { email },
       include: {
         _count: {
           select: { resumes: true, scans: true },
@@ -27,19 +29,25 @@ export async function GET() {
     });
 
     if (!dbUser) {
-      const name =
+      const rawName =
         authUser.user_metadata?.full_name ||
         authUser.user_metadata?.name ||
-        authUser.email.split('@')[0];
-      const avatarUrl =
+        email.split('@')[0];
+      const sanitizedName = String(rawName).trim().slice(0, 60);
+
+      const rawAvatar =
         authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null;
+      const sanitizedAvatar =
+        typeof rawAvatar === 'string' && rawAvatar.startsWith('http')
+          ? rawAvatar.slice(0, 500)
+          : null;
 
       dbUser = await prisma.user.create({
         data: {
           id: authUser.id,
-          email: authUser.email,
-          name,
-          avatarUrl,
+          email,
+          name: sanitizedName,
+          avatarUrl: sanitizedAvatar,
           tier: 'FREE',
         },
         include: {
@@ -63,7 +71,7 @@ export async function GET() {
       user: {
         id: dbUser.id,
         email: dbUser.email,
-        name: dbUser.name || dbUser.email.split('@')[0],
+        name: dbUser.name || email.split('@')[0],
         avatarUrl: dbUser.avatarUrl,
         plan: planTier,
         aiCredits: credits,
@@ -76,7 +84,7 @@ export async function GET() {
   } catch (err: any) {
     console.error('Error in /api/auth/me:', err);
     return NextResponse.json(
-      { error: err?.message || 'Failed to fetch user' },
+      { error: 'Failed to fetch user session' },
       { status: 500 }
     );
   }

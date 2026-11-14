@@ -1,5 +1,6 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
+import { sanitizeRedirect } from '@/lib/validation/auth';
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({
@@ -17,62 +18,45 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createServerClient(supabaseUrl, supabaseKey, {
     cookies: {
-      get(name: string) {
-        return request.cookies.get(name)?.value;
+      getAll() {
+        return request.cookies.getAll();
       },
-      set(name: string, value: string, options: CookieOptions) {
-        request.cookies.set({
-          name,
-          value,
-          ...options,
-        });
+      setAll(cookiesToSet: Array<{ name: string; value: string; options?: CookieOptions }>) {
+        cookiesToSet.forEach(({ name, value }) =>
+          request.cookies.set(name, value)
+        );
         response = NextResponse.next({
           request: {
             headers: request.headers,
           },
         });
-        response.cookies.set({
-          name,
-          value,
-          ...options,
-        });
-      },
-      remove(name: string, options: CookieOptions) {
-        request.cookies.set({
-          name,
-          value: '',
-          ...options,
-        });
-        response = NextResponse.next({
-          request: {
-            headers: request.headers,
-          },
-        });
-        response.cookies.set({
-          name,
-          value: '',
-          ...options,
-        });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options || {})
+        );
       },
     },
   });
 
+  // Always use getUser() instead of getSession() for secure server-side verification
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
 
-  // Protect /dashboard route
+  // Protect /dashboard route from unauthenticated access
   if (pathname.startsWith('/dashboard') && !user) {
     const redirectUrl = new URL('/login', request.url);
-    redirectUrl.searchParams.set('redirect', pathname);
+    const safePath = sanitizeRedirect(pathname, '/dashboard');
+    redirectUrl.searchParams.set('redirect', safePath);
     return NextResponse.redirect(redirectUrl);
   }
 
-  // If already logged in, redirect away from /login and /register
+  // If already authenticated, redirect away from guest-only auth pages
   if ((pathname === '/login' || pathname === '/register') && user) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    const rawRedirect = request.nextUrl.searchParams.get('redirect');
+    const safeTarget = sanitizeRedirect(rawRedirect, '/dashboard');
+    return NextResponse.redirect(new URL(safeTarget, request.url));
   }
 
   return response;

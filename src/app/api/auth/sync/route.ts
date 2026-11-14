@@ -17,28 +17,35 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const customName = body.name;
+    const rawCustomName = typeof body.name === 'string' ? body.name : undefined;
 
-    const name =
-      customName ||
+    const email = authUser.email.trim().toLowerCase();
+    const fallbackName =
       authUser.user_metadata?.full_name ||
       authUser.user_metadata?.name ||
-      authUser.email.split('@')[0];
-    const avatarUrl =
+      email.split('@')[0];
+
+    const sanitizedName = String(rawCustomName || fallbackName).trim().slice(0, 60);
+
+    const rawAvatar =
       authUser.user_metadata?.avatar_url || authUser.user_metadata?.picture || null;
+    const sanitizedAvatar =
+      typeof rawAvatar === 'string' && rawAvatar.startsWith('http')
+        ? rawAvatar.slice(0, 500)
+        : null;
 
     const dbUser = await prisma.user.upsert({
-      where: { email: authUser.email },
+      where: { email },
       create: {
         id: authUser.id,
-        email: authUser.email,
-        name,
-        avatarUrl,
+        email,
+        name: sanitizedName,
+        avatarUrl: sanitizedAvatar,
         tier: 'FREE',
       },
       update: {
-        name: name || undefined,
-        avatarUrl: avatarUrl || undefined,
+        name: sanitizedName || undefined,
+        avatarUrl: sanitizedAvatar || undefined,
       },
       include: {
         _count: {
@@ -60,7 +67,7 @@ export async function POST(request: Request) {
       user: {
         id: dbUser.id,
         email: dbUser.email,
-        name: dbUser.name || dbUser.email.split('@')[0],
+        name: dbUser.name || email.split('@')[0],
         avatarUrl: dbUser.avatarUrl,
         plan: planTier,
         aiCredits: credits,
@@ -73,7 +80,7 @@ export async function POST(request: Request) {
   } catch (err: any) {
     console.error('Error in /api/auth/sync:', err);
     return NextResponse.json(
-      { error: err?.message || 'Failed to sync user' },
+      { error: 'Failed to sync user' },
       { status: 500 }
     );
   }

@@ -33,7 +33,7 @@ interface AuthState {
   initAuth: () => Promise<void>;
   signInWithEmail: (email: string, password: string) => Promise<{ error?: string }>;
   signUpWithEmail: (email: string, password: string, name?: string) => Promise<{ error?: string }>;
-  signInWithGoogle: () => Promise<{ error?: string }>;
+  signInWithGoogle: (safeRedirect?: string) => Promise<{ error?: string }>;
   logout: () => Promise<void>;
 
   // Legacy/Store compatibility helpers
@@ -44,6 +44,8 @@ interface AuthState {
   ) => void;
   useAiCredit: () => boolean;
 }
+
+let authListenerSubscribed = false;
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -63,14 +65,32 @@ export const useAuthStore = create<AuthState>()(
                 isAuthenticated: true,
                 isLoading: false,
               });
-              return;
+            } else {
+              set({ user: null, isAuthenticated: false, isLoading: false });
             }
           }
-          // If no active server session
-          const supabase = createClient();
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!session) {
-            set({ user: null, isAuthenticated: false, isLoading: false });
+
+          // Attach real-time auth state listener once
+          if (!authListenerSubscribed && typeof window !== 'undefined') {
+            authListenerSubscribed = true;
+            const supabase = createClient();
+            supabase.auth.onAuthStateChange(async (event, session) => {
+              if (event === 'SIGNED_OUT' || !session) {
+                set({ user: null, isAuthenticated: false, isLoading: false });
+              } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+                const refreshedRes = await fetch('/api/auth/me');
+                if (refreshedRes.ok) {
+                  const refreshedData = await refreshedRes.json();
+                  if (refreshedData.user) {
+                    set({
+                      user: refreshedData.user,
+                      isAuthenticated: true,
+                      isLoading: false,
+                    });
+                  }
+                }
+              }
+            });
           }
         } catch {
           set({ isLoading: false });
@@ -184,14 +204,15 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      signInWithGoogle: async () => {
+      signInWithGoogle: async (safeRedirect?: string) => {
         try {
           const supabase = createClient();
           const origin = typeof window !== 'undefined' ? window.location.origin : '';
+          const nextParam = safeRedirect ? `?next=${encodeURIComponent(safeRedirect)}` : '';
           const { error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
             options: {
-              redirectTo: `${origin}/auth/callback`,
+              redirectTo: `${origin}/auth/callback${nextParam}`,
             },
           });
 

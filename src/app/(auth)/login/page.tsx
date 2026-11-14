@@ -3,20 +3,23 @@
 import { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/useAuthStore';
+import { loginSchema, sanitizeRedirect } from '@/lib/validation/auth';
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectUrl = searchParams.get('redirect') || '/dashboard';
+  const safeRedirect = sanitizeRedirect(searchParams.get('redirect'), '/dashboard');
   const urlError = searchParams.get('error');
 
   const { signInWithEmail, signInWithGoogle } = useAuthStore();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [formErrors, setFormErrors] = useState<{ email?: string; password?: string }>({});
   const [error, setError] = useState(
     urlError === 'auth-code-error'
       ? 'Authentication callback failed. Please try signing in again.'
@@ -25,24 +28,45 @@ function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
-
-    setLoading(true);
+    setFormErrors({});
     setError('');
 
-    const res = await signInWithEmail(email, password);
+    // Strict client-side Zod validation
+    const validation = loginSchema.safeParse({ email, password });
+    if (!validation.success) {
+      const fieldErrors: { email?: string; password?: string } = {};
+      validation.error.errors.forEach((err) => {
+        if (err.path[0] === 'email') fieldErrors.email = err.message;
+        if (err.path[0] === 'password') fieldErrors.password = err.message;
+      });
+      setFormErrors(fieldErrors);
+      return;
+    }
+
+    setLoading(true);
+
+    const res = await signInWithEmail(validation.data.email, validation.data.password);
     if (res.error) {
-      setError(res.error);
+      // User-friendly error mapping
+      if (res.error.toLowerCase().includes('invalid login credentials')) {
+        setError('Incorrect email or password. Please verify and try again.');
+      } else if (res.error.toLowerCase().includes('email not confirmed')) {
+        setError('Please check your inbox and verify your email before signing in.');
+      } else if (res.error.toLowerCase().includes('too many requests')) {
+        setError('Too many failed attempts. Please wait a moment and try again.');
+      } else {
+        setError(res.error);
+      }
       setLoading(false);
     } else {
-      router.push(redirectUrl);
+      router.push(safeRedirect);
     }
   };
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
     setError('');
-    const res = await signInWithGoogle();
+    const res = await signInWithGoogle(safeRedirect);
     if (res.error) {
       setError(res.error);
       setGoogleLoading(false);
@@ -75,12 +99,12 @@ function LoginForm() {
         type="button"
         onClick={handleGoogleLogin}
         disabled={googleLoading || loading}
-        className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition-all shadow-2xs hover:shadow flex items-center justify-center gap-3 disabled:opacity-60"
+        className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-bold transition-all shadow-2xs hover:shadow flex items-center justify-center gap-3 disabled:opacity-60 cursor-pointer"
       >
         {googleLoading ? (
           <Loader2 className="w-4 h-4 text-slate-500 animate-spin" />
         ) : (
-          <svg className="w-4 h-4" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
             <path
               fill="#4285F4"
               d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -109,20 +133,33 @@ function LoginForm() {
       </div>
 
       {/* Standard Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} noValidate className="space-y-4">
         <div>
           <label className="block text-xs font-bold text-slate-700 mb-1">Email Address</label>
           <div className="relative">
             <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
               type="email"
-              required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (formErrors.email) setFormErrors((prev) => ({ ...prev, email: undefined }));
+              }}
               placeholder="you@example.com"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+              autoComplete="email"
+              className={`w-full bg-slate-50 border rounded-xl pl-10 pr-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                formErrors.email
+                  ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
+                  : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-500'
+              }`}
             />
           </div>
+          {formErrors.email && (
+            <p className="mt-1 text-[11px] text-red-600 font-semibold flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              <span>{formErrors.email}</span>
+            </p>
+          )}
         </div>
 
         <div>
@@ -132,31 +169,54 @@ function LoginForm() {
           <div className="relative">
             <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
-              type="password"
-              required
+              type={showPassword ? 'text' : 'password'}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (formErrors.password) setFormErrors((prev) => ({ ...prev, password: undefined }));
+              }}
               placeholder="••••••••"
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all"
+              autoComplete="current-password"
+              className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
+                formErrors.password
+                  ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
+                  : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-500'
+              }`}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 transition-colors p-0.5"
+              tabIndex={-1}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
+          {formErrors.password && (
+            <p className="mt-1 text-[11px] text-red-600 font-semibold flex items-center gap-1">
+              <AlertCircle className="w-3 h-3" />
+              <span>{formErrors.password}</span>
+            </p>
+          )}
         </div>
 
         {error && (
-          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium text-center">
-            {error}
+          <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-medium text-center flex items-center justify-center gap-1.5 animate-in fade-in">
+            <AlertCircle className="w-4 h-4 shrink-0 text-red-600" />
+            <span>{error}</span>
           </div>
         )}
 
         <button
           type="submit"
-          disabled={loading || googleLoading || !email || !password}
-          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+          disabled={loading || googleLoading}
+          className="w-full py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md shadow-emerald-600/20 disabled:opacity-50 transition-all flex items-center justify-center gap-2 cursor-pointer"
         >
           {loading ? (
             <>
               <Loader2 className="w-4 h-4 animate-spin" />
-              <span>Signing in...</span>
+              <span>Signing in securely...</span>
             </>
           ) : (
             <>
@@ -169,7 +229,10 @@ function LoginForm() {
 
       <div className="text-center text-xs text-slate-500 pt-3 border-t border-slate-100">
         Don&apos;t have an account?{' '}
-        <Link href="/register" className="text-emerald-600 font-bold hover:underline">
+        <Link
+          href={`/register${safeRedirect !== '/dashboard' ? `?redirect=${encodeURIComponent(safeRedirect)}` : ''}`}
+          className="text-emerald-600 font-bold hover:underline"
+        >
           Create an account free
         </Link>
       </div>
