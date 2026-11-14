@@ -22,6 +22,7 @@ import {
   ZoomIn,
   ZoomOut,
   Maximize2,
+  FileCode,
 } from 'lucide-react';
 
 // Dynamically import @react-pdf/renderer components with SSR disabled
@@ -120,6 +121,16 @@ export function LivePreview() {
   const handleActualSize = () => {
     setZoomMode('custom');
     setCustomZoom(1.0);
+  };
+
+  const handleExportJson = () => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(content, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `${(content.personalInfo.fullName || 'resume').toLowerCase().replace(/\s+/g, '_')}_data.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
   };
 
   const getPdfDocument = () => {
@@ -291,22 +302,36 @@ export function LivePreview() {
           </div>
         )}
 
-        {/* Right: PDF Download Button */}
-        {isClient && (
-          <PDFDownloadLink
-            document={getPdfDocument()}
-            fileName={`${(content.personalInfo.fullName || 'resume').toLowerCase().replace(/\s+/g, '_')}_ats.pdf`}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition-all hover:shadow ml-auto"
-          >
-            {/* @ts-ignore */}
-            {({ loading }: { loading: boolean }) => (
-              <>
-                <Download className={`w-3.5 h-3.5 ${loading ? 'animate-bounce' : ''}`} />
-                <span>{loading ? 'Compiling ATS PDF...' : 'Download PDF'}</span>
-              </>
-            )}
-          </PDFDownloadLink>
-        )}
+        {/* Right: Export Actions */}
+        <div className="flex items-center gap-2 ml-auto">
+          {isClient && (
+            <button
+              type="button"
+              onClick={handleExportJson}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-all"
+              title="Export Resume Data as JSON"
+            >
+              <FileCode className="w-3.5 h-3.5 text-slate-500" />
+              <span>Export JSON</span>
+            </button>
+          )}
+
+          {isClient && (
+            <PDFDownloadLink
+              document={getPdfDocument()}
+              fileName={`${(content.personalInfo.fullName || 'resume').toLowerCase().replace(/\s+/g, '_')}_ats.pdf`}
+              className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition-all hover:shadow"
+            >
+              {/* @ts-ignore */}
+              {({ loading }: { loading: boolean }) => (
+                <>
+                  <Download className={`w-3.5 h-3.5 ${loading ? 'animate-bounce' : ''}`} />
+                  <span>{loading ? 'Compiling ATS PDF...' : 'Download PDF'}</span>
+                </>
+              )}
+            </PDFDownloadLink>
+          )}
+        </div>
       </div>
 
       {/* Preview Content Area */}

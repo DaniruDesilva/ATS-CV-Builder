@@ -194,23 +194,34 @@ export default function DashboardPage() {
         {/* Card 4: Plan Status */}
         <div className="bg-white border border-slate-200/90 rounded-2xl p-5 shadow-2xs hover:shadow-sm transition-all space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Plan &amp; Access</span>
-            <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Plan &amp; Credits</span>
+            <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <Crown className="w-4 h-4" />
             </div>
           </div>
           <div className="flex items-baseline gap-2">
-            <span className="text-base font-black text-slate-900">Free Tier</span>
-            <span className="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+            <span className="text-base font-black text-slate-900">
+              {user?.plan === 'lifetime'
+                ? 'Lifetime Access'
+                : user?.plan === 'pro_monthly' || user?.plan === 'pro'
+                ? 'Pro Monthly'
+                : 'Free Tier'}
+            </span>
+            <span className="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
               Active
             </span>
           </div>
-          <Link
-            href="/pricing"
-            className="text-[11px] text-amber-700 font-bold flex items-center gap-1 pt-1 hover:underline"
-          >
-            Upgrade to Pro →
-          </Link>
+          <div className="flex items-center justify-between text-[11px] pt-1">
+            <span className="text-slate-500 font-semibold">
+              {user?.aiCredits ?? 5} AI Credits left
+            </span>
+            <Link
+              href="/pricing"
+              className="text-emerald-700 font-bold hover:underline"
+            >
+              {user?.plan === 'free' || !user?.plan ? 'Upgrade →' : 'Manage →'}
+            </Link>
+          </div>
         </div>
       </div>
 

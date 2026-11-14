@@ -3,21 +3,28 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+export type PlanTier = 'free' | 'pro_monthly' | 'lifetime' | 'pro';
+
 export interface User {
   id: string;
   name: string;
   email: string;
   avatarUrl?: string;
-  plan: 'free' | 'pro';
+  plan: PlanTier;
+  aiCredits: number;
+  maxAiCredits: number;
+  pdfExportsUsed: number;
   createdAt: string;
 }
 
 interface AuthState {
   user: User | null;
   isAuthenticated: boolean;
-  login: (userData: { email: string; name?: string }) => void;
+  login: (userData: { email: string; name?: string; plan?: PlanTier }) => void;
   logout: () => void;
   updateUser: (data: Partial<User>) => void;
+  upgradePlan: (tier: 'pro_monthly' | 'lifetime') => void;
+  useAiCredit: () => boolean;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -26,18 +33,24 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
 
-      login: ({ email, name }) => {
+      login: ({ email, name, plan }) => {
         const fallbackName = name || email.split('@')[0] || 'User';
         const formattedName = fallbackName
           .split(/[._-]/)
           .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
           .join(' ');
 
+        const chosenPlan: PlanTier = plan || 'free';
+        const initialCredits = chosenPlan === 'lifetime' ? 300 : chosenPlan === 'pro_monthly' || chosenPlan === 'pro' ? 150 : 5;
+
         const user: User = {
           id: `usr_${Date.now()}`,
           email,
           name: formattedName,
-          plan: 'free',
+          plan: chosenPlan,
+          aiCredits: initialCredits,
+          maxAiCredits: initialCredits,
+          pdfExportsUsed: 0,
           createdAt: new Date().toISOString(),
         };
 
@@ -58,6 +71,56 @@ export const useAuthStore = create<AuthState>()(
         set((state) => ({
           user: state.user ? { ...state.user, ...data } : null,
         }));
+      },
+
+      upgradePlan: (tier: 'pro_monthly' | 'lifetime') => {
+        set((state) => {
+          const credits = tier === 'lifetime' ? 300 : 150;
+          if (!state.user) {
+            // If anonymous user upgrades, create user session
+            const newUser: User = {
+              id: `usr_${Date.now()}`,
+              email: 'subscriber@resumai.pro',
+              name: 'Pro Member',
+              plan: tier,
+              aiCredits: credits,
+              maxAiCredits: credits,
+              pdfExportsUsed: 0,
+              createdAt: new Date().toISOString(),
+            };
+            return {
+              user: newUser,
+              isAuthenticated: true,
+            };
+          }
+
+          return {
+            user: {
+              ...state.user,
+              plan: tier,
+              aiCredits: (state.user.aiCredits || 0) + credits,
+              maxAiCredits: credits,
+            },
+            isAuthenticated: true,
+          };
+        });
+      },
+
+      useAiCredit: () => {
+        let success = false;
+        set((state) => {
+          if (!state.user || (state.user.aiCredits ?? 0) <= 0) {
+            return state;
+          }
+          success = true;
+          return {
+            user: {
+              ...state.user,
+              aiCredits: (state.user.aiCredits ?? 1) - 1,
+            },
+          };
+        });
+        return success;
       },
     }),
     {
