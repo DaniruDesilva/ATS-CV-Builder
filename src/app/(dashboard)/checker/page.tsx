@@ -87,19 +87,19 @@ export default function CheckerPage() {
           </div>
 
           {/* Cross-Tool Banner: Job Keyword Gap Matcher */}
-          <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+          <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                 <Target className="w-4 h-4" />
               </div>
               <div>
                 <span className="font-extrabold text-slate-900 block">Tailoring your CV for a specific job posting?</span>
-                <span className="text-slate-500">Scan for missing keywords and automatically add them to your resume.</span>
+                <span className="text-slate-600">Scan for missing keywords and automatically add them to your resume.</span>
               </div>
             </div>
             <Link
               href="/keyword-matcher"
-              className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-2xs transition-colors shrink-0 flex items-center gap-1.5 justify-center"
+              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-2xs transition-colors shrink-0 flex items-center gap-1.5 justify-center"
             >
               <span>Job Keyword Gap Matcher</span>
               <ArrowRight className="w-3.5 h-3.5" />

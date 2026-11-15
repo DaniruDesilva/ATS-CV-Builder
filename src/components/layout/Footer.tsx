@@ -201,7 +201,7 @@ export function Footer() {
                       className="hover:text-emerald-600 transition-colors inline-flex items-center gap-1"
                     >
                       <span>Job Keyword Matcher</span>
-                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
+                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">
                         New
                       </span>
                     </Link>

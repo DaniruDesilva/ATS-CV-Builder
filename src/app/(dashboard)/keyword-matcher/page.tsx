@@ -278,17 +278,17 @@ function KeywordMatcherContent() {
   }, [analysisResult, addedSkills]);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8 animate-fade-in w-full selection:bg-purple-500/20">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 space-y-8 animate-fade-in w-full selection:bg-emerald-500/20">
       
       {/* ── HEADER ── */}
       <div className="text-center space-y-3.5 max-w-3xl mx-auto">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-50 border border-purple-200/80 text-purple-800 text-xs font-bold shadow-2xs">
-          <Target className="w-3.5 h-3.5 text-purple-600 animate-pulse" />
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 text-xs font-bold shadow-2xs">
+          <Target className="w-3.5 h-3.5 text-emerald-600 animate-pulse" />
           <span>Targeted Job Tailoring Engine</span>
         </div>
 
         <h1 className="text-3xl sm:text-4xl lg:text-[42px] font-extrabold text-slate-900 tracking-tight leading-[1.18]">
-          Job Keyword <span className="text-purple-600">Gap Matcher</span>
+          Job Keyword <span className="text-emerald-700">Gap Matcher</span>
         </h1>
 
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
@@ -304,7 +304,7 @@ function KeywordMatcherContent() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-xs">
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs border border-emerald-100">
                   1
                 </div>
                 <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide">
@@ -327,7 +327,7 @@ function KeywordMatcherContent() {
                     key={idx}
                     type="button"
                     onClick={() => setJobDescription(preset.text)}
-                    className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-purple-50 hover:text-purple-700 text-slate-600 text-[11px] font-semibold transition-colors text-left truncate max-w-[220px] cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-slate-100/90 hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200/70 hover:border-emerald-200 text-slate-700 text-xs font-semibold transition-all text-left truncate max-w-[240px] cursor-pointer shadow-2xs"
                   >
                     {preset.title.split('(')[0].trim()}
                   </button>
@@ -341,7 +341,7 @@ function KeywordMatcherContent() {
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
               placeholder="Paste the complete job description, requirements, and responsibilities here..."
-              className="w-full text-xs font-mono bg-slate-50/70 border border-slate-200 rounded-2xl p-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 resize-none transition-all leading-relaxed"
+              className="w-full text-xs font-mono bg-slate-50/70 border border-slate-200 rounded-2xl p-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none transition-all leading-relaxed"
             />
           </div>
 
@@ -364,7 +364,7 @@ function KeywordMatcherContent() {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-xs">
+                <div className="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold text-xs border border-emerald-100">
                   2
                 </div>
                 <h2 className="text-sm font-black text-slate-900 uppercase tracking-wide">
@@ -373,41 +373,41 @@ function KeywordMatcherContent() {
               </div>
 
               {/* Mode Toggle with 3 tabs */}
-              <div className="inline-flex p-0.5 bg-slate-100 rounded-xl">
+              <div className="inline-flex p-1 bg-slate-100/90 rounded-2xl border border-slate-200/60">
                 <button
                   type="button"
                   onClick={() => setResumeMode('store')}
-                  className={`px-2.5 sm:px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
                     resumeMode === 'store'
-                      ? 'bg-white text-emerald-700 shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-800'
+                      ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/70'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                   }`}
                 >
-                  <FileText className="w-3.5 h-3.5" />
+                  <FileText className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Active Draft</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setResumeMode('upload')}
-                  className={`px-2.5 sm:px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
                     resumeMode === 'upload'
-                      ? 'bg-white text-purple-700 shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-800'
+                      ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/70'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                   }`}
                 >
-                  <UploadCloud className="w-3.5 h-3.5" />
+                  <UploadCloud className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Upload File</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setResumeMode('paste')}
-                  className={`px-2.5 sm:px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                  className={`px-3 py-1.5 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
                     resumeMode === 'paste'
-                      ? 'bg-white text-slate-900 shadow-2xs'
-                      : 'text-slate-500 hover:text-slate-800'
+                      ? 'bg-white text-emerald-700 shadow-sm border border-slate-200/70'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
                   }`}
                 >
-                  <ClipboardType className="w-3.5 h-3.5" />
+                  <ClipboardType className="w-3.5 h-3.5 text-emerald-600" />
                   <span>Paste Text</span>
                 </button>
               </div>
@@ -471,30 +471,36 @@ function KeywordMatcherContent() {
 
                 {/* Helpful Callout if Draft is Empty */}
                 {!hasStoreResume && (
-                  <div className="p-3 bg-amber-50/90 border border-amber-200/90 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-900">
-                    <div className="flex items-center gap-1.5">
-                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
-                      <span>Your active resume draft is currently empty.</span>
+                  <div className="p-3.5 bg-slate-50 border border-slate-200/90 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <AlertCircle className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-slate-800 block">No draft in builder yet</span>
+                        <span className="text-[11px] text-slate-500">Choose how to provide your resume:</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
+                    <div className="flex items-center gap-2 shrink-0 flex-wrap">
                       <button
                         type="button"
                         onClick={loadSampleData}
-                        className="px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 font-bold hover:bg-amber-100 transition-colors text-[11px] cursor-pointer shadow-2xs"
+                        className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 hover:border-slate-400 text-slate-700 font-bold hover:bg-slate-100 transition-all text-xs cursor-pointer shadow-2xs"
                       >
                         Load Sample
                       </button>
                       <button
                         type="button"
                         onClick={() => setResumeMode('upload')}
-                        className="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-bold hover:bg-purple-700 transition-colors text-[11px] cursor-pointer shadow-2xs"
+                        className="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold transition-all text-xs cursor-pointer shadow-2xs flex items-center gap-1.5"
                       >
-                        Upload File
+                        <UploadCloud className="w-3.5 h-3.5" />
+                        <span>Upload File</span>
                       </button>
                       <button
                         type="button"
                         onClick={() => setResumeMode('paste')}
-                        className="px-2.5 py-1 rounded-lg bg-amber-600 text-white font-bold hover:bg-amber-700 transition-colors text-[11px] cursor-pointer shadow-2xs"
+                        className="px-3 py-1.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold transition-all text-xs cursor-pointer"
                       >
                         Paste Text
                       </button>
@@ -528,13 +534,13 @@ function KeywordMatcherContent() {
                     onClick={() => !isUploading && fileInputRef.current?.click()}
                     className={`border-2 border-dashed rounded-2xl p-6 sm:p-7 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[225px] ${
                       isDragOver
-                        ? 'border-purple-500 bg-purple-50/70 scale-[1.01]'
-                        : 'border-slate-200 hover:border-purple-400 bg-slate-50/60 hover:bg-purple-50/30'
+                        ? 'border-emerald-500 bg-emerald-50/80 scale-[1.01]'
+                        : 'border-slate-300 hover:border-emerald-500 bg-slate-50/60 hover:bg-emerald-50/30'
                     }`}
                   >
                     {isUploading ? (
                       <div className="flex flex-col items-center justify-center space-y-2">
-                        <RefreshCw className="w-8 h-8 text-purple-600 animate-spin" />
+                        <RefreshCw className="w-8 h-8 text-emerald-600 animate-spin" />
                         <p className="text-xs font-bold text-slate-800">
                           Extracting text from document...
                         </p>
@@ -544,12 +550,12 @@ function KeywordMatcherContent() {
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center space-y-2.5">
-                        <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center shadow-2xs">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shadow-2xs">
                           <UploadCloud className="w-6 h-6" />
                         </div>
                         <div>
                           <p className="text-xs sm:text-sm font-extrabold text-slate-900">
-                            Drag &amp; drop your resume or <span className="text-purple-600 underline">browse</span>
+                            Drag &amp; drop your resume or <span className="text-emerald-700 underline font-bold">browse</span>
                           </p>
                           <p className="text-[11px] text-slate-500 mt-0.5">
                             Supports PDF or DOCX files up to 10MB
@@ -560,10 +566,10 @@ function KeywordMatcherContent() {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-200/80 space-y-3">
+                    <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/80 space-y-3">
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
                             <FileCheck className="w-5 h-5" />
                           </div>
                           <div className="min-w-0">
@@ -592,14 +598,14 @@ function KeywordMatcherContent() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between pt-2 border-t border-purple-100 text-xs text-slate-600">
+                      <div className="flex items-center justify-between pt-2 border-t border-emerald-100 text-xs text-slate-600">
                         <span className="font-semibold text-[11px]">
                           {uploadedFile.characterCount.toLocaleString()} characters extracted
                         </span>
                         <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
-                          className="text-[11px] font-bold text-purple-700 hover:underline cursor-pointer"
+                          className="text-[11px] font-bold text-emerald-700 hover:underline cursor-pointer"
                         >
                           Change File
                         </button>
@@ -669,7 +675,7 @@ function KeywordMatcherContent() {
           type="button"
           onClick={handleAnalyze}
           disabled={isAnalyzing}
-          className="px-8 py-3.5 rounded-2xl bg-purple-600 hover:bg-purple-700 active:scale-98 text-white font-extrabold text-sm shadow-xl shadow-purple-600/20 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:shadow-purple-600/30"
+          className="px-8 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 active:scale-98 text-white font-extrabold text-sm shadow-xl shadow-emerald-600/25 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed hover:shadow-emerald-600/35"
         >
           {isAnalyzing ? (
             <>
@@ -678,7 +684,7 @@ function KeywordMatcherContent() {
             </>
           ) : (
             <>
-              <Sparkles className="w-4 h-4 text-purple-200" />
+              <Sparkles className="w-4 h-4 text-emerald-200" />
               <span>Analyze Keyword Match &amp; Gaps</span>
               <ArrowRight className="w-4 h-4" />
             </>
@@ -698,7 +704,7 @@ function KeywordMatcherContent() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-slate-100">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-md bg-purple-100 text-purple-800 tracking-wider">
+                <span className="text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 tracking-wider">
                   Target Role
                 </span>
                 <span className="text-xs font-semibold text-slate-500">
@@ -800,10 +806,10 @@ function KeywordMatcherContent() {
             </div>
 
             {/* BUCKET 2: MISSING KEYWORD GAPS (CLICK TO ADD) */}
-            <div className="bg-purple-50/30 border border-purple-200/80 rounded-2xl p-5 sm:p-6 space-y-4">
+            <div className="bg-slate-50/60 border border-slate-200/90 rounded-2xl p-5 sm:p-6 space-y-4">
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center">
                     <Plus className="w-4 h-4" />
                   </div>
                   <div>
@@ -820,7 +826,7 @@ function KeywordMatcherContent() {
                   <button
                     type="button"
                     onClick={handleAddAllMissingSkills}
-                    className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-[11px] font-bold shadow-2xs transition-colors shrink-0 cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold shadow-2xs transition-colors shrink-0 cursor-pointer"
                   >
                     Add All to Active Resume
                   </button>
@@ -839,7 +845,7 @@ function KeywordMatcherContent() {
                         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
                           isAdded
                             ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                            : 'bg-white hover:bg-purple-100/70 border-purple-200 text-purple-800 shadow-2xs hover:scale-105'
+                            : 'bg-white hover:bg-emerald-50/80 border-slate-200 hover:border-emerald-300 text-slate-800 hover:text-emerald-800 shadow-2xs hover:scale-102'
                         }`}
                         title={item.recommendation}
                       >
@@ -850,7 +856,7 @@ function KeywordMatcherContent() {
                           </>
                         ) : (
                           <>
-                            <Plus className="w-3.5 h-3.5 text-purple-600 stroke-[3]" />
+                            <Plus className="w-3.5 h-3.5 text-emerald-600 stroke-[3]" />
                             <span>{item.keyword}</span>
                           </>
                         )}
@@ -872,13 +878,13 @@ function KeywordMatcherContent() {
           {analysisResult.keyRecommendations.length > 0 && (
             <div className="bg-slate-50 border border-slate-200/90 rounded-2xl p-5 space-y-3">
               <h4 className="text-xs font-black text-slate-800 uppercase tracking-wide flex items-center gap-1.5">
-                <Zap className="w-4 h-4 text-purple-600" />
+                <Zap className="w-4 h-4 text-emerald-600" />
                 <span>Tactical Keyword Placement Recommendations</span>
               </h4>
               <ul className="space-y-2 text-xs text-slate-600">
                 {analysisResult.keyRecommendations.map((rec, idx) => (
                   <li key={idx} className="flex items-start gap-2">
-                    <span className="text-purple-600 font-bold mt-0.5">•</span>
+                    <span className="text-emerald-600 font-bold mt-0.5">•</span>
                     <span className="leading-relaxed">{rec}</span>
                   </li>
                 ))}
