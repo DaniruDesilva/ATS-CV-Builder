@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { KeywordGapItem, KeywordMatchAnalysis } from '@/lib/ai/gemini';
+import { ResumeContent } from '@/types/resume';
 
 const SAMPLE_JOB_PRESETS = [
   {
@@ -83,7 +84,7 @@ Core Competencies & Requirements:
 
 function KeywordMatcherContent() {
   const router = useRouter();
-  const { content, appendSkill, loadSampleData } = useResumeStore();
+  const { content, appendSkill, loadSampleData, importScannedResume } = useResumeStore();
 
   const [jobDescription, setJobDescription] = useState(SAMPLE_JOB_PRESETS[0].text);
   const [resumeMode, setResumeMode] = useState<'store' | 'upload' | 'paste'>('store');
@@ -97,6 +98,7 @@ function KeywordMatcherContent() {
     characterCount: number;
   } | null>(null);
   const [uploadedFileText, setUploadedFileText] = useState('');
+  const [uploadedResumeContent, setUploadedResumeContent] = useState<ResumeContent | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
@@ -169,6 +171,9 @@ function KeywordMatcherContent() {
         characterCount: data.characterCount,
       });
       setUploadedFileText(data.text);
+      if (data.extractedResume) {
+        setUploadedResumeContent(data.extractedResume);
+      }
     } catch (err: any) {
       setUploadError(err.message || 'Failed to parse resume document.');
     } finally {
@@ -188,6 +193,7 @@ function KeywordMatcherContent() {
   const handleClearUploadedFile = () => {
     setUploadedFile(null);
     setUploadedFileText('');
+    setUploadedResumeContent(null);
     setUploadError('');
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
@@ -653,10 +659,24 @@ function KeywordMatcherContent() {
                   : 'Upload your existing PDF or DOCX resume document.'
                 : `${pastedResumeText.length} characters pasted.`}
             </span>
-            <Link href="/builder" className="text-emerald-700 font-bold hover:underline inline-flex items-center gap-1">
-              <span>Open in Builder</span>
-              <ArrowRight className="w-3 h-3" />
-            </Link>
+            {resumeMode === 'upload' && uploadedResumeContent ? (
+              <button
+                type="button"
+                onClick={() => {
+                  importScannedResume(uploadedResumeContent, uploadedFile?.name || 'Resume');
+                  router.push('/builder');
+                }}
+                className="text-emerald-700 font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                <span>Import to Builder</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            ) : (
+              <Link href="/builder" className="text-emerald-700 font-bold hover:underline inline-flex items-center gap-1">
+                <span>Open in Builder</span>
+                <ArrowRight className="w-3 h-3" />
+              </Link>
+            )}
           </div>
         </div>
 
@@ -907,13 +927,19 @@ function KeywordMatcherContent() {
                 Scan Full Document
               </Link>
 
-              <Link
-                href="/builder?step=3"
+              <button
+                type="button"
+                onClick={() => {
+                  if (resumeMode === 'upload' && uploadedResumeContent) {
+                    importScannedResume(uploadedResumeContent, uploadedFile?.name || 'Resume');
+                  }
+                  router.push('/builder?step=3');
+                }}
                 className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition-all flex items-center gap-1.5 cursor-pointer"
               >
                 <span>Edit Skills in Builder</span>
                 <ArrowRight className="w-3.5 h-3.5" />
-              </Link>
+              </button>
             </div>
           </div>
 

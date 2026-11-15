@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parseDocument } from '@/lib/checker/pdfParser';
+import { parseStructuredResumeFromText } from '@/lib/checker/ruleEngine';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +33,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const extractedResume = parseStructuredResumeFromText(extracted.text, fileName, extracted.links || []);
+
     return NextResponse.json({
       success: true,
       fileName,
@@ -40,6 +43,8 @@ export async function POST(req: NextRequest) {
       pageCount: extracted.pageCount,
       text: extracted.text,
       characterCount: extracted.text.length,
+      links: extracted.links || [],
+      extractedResume,
     });
   } catch (error: any) {
     console.error('Error parsing document in parse-document API:', error);

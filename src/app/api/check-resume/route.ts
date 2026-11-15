@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parseDocument } from '@/lib/checker/pdfParser';
-import { evaluateDeterministicRules } from '@/lib/checker/ruleEngine';
+import {
+  evaluateDeterministicRules,
+  parseStructuredResumeFromText,
+  mergeResumeData,
+} from '@/lib/checker/ruleEngine';
 import { analyzeResumeWithGemini, fallbackStructuredResume } from '@/lib/ai/gemini';
 import { ScanReportData, ScanResultData } from '@/types/checker';
 
@@ -93,7 +97,10 @@ export async function POST(req: NextRequest) {
       missingStandardHeadings: deterministic.missingStandardHeadings
     };
 
-    const extractedResume = aiResult?.extractedResume || fallbackStructuredResume(extracted.text, fileName);
+    const deterministicResume = parseStructuredResumeFromText(extracted.text, fileName, extracted.links || []);
+    const extractedResume = aiResult?.extractedResume
+      ? mergeResumeData(aiResult.extractedResume, deterministicResume)
+      : deterministicResume;
 
     const scanResult: ScanResultData = {
       fileName,

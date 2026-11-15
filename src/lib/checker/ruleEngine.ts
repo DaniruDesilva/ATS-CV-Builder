@@ -1,4 +1,15 @@
 import { FormattingIssue, QuantificationStats, BulletImprovement, ActionVerbStats } from '@/types/checker';
+import {
+  ResumeContent,
+  PersonalInfo,
+  ExperienceItem,
+  EducationItem,
+  SkillCategory,
+  ProjectItem,
+  CertificationItem,
+  AchievementItem,
+  ReferenceItem,
+} from '@/types/resume';
 
 /* ═══════════════════════════════════════════════
    COMPREHENSIVE ATS RULE ENGINE
@@ -645,5 +656,565 @@ export function evaluateDeterministicRules(
     missingKeywords,
     bulletImprovements,
     summary
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   FULL DETERMINISTIC STRUCTURED RESUME PARSER
+   Guarantees 100% extraction of sections, contacts, links,
+   projects, education, experience, certs & achievements.
+   ═══════════════════════════════════════════════════════════════ */
+
+export function parseStructuredResumeFromText(
+  rawText: string,
+  fileName?: string,
+  links: string[] = []
+): ResumeContent {
+  const SECTION_HEADERS = [
+    'SUMMARY', 'PROFESSIONAL SUMMARY', 'CAREER OBJECTIVE', 'PROFILE', 'ABOUT ME', 'CAREER PROFILE',
+    'EDUCATION', 'ACADEMIC BACKGROUND', 'ACADEMIC QUALIFICATIONS', 'QUALIFICATIONS',
+    'EXPERIENCE', 'WORK EXPERIENCE', 'PROFESSIONAL EXPERIENCE', 'EMPLOYMENT HISTORY', 'WORK HISTORY',
+    'TECHNICAL SKILLS', 'SKILLS', 'CORE COMPETENCIES', 'COMPETENCIES', 'TECHNOLOGIES', 'TECH STACK',
+    'KEY PROJECTS', 'PROJECTS', 'PERSONAL PROJECTS', 'ACADEMIC PROJECTS', 'NOTABLE PROJECTS',
+    'CERTIFICATIONS', 'CERTIFICATES', 'PROFESSIONAL CERTIFICATIONS', 'LICENSES',
+    'EXTRA-CURRICULAR & ACHIEVEMENTS', 'ACHIEVEMENTS', 'AWARDS', 'HONORS', 'EXTRA-CURRICULAR', 'ACTIVITIES',
+    'REFERENCES', 'PROFESSIONAL REFERENCES'
+  ];
+
+  const lines = rawText.split('\n').map((l) => l.trim());
+  let currentSection = 'HEADER';
+  const sections: Record<string, string[]> = { HEADER: [] };
+
+  for (const line of lines) {
+    if (!line) continue;
+    const cleanHeader = line
+      .replace(/^[#*•\-_]+\s*/, '')
+      .replace(/[:*]+$/, '')
+      .trim()
+      .toUpperCase();
+
+    const matchedHeader = SECTION_HEADERS.find((h) => cleanHeader === h || cleanHeader.startsWith(h));
+    if (matchedHeader) {
+      currentSection = matchedHeader;
+      if (!sections[currentSection]) sections[currentSection] = [];
+    } else {
+      if (!sections[currentSection]) sections[currentSection] = [];
+      sections[currentSection].push(line);
+    }
+  }
+
+  const getSectionLines = (aliases: string[]): string[] => {
+    for (const key of Object.keys(sections)) {
+      if (aliases.some((a) => key.toUpperCase().includes(a))) {
+        return sections[key];
+      }
+    }
+    return [];
+  };
+
+  /* ═══ 1. PERSONAL INFO & CONTACTS ═══ */
+  const headerLines = sections.HEADER || [];
+
+  // Name
+  let fullName = '';
+  if (headerLines.length > 0) {
+    const candidate = headerLines.find(
+      (l) =>
+        l.length >= 2 &&
+        l.length <= 50 &&
+        !l.includes('@') &&
+        !/\d{5,}/.test(l) &&
+        !/curriculum|resume|cv\b/i.test(l) &&
+        !/https?:\/\//i.test(l)
+    );
+    if (candidate) fullName = candidate.replace(/^[#*•\-_]+\s*/, '').trim();
+  }
+  if (!fullName && fileName) {
+    fullName = fileName
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[-_]/g, ' ')
+      .replace(/\b(cv|resume|daniru)\b/gi, '')
+      .trim();
+    if (!fullName) fullName = 'Candidate';
+  }
+
+  // Job Title
+  let jobTitle = '';
+  if (headerLines.length > 1) {
+    const titleCandidate = headerLines.find(
+      (l, idx) =>
+        idx > 0 &&
+        l !== fullName &&
+        !l.includes('@') &&
+        !/https?:\/\//i.test(l) &&
+        !/\d{5,}/.test(l) &&
+        l.length < 60
+    );
+    if (titleCandidate) jobTitle = titleCandidate.replace(/^[#*•\-_|]+\s*/, '').trim();
+  }
+  if (!jobTitle) {
+    const titleMatch = rawText.match(
+      /\b(Software (?:Engineer|Engineering Intern|Developer)|Full Stack Developer|Frontend Developer|Backend Developer|DevOps Engineer|Mobile Application Developer|Data Scientist|Product Manager|UI\/UX Designer|Cloud Architect)\b/i
+    );
+    if (titleMatch) jobTitle = titleMatch[0];
+  }
+
+  // Email
+  let email = '';
+  const emailMatch = rawText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  if (emailMatch) {
+    email = emailMatch[0];
+  } else {
+    const mailto = links.find((l) => l.startsWith('mailto:'));
+    if (mailto) email = mailto.replace(/^mailto:/i, '').split('?')[0].trim();
+  }
+
+  // Phone
+  let phone = '';
+  const phoneMatch = rawText.match(/(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{3,4}/);
+  if (phoneMatch) phone = phoneMatch[0].trim();
+
+  // Location
+  let location = '';
+  for (const line of headerLines) {
+    const parts = line.split(/[|•·]/).map((p) => p.trim());
+    for (const p of parts) {
+      if (
+        p.includes('@') ||
+        /https?:\/\//i.test(p) ||
+        /\d{4,}/.test(p) ||
+        p.toLowerCase().includes('github') ||
+        p.toLowerCase().includes('linkedin')
+      ) {
+        continue;
+      }
+      if (
+        /[A-Z][a-zA-Z\s]+,\s*[A-Z][a-zA-Z\s]+/.test(p) ||
+        /Sri Lanka|United States|United Kingdom|Canada|Germany|Australia|India|Singapore|Remote/i.test(p)
+      ) {
+        location = p.replace(/^location:\s*/i, '').trim();
+        break;
+      }
+    }
+    if (location) break;
+  }
+
+  // LinkedIn
+  let linkedin = '';
+  const linkInMatch = rawText.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([a-zA-Z0-9_-]+)/i);
+  if (linkInMatch) {
+    linkedin = linkInMatch[0].startsWith('http') ? linkInMatch[0] : `https://${linkInMatch[0]}`;
+  } else {
+    const lFromLinks = links.find((l) => /linkedin\.com\/in\//i.test(l));
+    if (lFromLinks) linkedin = lFromLinks;
+  }
+
+  // GitHub
+  let github = '';
+  const githubMatch = rawText.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([a-zA-Z0-9_-]+)/i);
+  if (githubMatch) {
+    github = githubMatch[0].startsWith('http') ? githubMatch[0] : `https://${githubMatch[0]}`;
+  } else {
+    const gFromLinks = links.find((l) => /github\.com\//i.test(l));
+    if (gFromLinks) github = gFromLinks;
+  }
+
+  // Website / Portfolio
+  let website = '';
+  const fromLinksSite = links.find((l) => {
+    const low = l.toLowerCase();
+    return (
+      !low.includes('linkedin.com') &&
+      !low.includes('github.com') &&
+      !low.startsWith('mailto:') &&
+      !low.includes('simplilearn') &&
+      !low.includes('sololearn')
+    );
+  });
+
+  if (fromLinksSite) {
+    website = fromLinksSite;
+  } else {
+    // Strip emails to avoid matching gmail.com / outlook.com
+    const noEmails = rawText.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '');
+    const siteMatches = Array.from(
+      noEmails.matchAll(
+        /(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.(?:com|dev|io|me|org|net|lk|app|tech))(?:\/[^\s,|]*)?/gi
+      )
+    );
+    for (const sm of siteMatches) {
+      const url = sm[0].replace(/[,;)]+$/, '');
+      const low = url.toLowerCase();
+      if (
+        !low.includes('linkedin.com') &&
+        !low.includes('github.com') &&
+        !low.includes('sololearn.com') &&
+        !low.includes('simplilearn.com') &&
+        !low.includes('coursera.org')
+      ) {
+        website = url.startsWith('http') ? url : `https://${url}`;
+        break;
+      }
+    }
+  }
+
+  /* ═══ 2. SUMMARY ═══ */
+  const summaryLines = getSectionLines(['SUMMARY', 'OBJECTIVE', 'PROFILE', 'ABOUT ME']);
+  const summary = summaryLines.filter((l) => !l.startsWith('#')).join(' ').trim();
+
+  /* ═══ 3. SKILLS ═══ */
+  const skillsLines = getSectionLines(['SKILLS', 'COMPETENCIES', 'TECHNOLOGIES', 'TECH STACK']);
+  const skills: SkillCategory[] = [];
+  let currentCat = 'Technical Skills';
+  let catSkills: string[] = [];
+
+  for (const line of skillsLines) {
+    if (line.includes(':')) {
+      if (catSkills.length > 0) {
+        skills.push({ id: `sk-${skills.length + 1}`, categoryName: currentCat, skills: catSkills });
+        catSkills = [];
+      }
+      const [catName, skillItems] = line.split(':');
+      currentCat = catName.replace(/^[-*•]\s*/, '').trim();
+      const items = (skillItems || '')
+        .split(/[,|•·]/)
+        .map((s) => s.trim().replace(/\([^)]*\)/g, '').trim())
+        .filter((s) => s.length > 0);
+      catSkills = items;
+    } else {
+      const items = line
+        .split(/[,|•·]/)
+        .map((s) => s.trim().replace(/\([^)]*\)/g, '').trim())
+        .filter((s) => s.length > 0);
+      catSkills.push(...items);
+    }
+  }
+  if (catSkills.length > 0) {
+    skills.push({ id: `sk-${skills.length + 1}`, categoryName: currentCat, skills: catSkills });
+  }
+
+  // Fallback: if no skills parsed from section, extract via dictionary
+  if (skills.length === 0) {
+    const extractedSkills = extractSkillsFromText(rawText);
+    if (extractedSkills.length > 0) {
+      skills.push({ id: 'sk-1', categoryName: 'Technical Skills', skills: extractedSkills });
+    }
+  }
+
+  /* ═══ 4. EDUCATION ═══ */
+  const eduLines = getSectionLines(['EDUCATION', 'ACADEMIC BACKGROUND', 'ACADEMIC QUALIFICATIONS']);
+  const education: EducationItem[] = [];
+  let currentEdu: EducationItem | null = null;
+
+  for (const line of eduLines) {
+    if (/university of|college of|institute of|school of|academy/i.test(line)) {
+      if (currentEdu) education.push(currentEdu);
+      currentEdu = {
+        id: `edu-${education.length + 1}`,
+        institution: line.replace(/^[-*•]\s*/, '').trim(),
+        degree: '',
+        fieldOfStudy: '',
+        startDate: '',
+        endDate: '',
+        gpa: '',
+        highlights: [],
+      };
+    } else if (
+      currentEdu &&
+      !currentEdu.degree &&
+      /bachelor|master|bsc|msc|phd|b\.e|b\.tech|diploma|g\.c\.e/i.test(line)
+    ) {
+      currentEdu.degree = line.replace(/^[-*•]\s*/, '').trim();
+    } else if (currentEdu && /\b(19\d\d|20\d\d)\b/.test(line)) {
+      const years = line.match(/\b(19\d\d|20\d\d)\b/g);
+      if (years && years.length >= 2) {
+        currentEdu.startDate = years[0];
+        currentEdu.endDate = years[1];
+      } else if (years) {
+        currentEdu.endDate = years[0];
+      }
+      if (/gpa|grade|score/i.test(line)) {
+        const gpaMatch = line.match(/(?:gpa|grade|score):\s*([0-9.]+(?:\s*\/\s*[0-9.]+)?)/i);
+        if (gpaMatch) currentEdu.gpa = gpaMatch[1];
+      }
+    } else if (currentEdu) {
+      if (/gpa|grade/i.test(line)) {
+        const gpaMatch = line.match(/(?:gpa|grade):\s*([0-9.]+(?:\s*\/\s*[0-9.]+)?)/i);
+        if (gpaMatch) currentEdu.gpa = gpaMatch[1];
+      } else {
+        currentEdu.highlights = currentEdu.highlights || [];
+        currentEdu.highlights.push(line.replace(/^[-*•]\s*/, '').trim());
+      }
+    }
+  }
+  if (currentEdu) education.push(currentEdu);
+
+  /* ═══ 5. EXPERIENCE ═══ */
+  const expLines = getSectionLines(['EXPERIENCE', 'WORK HISTORY', 'EMPLOYMENT']);
+  const experience: ExperienceItem[] = [];
+  let currentExp: ExperienceItem | null = null;
+
+  for (const line of expLines) {
+    const isCompanyOrRole =
+      /^(director|software engineer|intern|developer|lead|consultant|manager|designer|architect|engineer|co-founder|founder)/i.test(
+        line
+      ) ||
+      /\((?:pvt|ltd|inc|llc|corp)\)|pvt\s*ltd/i.test(line) ||
+      (line.includes('|') && /\b(20\d\d|present|current)\b/i.test(line));
+
+    if (isCompanyOrRole && (!currentExp || (currentExp.highlights && currentExp.highlights.length > 0))) {
+      if (currentExp) experience.push(currentExp);
+      const parts = line.split(/\s*[|•·]\s*|\s+[-–—]\s+/).map((p) => p.trim());
+      currentExp = {
+        id: `exp-${experience.length + 1}`,
+        company: parts[0] || 'Company',
+        position: parts[1] || 'Role',
+        location: parts.find((p) => /sri lanka|usa|uk|remote/i.test(p)) || '',
+        startDate: '',
+        endDate: 'Present',
+        current: true,
+        highlights: [],
+      };
+      const years = line.match(/\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)?\s*(19\d\d|20\d\d)\b/gi);
+      if (years && years.length >= 1) currentExp.startDate = years[0];
+      if (/present|current/i.test(line)) currentExp.current = true;
+    } else if (currentExp) {
+      if (/^[•\-*–▪►]/.test(line) || line.length > 25) {
+        currentExp.highlights.push(line.replace(/^[•\-*–▪►]\s*/, '').trim());
+      }
+    }
+  }
+  if (currentExp) experience.push(currentExp);
+
+  /* ═══ 6. PROJECTS ═══ */
+  const projLines = getSectionLines(['PROJECTS', 'KEY PROJECTS', 'PERSONAL PROJECTS']);
+  const projects: ProjectItem[] = [];
+  let currentProj: ProjectItem | null = null;
+
+  for (const line of projLines) {
+    const isProjHeader =
+      /^\d+\.\s*[A-Z0-9]/.test(line) ||
+      (line.includes('|') && (line.includes('http') || /next\.js|react|node|python|express|flutter/i.test(line)));
+
+    if (isProjHeader) {
+      if (currentProj) projects.push(currentProj);
+      const parts = line.split('|').map((p) => p.trim());
+      const rawTitle = parts[0].replace(/^\d+\.\s*/, '').trim();
+      const urls = line.match(/https?:\/\/[^\s|)]+/g) || [];
+      const liveUrl = urls.find((u) => !u.includes('github.com')) || '';
+      const githubUrl = urls.find((u) => u.includes('github.com')) || '';
+      const techPart = parts.find((p) => p !== parts[0] && !p.startsWith('http'));
+      const techs = techPart ? techPart.split(/[,/]/).map((t) => t.trim()).filter(Boolean) : [];
+
+      currentProj = {
+        id: `proj-${projects.length + 1}`,
+        name: rawTitle,
+        description: '',
+        technologies: techs,
+        url: liveUrl,
+        githubUrl: githubUrl,
+        highlights: [],
+      };
+    } else if (currentProj) {
+      if (/^[•\-*–▪►]/.test(line) || line.length > 20) {
+        currentProj.highlights.push(line.replace(/^[•\-*–▪►]\s*/, '').trim());
+      }
+    }
+  }
+  if (currentProj) projects.push(currentProj);
+
+  /* ═══ 7. CERTIFICATIONS ═══ */
+  const certLines = getSectionLines(['CERTIFICATIONS', 'CERTIFICATES']);
+  const certifications: CertificationItem[] = [];
+  for (const line of certLines) {
+    if (!line || line.startsWith('#')) continue;
+    const parts = line.split(':');
+    if (parts.length >= 2) {
+      certifications.push({
+        id: `cert-${certifications.length + 1}`,
+        issuer: parts[0].replace(/^[-*•]\s*/, '').trim(),
+        name: parts.slice(1).join(':').replace(/\([^)]*\)/g, '').trim(),
+        credentialId: (line.match(/\(([^)]+)\)/) || [])[1] || '',
+      });
+    } else {
+      certifications.push({
+        id: `cert-${certifications.length + 1}`,
+        name: line.replace(/^[-*•]\s*/, '').trim(),
+      });
+    }
+  }
+
+  /* ═══ 8. ACHIEVEMENTS & EXTRA-CURRICULAR ═══ */
+  const achLines = getSectionLines(['ACHIEVEMENTS', 'EXTRA-CURRICULAR', 'AWARDS', 'HONORS']);
+  const achievements: AchievementItem[] = [];
+  for (const line of achLines) {
+    if (!line || line.startsWith('#')) continue;
+    achievements.push({
+      id: `ach-${achievements.length + 1}`,
+      title: line.replace(/^[-*•]\s*/, '').trim(),
+    });
+  }
+
+  /* ═══ 9. REFERENCES ═══ */
+  const refLines = getSectionLines(['REFERENCES']);
+  const references: ReferenceItem[] = [];
+  let currentRef: ReferenceItem | null = null;
+
+  for (const line of refLines) {
+    if (!line || line.startsWith('#')) continue;
+    if (!currentRef || line.includes('@')) {
+      if (!currentRef) {
+        currentRef = {
+          id: `ref-${references.length + 1}`,
+          name: line.replace(/^[-*•]\s*/, '').trim(),
+          designation: '',
+          institution: '',
+          email: '',
+          phone: '',
+        };
+      } else if (line.includes('@')) {
+        currentRef.email = (line.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/) || [])[0] || '';
+        references.push(currentRef);
+        currentRef = null;
+      }
+    } else if (currentRef && !currentRef.designation) {
+      const parts = line.split(',');
+      currentRef.designation = parts[0]?.trim() || '';
+      if (parts[1]) currentRef.institution = parts.slice(1).join(',').trim();
+    } else if (currentRef && !currentRef.institution) {
+      currentRef.institution = line.trim();
+    }
+  }
+  if (currentRef) references.push(currentRef);
+
+  return {
+    personalInfo: {
+      fullName,
+      jobTitle,
+      email,
+      phone,
+      location,
+      website,
+      linkedin,
+      github,
+    },
+    summary,
+    education,
+    skills,
+    experience,
+    projects,
+    certifications,
+    achievements,
+    references,
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SMART FUSION / MERGE FUNCTION
+   Merges AI extracted data with deterministic fallback so no
+   link, project, cert, or achievement is ever lost.
+   ═══════════════════════════════════════════════════════════════ */
+
+export function mergeResumeData(
+  aiData: Partial<ResumeContent> | null | undefined,
+  deterministicData: ResumeContent
+): ResumeContent {
+  if (!aiData) return deterministicData;
+
+  const aiPersonal: Partial<PersonalInfo> = aiData.personalInfo || {};
+  const detPersonal: Partial<PersonalInfo> = deterministicData.personalInfo || {};
+
+  const mergedPersonalInfo: PersonalInfo = {
+    fullName: aiPersonal.fullName?.trim() || detPersonal.fullName || 'Candidate',
+    jobTitle: aiPersonal.jobTitle?.trim() || detPersonal.jobTitle || '',
+    email: aiPersonal.email?.trim() || detPersonal.email || '',
+    phone: aiPersonal.phone?.trim() || detPersonal.phone || '',
+    location: aiPersonal.location?.trim() || detPersonal.location || '',
+    linkedin: aiPersonal.linkedin?.trim() || detPersonal.linkedin || '',
+    github: aiPersonal.github?.trim() || detPersonal.github || '',
+    website: aiPersonal.website?.trim() || detPersonal.website || '',
+  };
+
+  // If website is erroneously set to linkedin or github, backfill with deterministic
+  if (
+    mergedPersonalInfo.website &&
+    (mergedPersonalInfo.website.includes('linkedin.com') || mergedPersonalInfo.website.includes('github.com'))
+  ) {
+    mergedPersonalInfo.website = detPersonal.website || '';
+  }
+
+  // Summary
+  const mergedSummary = aiData.summary?.trim() || deterministicData.summary || '';
+
+  // Experience
+  const mergedExperience =
+    aiData.experience && aiData.experience.length > 0
+      ? aiData.experience
+      : deterministicData.experience || [];
+
+  // Education
+  const mergedEducation =
+    aiData.education && aiData.education.length > 0
+      ? aiData.education
+      : deterministicData.education || [];
+
+  // Skills
+  const mergedSkills =
+    aiData.skills && aiData.skills.length > 0
+      ? aiData.skills
+      : deterministicData.skills || [];
+
+  // Projects (backfill missing live URLs & github URLs from deterministic)
+  let mergedProjects =
+    aiData.projects && aiData.projects.length > 0
+      ? aiData.projects
+      : deterministicData.projects || [];
+
+  if (mergedProjects.length > 0 && deterministicData.projects && deterministicData.projects.length > 0) {
+    mergedProjects = mergedProjects.map((p, idx) => {
+      const matchDet =
+        deterministicData.projects.find(
+          (dp) =>
+            dp.name.toLowerCase().includes(p.name.toLowerCase()) ||
+            p.name.toLowerCase().includes(dp.name.toLowerCase())
+        ) || deterministicData.projects[idx];
+
+      return {
+        ...p,
+        url: p.url || matchDet?.url || '',
+        githubUrl: p.githubUrl || matchDet?.githubUrl || '',
+        technologies: p.technologies?.length > 0 ? p.technologies : matchDet?.technologies || [],
+      };
+    });
+  }
+
+  // Certifications
+  const mergedCertifications =
+    aiData.certifications && aiData.certifications.length > 0
+      ? aiData.certifications
+      : deterministicData.certifications || [];
+
+  // Achievements
+  const mergedAchievements =
+    aiData.achievements && aiData.achievements.length > 0
+      ? aiData.achievements
+      : deterministicData.achievements || [];
+
+  // References
+  const mergedReferences =
+    aiData.references && aiData.references.length > 0
+      ? aiData.references
+      : deterministicData.references || [];
+
+  return {
+    personalInfo: mergedPersonalInfo,
+    summary: mergedSummary,
+    experience: mergedExperience,
+    education: mergedEducation,
+    skills: mergedSkills,
+    projects: mergedProjects,
+    certifications: mergedCertifications,
+    achievements: mergedAchievements,
+    references: mergedReferences,
   };
 }

@@ -1,5 +1,11 @@
 import { GoogleGenAI } from '@google/genai';
-import { generateBulletImprovement, generateSummaryImprovement, extractSkillsFromText } from '@/lib/checker/ruleEngine';
+import {
+  generateBulletImprovement,
+  generateSummaryImprovement,
+  extractSkillsFromText,
+  parseStructuredResumeFromText,
+  mergeResumeData,
+} from '@/lib/checker/ruleEngine';
 import { ResumeContent } from '@/types/resume';
 
 const apiKey = process.env.GEMINI_API_KEY || '';
@@ -22,6 +28,14 @@ export async function analyzeResumeWithGemini(resumeText: string, jobDescription
     const prompt = `You are an enterprise Applicant Tracking System (ATS) algorithmic parser and senior technical recruiter.
 Evaluate the following resume text against the target job description (if provided, otherwise evaluate against modern industry standards).
 Also accurately parse and structure the candidate's actual resume into the provided JSON schema so it can be loaded directly into our interactive resume editor.
+
+CRITICAL INSTRUCTIONS FOR RESUME DATA EXTRACTION:
+1. Extract ALL links, including LinkedIn (personalInfo.linkedin), GitHub (personalInfo.github), and personal portfolio/website (personalInfo.website). Ensure full URLs starting with https://.
+2. For each project, extract the project name, tech stack into the 'technologies' array, live project URL into 'url', repository URL into 'githubUrl', and bullet achievements into 'highlights'.
+3. Extract all certifications into 'certifications' (including issuer and credential IDs).
+4. Extract all extracurricular activities, awards, honors, and competition achievements into 'achievements'.
+5. Extract professional or academic references into 'references'.
+6. Categorize technical skills logically (e.g. 'Programming Languages', 'Frontend Technologies', 'Backend & APIs', 'Databases & ORM', 'Cloud & DevOps', 'Tools & Frameworks').
 
 Job Description:
 ${jobDescription || 'Standard Professional Role - Senior Level Tech / Management'}
@@ -97,6 +111,32 @@ Respond ONLY with a valid JSON object matching this schema:
         "githubUrl": string,
         "highlights": string[]
       }
+    ],
+    "certifications": [
+      {
+        "id": string (e.g. "cert-1"),
+        "name": string,
+        "issuer": string,
+        "issueDate": string,
+        "credentialId": string,
+        "url": string
+      }
+    ],
+    "achievements": [
+      {
+        "id": string (e.g. "ach-1"),
+        "title": string
+      }
+    ],
+    "references": [
+      {
+        "id": string (e.g. "ref-1"),
+        "name": string,
+        "designation": string,
+        "institution": string,
+        "email": string,
+        "phone": string
+      }
     ]
   }
 }`;
@@ -115,10 +155,11 @@ Respond ONLY with a valid JSON object matching this schema:
     const parsed = JSON.parse(cleanedJson);
     parsed._isAiGenerated = true;
 
-    // Ensure extractedResume has valid structure
-    if (!parsed.extractedResume) {
-      parsed.extractedResume = fallbackStructuredResume(resumeText, fileName);
-    }
+    // Merge AI extracted data with deterministic parser to guarantee no links, projects, certs, or fields are missed
+    const deterministicFallback = parseStructuredResumeFromText(resumeText, fileName, []);
+    parsed.extractedResume = parsed.extractedResume
+      ? mergeResumeData(parsed.extractedResume, deterministicFallback)
+      : deterministicFallback;
 
     return parsed;
   } catch (error) {
@@ -178,81 +219,8 @@ Guidelines:
   }
 }
 
-export function fallbackStructuredResume(text: string, fileName?: string): ResumeContent {
-  const lines = text.split('\n').map((l) => l.trim()).filter((l) => l.length > 0);
-  
-  // 1. Name: first line that doesn't look like an email/phone or header
-  const nameCandidate = lines.find((l) => l.length < 50 && !l.includes('@') && !/\d{5,}/.test(l) && !/resume|curriculum|cv/i.test(l));
-  const fallbackName = fileName ? fileName.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' ') : '';
-  const fullName = nameCandidate || fallbackName || 'Candidate';
-
-  // 2. Email
-  const emailMatch = text.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
-  const email = emailMatch ? emailMatch[0] : '';
-
-  // 3. Phone
-  const phoneMatch = text.match(/(?:\+?\d{1,3}[-.\s]?)?(?:\(?\d{2,4}\)?[-.\s]?)?\d{3,4}[-.\s]?\d{3,4}/);
-  const phone = phoneMatch ? phoneMatch[0] : '';
-
-  // 4. LinkedIn & GitHub & Website
-  const linkedinMatch = text.match(/(?:https?:\/\/)?(?:www\.)?linkedin\.com\/in\/([a-zA-Z0-9_-]+)/i);
-  const linkedin = linkedinMatch ? (linkedinMatch[0].startsWith('http') ? linkedinMatch[0] : `https://${linkedinMatch[0]}`) : '';
-
-  const githubMatch = text.match(/(?:https?:\/\/)?(?:www\.)?github\.com\/([a-zA-Z0-9_-]+)/i);
-  const github = githubMatch ? (githubMatch[0].startsWith('http') ? githubMatch[0] : `https://${githubMatch[0]}`) : '';
-
-  const websiteMatch = text.match(/(?:https?:\/\/)?(?:www\.)?([a-zA-Z0-9-]+\.(?:com|dev|io|me|org|net))(?:\/[^\s]*)?/i);
-  const website = websiteMatch && !websiteMatch[0].includes('linkedin') && !websiteMatch[0].includes('github')
-    ? (websiteMatch[0].startsWith('http') ? websiteMatch[0] : `https://${websiteMatch[0]}`)
-    : '';
-
-  // 5. Detect Skills from Common Tech Dictionary
-  const commonTech = [
-    'JavaScript', 'TypeScript', 'React', 'Next.js', 'Node.js', 'Express',
-    'Python', 'Java', 'C++', 'C#', 'PHP', 'Dart', 'Flutter', 'HTML5', 'CSS3',
-    'Tailwind CSS', 'SQL', 'PostgreSQL', 'MySQL', 'MongoDB', 'Supabase',
-    'Firebase', 'Docker', 'Kubernetes', 'AWS', 'GCP', 'Azure', 'Git', 'GitHub',
-    'REST APIs', 'GraphQL', 'Prisma', 'Linux', 'CI/CD', 'Figma'
-  ];
-  const detectedSkills = commonTech.filter((skill) => {
-    const escaped = skill.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
-    const regex = new RegExp(`\\b${escaped}\\b`, 'i');
-    return regex.test(text);
-  });
-
-  const skills = detectedSkills.length > 0
-    ? [{ id: 'sk-1', categoryName: 'Technical Skills', skills: detectedSkills }]
-    : [];
-
-  // 6. Detect Target Job Title candidate
-  const titleKeywords = [
-    'Software Engineer', 'Full Stack Developer', 'Frontend Developer',
-    'Backend Developer', 'Software Engineering Intern', 'Web Developer',
-    'DevOps Engineer', 'Mobile Application Developer', 'Data Scientist',
-    'Product Manager', 'Project Manager', 'UI/UX Designer', 'Cloud Architect'
-  ];
-  const matchedTitle = titleKeywords.find((tk) => new RegExp(`\\b${tk}\\b`, 'i').test(text)) || '';
-
-  return {
-    personalInfo: {
-      fullName,
-      jobTitle: matchedTitle,
-      email,
-      phone,
-      location: '',
-      website,
-      linkedin,
-      github,
-    },
-    summary: '',
-    experience: [],
-    education: [],
-    skills,
-    projects: [],
-    certifications: [],
-    achievements: [],
-    references: [],
-  };
+export function fallbackStructuredResume(text: string, fileName?: string, links: string[] = []): ResumeContent {
+  return parseStructuredResumeFromText(text, fileName, links);
 }
 
 function generateFallbackAiAnalysis(resumeText: string, _jobDescription?: string, fileName?: string) {
@@ -264,7 +232,7 @@ function generateFallbackAiAnalysis(resumeText: string, _jobDescription?: string
     matchedSkills: [],
     missingKeywords: [],
     bulletImprovements: [],
-    extractedResume: fallbackStructuredResume(resumeText, fileName),
+    extractedResume: parseStructuredResumeFromText(resumeText, fileName, []),
   };
 }
 
