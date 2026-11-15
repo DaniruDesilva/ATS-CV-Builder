@@ -39,9 +39,13 @@ export async function middleware(request: NextRequest) {
   });
 
   // Always use getUser() instead of getSession() for secure server-side verification
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let user = null;
+  try {
+    const { data } = await supabase.auth.getUser();
+    user = data?.user || null;
+  } catch (err) {
+    console.error('Middleware auth check error:', err);
+  }
 
   const pathname = request.nextUrl.pathname;
 
@@ -50,14 +54,18 @@ export async function middleware(request: NextRequest) {
     const redirectUrl = new URL('/login', request.url);
     const safePath = sanitizeRedirect(pathname, '/dashboard');
     redirectUrl.searchParams.set('redirect', safePath);
-    return NextResponse.redirect(redirectUrl);
+    const redirectRes = NextResponse.redirect(redirectUrl);
+    response.cookies.getAll().forEach((cookie) => redirectRes.cookies.set(cookie));
+    return redirectRes;
   }
 
   // If already authenticated, redirect away from guest-only auth pages
   if ((pathname === '/login' || pathname === '/register') && user) {
     const rawRedirect = request.nextUrl.searchParams.get('redirect');
     const safeTarget = sanitizeRedirect(rawRedirect, '/dashboard');
-    return NextResponse.redirect(new URL(safeTarget, request.url));
+    const redirectRes = NextResponse.redirect(new URL(safeTarget, request.url));
+    response.cookies.getAll().forEach((cookie) => redirectRes.cookies.set(cookie));
+    return redirectRes;
   }
 
   return response;

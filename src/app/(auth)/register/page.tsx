@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Mail, User, Lock, Sparkles, CheckCircle2, Loader2, Eye, EyeOff, AlertCircle } from 'lucide-react';
@@ -13,7 +13,7 @@ function RegisterForm() {
   const searchParams = useSearchParams();
   const safeRedirect = sanitizeRedirect(searchParams.get('redirect'), '/dashboard');
 
-  const { signUpWithEmail, signInWithGoogle } = useAuthStore();
+  const { isAuthenticated, isLoading, signUpWithEmail, signInWithGoogle } = useAuthStore();
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -31,6 +31,17 @@ function RegisterForm() {
     confirmPassword?: string;
   }>({});
   const [error, setError] = useState('');
+
+  // Auto-redirect if user is already authenticated
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      if (typeof window !== 'undefined') {
+        window.location.href = safeRedirect;
+      } else {
+        router.push(safeRedirect);
+      }
+    }
+  }, [isAuthenticated, isLoading, safeRedirect, router]);
 
   // Password strength calculator
   const getPasswordStrength = (pwd: string) => {
@@ -93,7 +104,11 @@ function RegisterForm() {
       }
       setLoading(false);
     } else {
-      router.push(safeRedirect);
+      if (typeof window !== 'undefined') {
+        window.location.href = safeRedirect;
+      } else {
+        router.push(safeRedirect);
+      }
     }
   };
 
@@ -106,6 +121,18 @@ function RegisterForm() {
       setGoogleLoading(false);
     }
   };
+
+  if (isAuthenticated) {
+    return (
+      <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-xl space-y-4 text-center animate-fade-in">
+        <div className="inline-flex p-3 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 mb-1">
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-600" />
+        </div>
+        <h2 className="text-xl font-black text-slate-900 tracking-tight">Signed In Successfully</h2>
+        <p className="text-xs text-slate-500">Redirecting to your dashboard...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-md bg-white p-8 sm:p-10 rounded-3xl border border-slate-200 shadow-xl space-y-6 animate-fade-in">

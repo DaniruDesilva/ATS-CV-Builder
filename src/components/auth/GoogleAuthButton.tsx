@@ -47,7 +47,11 @@ export function GoogleAuthButton({
             onError?.(res.error);
             setLoading(false);
           } else {
-            router.push(safeRedirect);
+            if (typeof window !== 'undefined') {
+              window.location.href = safeRedirect;
+            } else {
+              router.push(safeRedirect);
+            }
           }
         },
         auto_select: false,
