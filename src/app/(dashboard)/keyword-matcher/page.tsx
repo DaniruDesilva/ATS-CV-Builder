@@ -21,6 +21,12 @@ import {
   ChevronRight,
   ShieldCheck,
   CheckCheck,
+  UploadCloud,
+  FileCheck,
+  FileUp,
+  X,
+  ClipboardType,
+  FileSearch,
 } from 'lucide-react';
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { KeywordGapItem, KeywordMatchAnalysis } from '@/lib/ai/gemini';
@@ -80,8 +86,22 @@ function KeywordMatcherContent() {
   const { content, appendSkill, loadSampleData } = useResumeStore();
 
   const [jobDescription, setJobDescription] = useState(SAMPLE_JOB_PRESETS[0].text);
-  const [resumeMode, setResumeMode] = useState<'store' | 'paste'>('store');
+  const [resumeMode, setResumeMode] = useState<'store' | 'upload' | 'paste'>('store');
   const [pastedResumeText, setPastedResumeText] = useState('');
+
+  // Upload file state
+  const [uploadedFile, setUploadedFile] = useState<{
+    name: string;
+    size: number;
+    pageCount: number;
+    characterCount: number;
+  } | null>(null);
+  const [uploadedFileText, setUploadedFileText] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState('');
+  const [isDragOver, setIsDragOver] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisResult, setAnalysisResult] = useState<KeywordMatchAnalysis | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
@@ -114,17 +134,91 @@ function KeywordMatcherContent() {
 
   const hasStoreResume = Boolean(content.personalInfo?.fullName?.trim());
 
+  const handleFileUpload = async (file: File) => {
+    setUploadError('');
+    const name = file.name.toLowerCase();
+    if (!name.endsWith('.pdf') && !name.endsWith('.docx') && !name.endsWith('.doc')) {
+      setUploadError('Unsupported file format. Please upload a .pdf or .docx document.');
+      return;
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('File size exceeds 10MB limit.');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/parse-document', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Failed to extract text from document.');
+      }
+
+      const data = await res.json();
+      setUploadedFile({
+        name: data.fileName,
+        size: data.fileSize,
+        pageCount: data.pageCount,
+        characterCount: data.characterCount,
+      });
+      setUploadedFileText(data.text);
+    } catch (err: any) {
+      setUploadError(err.message || 'Failed to parse resume document.');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleFileDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    const droppedFile = e.dataTransfer.files?.[0];
+    if (droppedFile) {
+      handleFileUpload(droppedFile);
+    }
+  };
+
+  const handleClearUploadedFile = () => {
+    setUploadedFile(null);
+    setUploadedFileText('');
+    setUploadError('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
   const handleAnalyze = async () => {
     if (!jobDescription.trim()) {
       setErrorMsg('Please paste or select a target job description.');
       return;
     }
 
-    const activeResumeText = resumeMode === 'store' ? storeResumeText : pastedResumeText;
-
-    if (!activeResumeText.trim() && resumeMode === 'paste') {
-      setErrorMsg('Please paste your resume text to compare against the job description.');
-      return;
+    let activeResumeText = '';
+    if (resumeMode === 'store') {
+      if (!hasStoreResume) {
+        setErrorMsg('Your active resume draft is empty. Click "Load Sample", switch to "Upload File", or "Paste Text".');
+        return;
+      }
+      activeResumeText = storeResumeText;
+    } else if (resumeMode === 'upload') {
+      if (!uploadedFileText.trim()) {
+        setErrorMsg('Please upload a PDF or DOCX resume document to compare.');
+        return;
+      }
+      activeResumeText = uploadedFileText;
+    } else {
+      if (!pastedResumeText.trim()) {
+        setErrorMsg('Please paste your resume text to compare against the job description.');
+        return;
+      }
+      activeResumeText = pastedResumeText;
     }
 
     setErrorMsg('');
@@ -278,35 +372,61 @@ function KeywordMatcherContent() {
                 </h2>
               </div>
 
-              {/* Mode Toggle */}
+              {/* Mode Toggle with 3 tabs */}
               <div className="inline-flex p-0.5 bg-slate-100 rounded-xl">
                 <button
                   type="button"
                   onClick={() => setResumeMode('store')}
-                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  className={`px-2.5 sm:px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
                     resumeMode === 'store'
                       ? 'bg-white text-emerald-700 shadow-2xs'
                       : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
-                  My Active Draft
+                  <FileText className="w-3.5 h-3.5" />
+                  <span>Active Draft</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setResumeMode('upload')}
+                  className={`px-2.5 sm:px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
+                    resumeMode === 'upload'
+                      ? 'bg-white text-purple-700 shadow-2xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  <UploadCloud className="w-3.5 h-3.5" />
+                  <span>Upload File</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setResumeMode('paste')}
-                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                  className={`px-2.5 sm:px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center gap-1.5 ${
                     resumeMode === 'paste'
                       ? 'bg-white text-slate-900 shadow-2xs'
                       : 'text-slate-500 hover:text-slate-800'
                   }`}
                 >
-                  Paste Text
+                  <ClipboardType className="w-3.5 h-3.5" />
+                  <span>Paste Text</span>
                 </button>
               </div>
             </div>
 
+            {/* Hidden File Input for PDF/DOCX Upload */}
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.docx,.doc"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) handleFileUpload(file);
+              }}
+              className="hidden"
+            />
+
             {/* Mode 1: Active Store Resume Card */}
-            {resumeMode === 'store' ? (
+            {resumeMode === 'store' && (
               <div className="space-y-3">
                 <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/70 space-y-3">
                   <div className="flex items-center justify-between">
@@ -351,18 +471,25 @@ function KeywordMatcherContent() {
 
                 {/* Helpful Callout if Draft is Empty */}
                 {!hasStoreResume && (
-                  <div className="p-3 bg-amber-50/90 border border-amber-200/90 rounded-2xl flex items-center justify-between gap-2 text-xs text-amber-900">
+                  <div className="p-3 bg-amber-50/90 border border-amber-200/90 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-amber-900">
                     <div className="flex items-center gap-1.5">
                       <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
                       <span>Your active resume draft is currently empty.</span>
                     </div>
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <div className="flex items-center gap-1.5 shrink-0 flex-wrap">
                       <button
                         type="button"
                         onClick={loadSampleData}
                         className="px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 font-bold hover:bg-amber-100 transition-colors text-[11px] cursor-pointer shadow-2xs"
                       >
                         Load Sample
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setResumeMode('upload')}
+                        className="px-2.5 py-1 rounded-lg bg-purple-600 text-white font-bold hover:bg-purple-700 transition-colors text-[11px] cursor-pointer shadow-2xs"
+                      >
+                        Upload File
                       </button>
                       <button
                         type="button"
@@ -381,12 +508,125 @@ function KeywordMatcherContent() {
                   <p className="whitespace-pre-line leading-relaxed">
                     {hasStoreResume
                       ? `${storeResumeText.slice(0, 500)}...`
-                      : 'No resume loaded yet. Click "Load Sample" above or switch to "Paste Text" to compare against the job posting.'}
+                      : 'No resume loaded yet. Click "Load Sample", "Upload File", or switch to "Paste Text" to compare against the job posting.'}
                   </p>
                 </div>
               </div>
-            ) : (
-              /* Mode 2: Paste Raw Resume Text */
+            )}
+
+            {/* Mode 2: Direct PDF / DOCX File Upload */}
+            {resumeMode === 'upload' && (
+              <div className="space-y-3">
+                {!uploadedFile ? (
+                  <div
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragOver(true);
+                    }}
+                    onDragLeave={() => setIsDragOver(false)}
+                    onDrop={handleFileDrop}
+                    onClick={() => !isUploading && fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-2xl p-6 sm:p-7 text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center min-h-[225px] ${
+                      isDragOver
+                        ? 'border-purple-500 bg-purple-50/70 scale-[1.01]'
+                        : 'border-slate-200 hover:border-purple-400 bg-slate-50/60 hover:bg-purple-50/30'
+                    }`}
+                  >
+                    {isUploading ? (
+                      <div className="flex flex-col items-center justify-center space-y-2">
+                        <RefreshCw className="w-8 h-8 text-purple-600 animate-spin" />
+                        <p className="text-xs font-bold text-slate-800">
+                          Extracting text from document...
+                        </p>
+                        <p className="text-[11px] text-slate-400">
+                          Parsing ATS text layer in milliseconds
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center space-y-2.5">
+                        <div className="w-12 h-12 rounded-2xl bg-purple-100 text-purple-700 flex items-center justify-center shadow-2xs">
+                          <UploadCloud className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <p className="text-xs sm:text-sm font-extrabold text-slate-900">
+                            Drag &amp; drop your resume or <span className="text-purple-600 underline">browse</span>
+                          </p>
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            Supports PDF or DOCX files up to 10MB
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="p-4 rounded-2xl bg-purple-50/60 border border-purple-200/80 space-y-3">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-9 h-9 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                            <FileCheck className="w-5 h-5" />
+                          </div>
+                          <div className="min-w-0">
+                            <h3 className="text-xs font-bold text-slate-900 truncate">
+                              {uploadedFile.name}
+                            </h3>
+                            <p className="text-[11px] text-slate-500">
+                              {(uploadedFile.size / 1024).toFixed(0)} KB • {uploadedFile.pageCount} page{uploadedFile.pageCount > 1 ? 's' : ''}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[10px] uppercase font-black px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                            <Check className="w-3 h-3" />
+                            <span>Extracted</span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={handleClearUploadedFile}
+                            className="p-1 text-slate-400 hover:text-red-600 transition-colors cursor-pointer"
+                            title="Remove file"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-purple-100 text-xs text-slate-600">
+                        <span className="font-semibold text-[11px]">
+                          {uploadedFile.characterCount.toLocaleString()} characters extracted
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="text-[11px] font-bold text-purple-700 hover:underline cursor-pointer"
+                        >
+                          Change File
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Preview text stream */}
+                    <div className="h-[148px] overflow-auto rounded-2xl bg-slate-50 border border-slate-200 p-3 text-[11px] font-mono text-slate-600 space-y-1">
+                      <span className="text-slate-400 font-bold block mb-1">Extracted Document Stream:</span>
+                      <p className="whitespace-pre-line leading-relaxed">
+                        {uploadedFileText.slice(0, 500)}...
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {uploadError && (
+                  <div className="p-2.5 rounded-xl bg-red-50 border border-red-200 text-xs font-semibold text-red-600 flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>{uploadError}</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Mode 3: Paste Raw Resume Text */}
+            {resumeMode === 'paste' && (
               <textarea
                 rows={11}
                 value={pastedResumeText}
@@ -401,6 +641,10 @@ function KeywordMatcherContent() {
             <span>
               {resumeMode === 'store'
                 ? 'Pulling real-time content directly from your Resume Builder.'
+                : resumeMode === 'upload'
+                ? uploadedFile
+                  ? `Loaded ${uploadedFile.name} (${uploadedFile.characterCount.toLocaleString()} chars).`
+                  : 'Upload your existing PDF or DOCX resume document.'
                 : `${pastedResumeText.length} characters pasted.`}
             </span>
             <Link href="/builder" className="text-emerald-700 font-bold hover:underline inline-flex items-center gap-1">
