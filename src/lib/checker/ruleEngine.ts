@@ -248,7 +248,7 @@ function findBuzzwords(text: string): string[] {
   return BUZZWORDS_CLICHES.filter(bw => lowerText.includes(bw));
 }
 
-function extractSkillsFromText(text: string): string[] {
+export function extractSkillsFromText(text: string): string[] {
   const found: string[] = [];
   for (const [, skills] of Object.entries(SKILLS_DICTIONARY)) {
     for (const skill of skills) {

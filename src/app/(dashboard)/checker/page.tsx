@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useResumeStore } from '@/lib/store/useResumeStore';
 import { Dropzone } from '@/components/checker/Dropzone';
@@ -8,7 +9,7 @@ import { ScoreGauge } from '@/components/checker/ScoreGauge';
 import { SectionBreakdown } from '@/components/checker/SectionBreakdown';
 import { SuggestionList } from '@/components/checker/SuggestionList';
 import { ScanResultData } from '@/types/checker';
-import { CheckCircle2, FileSearch, RefreshCw, AlertCircle, Shield, ArrowRight } from 'lucide-react';
+import { CheckCircle2, FileSearch, RefreshCw, AlertCircle, Shield, ArrowRight, Target } from 'lucide-react';
 
 export default function CheckerPage() {
   const router = useRouter();
@@ -75,13 +76,35 @@ export default function CheckerPage() {
 
       {/* Main Container */}
       {!scanResult ? (
-        <div className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 max-w-3xl mx-auto space-y-6 shadow-sm">
-          <Dropzone onAnalyze={handleAnalyzeResume} isLoading={isLoading} />
-          {errorMsg && (
-            <div className="flex items-center gap-2 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
-              <AlertCircle className="w-4 h-4 flex-shrink-0" /> {errorMsg}
+        <div className="space-y-4 max-w-3xl mx-auto">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 space-y-6 shadow-sm">
+            <Dropzone onAnalyze={handleAnalyzeResume} isLoading={isLoading} />
+            {errorMsg && (
+              <div className="flex items-center gap-2 p-4 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-medium">
+                <AlertCircle className="w-4 h-4 flex-shrink-0" /> {errorMsg}
+              </div>
+            )}
+          </div>
+
+          {/* Cross-Tool Banner: Job Keyword Gap Matcher */}
+          <div className="p-4 rounded-2xl bg-purple-50/70 border border-purple-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-purple-100 text-purple-700 flex items-center justify-center shrink-0">
+                <Target className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-extrabold text-slate-900 block">Tailoring your CV for a specific job posting?</span>
+                <span className="text-slate-500">Scan for missing keywords and automatically add them to your resume.</span>
+              </div>
             </div>
-          )}
+            <Link
+              href="/keyword-matcher"
+              className="px-3.5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shadow-2xs transition-colors shrink-0 flex items-center gap-1.5 justify-center"
+            >
+              <span>Job Keyword Gap Matcher</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
         </div>
       ) : (
         /* Results View */

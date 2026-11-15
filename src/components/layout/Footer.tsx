@@ -197,11 +197,11 @@ export function Footer() {
                   </li>
                   <li>
                     <Link
-                      href="/checker"
+                      href="/keyword-matcher"
                       className="hover:text-emerald-600 transition-colors inline-flex items-center gap-1"
                     >
                       <span>Job Keyword Matcher</span>
-                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+                      <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded bg-purple-100 text-purple-800">
                         New
                       </span>
                     </Link>

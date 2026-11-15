@@ -1,5 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
-import { generateBulletImprovement, generateSummaryImprovement } from '@/lib/checker/ruleEngine';
+import { generateBulletImprovement, generateSummaryImprovement, extractSkillsFromText } from '@/lib/checker/ruleEngine';
 import { ResumeContent } from '@/types/resume';
 
 const apiKey = process.env.GEMINI_API_KEY || '';
@@ -266,4 +266,144 @@ function generateFallbackAiAnalysis(resumeText: string, _jobDescription?: string
     bulletImprovements: [],
     extractedResume: fallbackStructuredResume(resumeText, fileName),
   };
+}
+
+export interface KeywordGapItem {
+  keyword: string;
+  category: 'core' | 'tool' | 'soft';
+  importance: 'high' | 'medium' | 'low';
+  recommendation: string;
+}
+
+export interface KeywordMatchAnalysis {
+  matchScore: number;
+  jobTitle: string;
+  matchedKeywords: string[];
+  missingKeywords: KeywordGapItem[];
+  summary: string;
+  keyRecommendations: string[];
+  totalJdKeywords: number;
+}
+
+export function generateFallbackKeywordMatch(jobDescription: string, resumeText: string): KeywordMatchAnalysis {
+  const jdSkills = extractSkillsFromText(jobDescription || '');
+  const resumeSkills = extractSkillsFromText(resumeText || '');
+  const lowerResume = (resumeText || '').toLowerCase();
+
+  const matchedKeywords = jdSkills.filter(
+    (skill) => resumeSkills.includes(skill) || lowerResume.includes(skill.toLowerCase())
+  );
+  const rawMissing = jdSkills.filter((skill) => !matchedKeywords.includes(skill));
+
+  const missingKeywords: KeywordGapItem[] = rawMissing.map((skill, index) => {
+    const isHigh = index < 4;
+    return {
+      keyword: skill,
+      category: /git|docker|aws|linux|jira|figma|postman/i.test(skill)
+        ? 'tool'
+        : /leadership|communication|management|agile|scrum/i.test(skill)
+        ? 'soft'
+        : 'core',
+      importance: isHigh ? 'high' : 'medium',
+      recommendation: `Add "${skill}" to your Technical Skills section and mention a concrete project utilizing it.`,
+    };
+  });
+
+  const totalJd = Math.max(1, jdSkills.length);
+  const matchScore = jdSkills.length === 0 ? 80 : Math.round((matchedKeywords.length / totalJd) * 100);
+
+  // Extract candidate job title from first line of JD
+  const firstLine = (jobDescription || '').split('\n').map((l) => l.trim()).find((l) => l.length > 5 && l.length < 80);
+  const jobTitle = firstLine || 'Target Position';
+
+  return {
+    matchScore: Math.min(100, Math.max(25, matchScore)),
+    jobTitle,
+    matchedKeywords,
+    missingKeywords,
+    totalJdKeywords: jdSkills.length,
+    summary:
+      matchScore >= 80
+        ? `Strong candidate keyword alignment (${matchScore}% match). Your resume covers ${matchedKeywords.length} essential qualifications specified in the job posting.`
+        : `Moderate keyword coverage (${matchScore}% match). The job description highlights ${missingKeywords.length} critical skills and tools that are missing from your resume. Adding these keywords will significantly reduce ATS filtering risk.`,
+    keyRecommendations: [
+      `Incorporate high-priority keywords (${missingKeywords.slice(0, 3).map((m) => m.keyword).join(', ')}) into your Technical Skills and Experience bullet points.`,
+      'Mirror exact phrasing used in the job description rather than acronyms or synonyms.',
+      'Quantify your experience with these tools using Google X-Y-Z formula metrics.',
+    ],
+  };
+}
+
+export async function matchJobKeywordsWithGemini(
+  jobDescription: string,
+  resumeText: string
+): Promise<KeywordMatchAnalysis> {
+  const client = getGeminiClient();
+
+  if (!client || !jobDescription?.trim()) {
+    return generateFallbackKeywordMatch(jobDescription, resumeText);
+  }
+
+  try {
+    const prompt = `You are an enterprise Applicant Tracking System (ATS) algorithmic parser and senior recruiter.
+Analyze the following Target Job Description against the Candidate Resume Text.
+1. Extract all key hard skills, technical requirements, tools, and methodologies required by the job posting.
+2. Determine which keywords exist in the candidate's resume ("matchedKeywords") and which are missing ("missingKeywords").
+3. Assign each missing keyword a category ("core" | "tool" | "soft"), importance ("high" | "medium" | "low"), and a concise recommendation for where/how to add it to the resume.
+4. Calculate an accurate ATS Keyword Match Percentage (0-100).
+
+Target Job Description:
+${jobDescription}
+
+Candidate Resume Text:
+${resumeText || 'No resume text provided.'}
+
+Respond ONLY with valid JSON matching this schema:
+{
+  "matchScore": number (0-100),
+  "jobTitle": string (Target role detected from Job Description),
+  "matchedKeywords": string[],
+  "missingKeywords": [
+    {
+      "keyword": string,
+      "category": "core" | "tool" | "soft",
+      "importance": "high" | "medium" | "low",
+      "recommendation": string
+    }
+  ],
+  "summary": string (2-3 sentences evaluating ATS filter pass likelihood and recruiter impressions),
+  "keyRecommendations": string[]
+}`;
+
+    const response = await client.models.generateContent({
+      model: modelName,
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        temperature: 0.2,
+      },
+    });
+
+    const text = response.text || '{}';
+    const cleaned = text.replace(/^```json\s*/i, '').replace(/```$/i, '').trim();
+    const parsed = JSON.parse(cleaned);
+
+    const matched = Array.isArray(parsed.matchedKeywords) ? parsed.matchedKeywords : [];
+    const missing = Array.isArray(parsed.missingKeywords) ? parsed.missingKeywords : [];
+
+    return {
+      matchScore: typeof parsed.matchScore === 'number' ? parsed.matchScore : 72,
+      jobTitle: parsed.jobTitle || 'Target Position',
+      matchedKeywords: matched,
+      missingKeywords: missing,
+      totalJdKeywords: matched.length + missing.length,
+      summary: parsed.summary || 'Keyword match analysis completed.',
+      keyRecommendations: Array.isArray(parsed.keyRecommendations)
+        ? parsed.keyRecommendations
+        : ['Add missing core skills to Technical Skills section.'],
+    };
+  } catch (error) {
+    console.error('Gemini keyword match error, using fallback:', error);
+    return generateFallbackKeywordMatch(jobDescription, resumeText);
+  }
 }

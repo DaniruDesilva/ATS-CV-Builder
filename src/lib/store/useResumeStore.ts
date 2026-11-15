@@ -267,6 +267,7 @@ interface ResumeState {
   addSkillCategory: (cat: SkillCategory) => void;
   updateSkillCategory: (id: string, name: string, skills: string[]) => void;
   removeSkillCategory: (id: string) => void;
+  appendSkill: (skill: string, categoryName?: string) => void;
   
   // Projects
   addProject: (proj: ProjectItem) => void;
@@ -485,6 +486,38 @@ export const useResumeStore = create<ResumeState>()(
             skills: state.content.skills.filter((s) => s.id !== id)
           }
         })),
+
+      appendSkill: (skill, categoryName = 'Technical Skills') =>
+        set((state) => {
+          const trimmed = skill.trim();
+          if (!trimmed) return state;
+
+          const existingCategories = [...state.content.skills];
+          let targetCategory = existingCategories.find(
+            (c) => c.categoryName.toLowerCase() === categoryName.toLowerCase()
+          );
+
+          if (!targetCategory && existingCategories.length > 0) {
+            targetCategory = existingCategories[0];
+          }
+
+          if (targetCategory) {
+            if (targetCategory.skills.includes(trimmed)) return state;
+            const updated = existingCategories.map((c) =>
+              c.id === targetCategory!.id
+                ? { ...c, skills: [...c.skills, trimmed] }
+                : c
+            );
+            return { content: { ...state.content, skills: updated } };
+          } else {
+            const newCat: SkillCategory = {
+              id: 'sk-' + Date.now(),
+              categoryName,
+              skills: [trimmed],
+            };
+            return { content: { ...state.content, skills: [newCat] } };
+          }
+        }),
 
       addProject: (proj) =>
         set((state) => ({

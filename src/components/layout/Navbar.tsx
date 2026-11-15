@@ -212,7 +212,7 @@ export function Navbar() {
               type="button"
               onClick={() => setToolsDropdownOpen(!toolsDropdownOpen)}
               className={`flex items-center gap-1 px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                pathname.startsWith('/checker') || pathname.startsWith('/bullet-optimizer')
+                pathname.startsWith('/checker') || pathname.startsWith('/bullet-optimizer') || pathname.startsWith('/keyword-matcher')
                   ? 'text-emerald-700 bg-emerald-50/80 font-bold'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
               }`}
@@ -269,7 +269,7 @@ export function Navbar() {
 
                   {/* Item 3: Job Keyword Gap Matcher */}
                   <Link
-                    href="/checker"
+                    href="/keyword-matcher"
                     onClick={() => setToolsDropdownOpen(false)}
                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
                   >
@@ -393,6 +393,14 @@ export function Navbar() {
                       <Zap className="w-3.5 h-3.5 text-amber-600" /> Bullet Optimizer
                     </Link>
 
+                    <Link
+                      href="/keyword-matcher"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-purple-700 transition-colors"
+                    >
+                      <Target className="w-3.5 h-3.5 text-purple-600" /> Keyword Gap Matcher
+                    </Link>
+
                     <div className="border-t border-slate-100 pt-1 mt-1">
                       <button
                         type="button"
@@ -481,6 +489,14 @@ export function Navbar() {
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-900 bg-slate-50"
           >
             <Zap className="w-4 h-4 text-amber-600" /> ATS Bullet Optimizer
+          </Link>
+
+          <Link
+            href="/keyword-matcher"
+            onClick={() => setMobileMenuOpen(false)}
+            className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-900 bg-slate-50"
+          >
+            <Target className="w-4 h-4 text-purple-600" /> Job Keyword Gap Matcher
           </Link>
 
           <Link
