@@ -77,7 +77,7 @@ Core Competencies & Requirements:
 
 function KeywordMatcherContent() {
   const router = useRouter();
-  const { content, appendSkill } = useResumeStore();
+  const { content, appendSkill, loadSampleData } = useResumeStore();
 
   const [jobDescription, setJobDescription] = useState(SAMPLE_JOB_PRESETS[0].text);
   const [resumeMode, setResumeMode] = useState<'store' | 'paste'>('store');
@@ -349,10 +349,40 @@ function KeywordMatcherContent() {
                   </div>
                 </div>
 
+                {/* Helpful Callout if Draft is Empty */}
+                {!hasStoreResume && (
+                  <div className="p-3 bg-amber-50/90 border border-amber-200/90 rounded-2xl flex items-center justify-between gap-2 text-xs text-amber-900">
+                    <div className="flex items-center gap-1.5">
+                      <AlertCircle className="w-4 h-4 text-amber-600 shrink-0" />
+                      <span>Your active resume draft is currently empty.</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={loadSampleData}
+                        className="px-2.5 py-1 rounded-lg bg-white border border-amber-300 text-amber-900 font-bold hover:bg-amber-100 transition-colors text-[11px] cursor-pointer shadow-2xs"
+                      >
+                        Load Sample
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setResumeMode('paste')}
+                        className="px-2.5 py-1 rounded-lg bg-amber-600 text-white font-bold hover:bg-amber-700 transition-colors text-[11px] cursor-pointer shadow-2xs"
+                      >
+                        Paste Text
+                      </button>
+                    </div>
+                  </div>
+                )}
+
                 {/* Preview text stream */}
                 <div className="h-[148px] overflow-auto rounded-2xl bg-slate-50 border border-slate-200 p-3 text-[11px] font-mono text-slate-600 space-y-1">
                   <span className="text-slate-400 font-bold block mb-1">Extracted Document Stream:</span>
-                  <p className="whitespace-pre-line leading-relaxed">{storeResumeText.slice(0, 500)}...</p>
+                  <p className="whitespace-pre-line leading-relaxed">
+                    {hasStoreResume
+                      ? `${storeResumeText.slice(0, 500)}...`
+                      : 'No resume loaded yet. Click "Load Sample" above or switch to "Paste Text" to compare against the job posting.'}
+                  </p>
                 </div>
               </div>
             ) : (
