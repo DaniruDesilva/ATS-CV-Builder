@@ -56,6 +56,7 @@ export default function BulletOptimizerPage() {
   const [copied, setCopied] = useState(false);
   const [insertedToBuilder, setInsertedToBuilder] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleOptimize = async (textToOptimize?: string) => {
     const text = (textToOptimize || inputBullet).trim();
@@ -69,6 +70,7 @@ export default function BulletOptimizerPage() {
 
     setIsOptimizing(true);
     setInsertedToBuilder(false);
+    setErrorMsg(null);
 
     try {
       const res = await fetch('/api/ai/optimize-bullet', {
@@ -83,30 +85,21 @@ export default function BulletOptimizerPage() {
           setShowAuthModal(true);
           return;
         }
+        setErrorMsg(errData.error || 'Failed to optimize bullet point. Please try again.');
+        return;
       }
 
-      if (res.ok) {
-        const data = await res.json();
-        if (data.improved) {
-          setOptimizedResult(data.improved);
-        } else {
-          setOptimizedResult(
-            `Spearheaded cross-functional project deliverables across 3 business units, slashing delivery delays by 28% and ensuring 99.4% milestone achievement.`
-          );
-        }
+      const data = await res.json();
+      if (data.improved) {
+        setOptimizedResult(data.improved);
         if (!isAuthenticated) {
           recordBullet();
         }
       } else {
-        // Fallback transformation
-        setOptimizedResult(
-          `Spearheaded cross-functional project deliverables across 3 business units, slashing delivery delays by 28% and ensuring 99.4% milestone achievement.`
-        );
+        setErrorMsg('No optimization result returned. Please try again.');
       }
     } catch {
-      setOptimizedResult(
-        `Spearheaded cross-functional project deliverables across 3 business units, slashing delivery delays by 28% and ensuring 99.4% milestone achievement.`
-      );
+      setErrorMsg('Network error occurred while optimizing. Please try again.');
     } finally {
       setIsOptimizing(false);
     }
@@ -236,6 +229,13 @@ export default function BulletOptimizerPage() {
               ))}
             </div>
           </div>
+
+          {/* Error Feedback */}
+          {errorMsg && (
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs font-medium text-red-700">
+              {errorMsg}
+            </div>
+          )}
 
           {/* Action Button */}
           <div className="pt-3">

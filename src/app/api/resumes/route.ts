@@ -1,12 +1,35 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextResponse } from 'next/server';
+import { z } from 'zod';
 import { prisma } from '@/lib/db/prisma';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
+import { isValidUuid } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
+const MAX_RESUME_PAYLOAD_BYTES = 250_000; // 250 KB cap on JSON resume content
+
+const resumeSaveSchema = z.object({
+  id: z.string().uuid().optional().nullable(),
+  title: z.string().trim().min(1).max(120).optional(),
+  templateId: z
+    .enum(['classic-ats', 'traditional-ats', 'modern-executive', 'technical-clean'])
+    .optional(),
+  content: z.record(z.string(), z.any()).optional(),
+});
+
 // GET all resumes for current logged-in user
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rate = checkRateLimit(`resumes:get:${ip}`, 60, 60_000);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please slow down.' },
+        { status: 429, headers: { 'Retry-After': String(rate.retryAfterSeconds) } }
+      );
+    }
+
     const supabase = createClient();
     const {
       data: { user: authUser },
@@ -29,6 +52,7 @@ export async function GET() {
     const resumes = await prisma.resume.findMany({
       where: { userId: dbUser.id },
       orderBy: { updatedAt: 'desc' },
+      take: 50,
     });
 
     return NextResponse.json({ resumes });
@@ -44,6 +68,15 @@ export async function GET() {
 // POST: Save or update a resume for current logged-in user
 export async function POST(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rate = checkRateLimit(`resumes:post:${ip}`, 60, 60_000);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Too many save requests. Please wait a moment.' },
+        { status: 429, headers: { 'Retry-After': String(rate.retryAfterSeconds) } }
+      );
+    }
+
     const supabase = createClient();
     const {
       data: { user: authUser },
@@ -54,41 +87,68 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const rawBody = await request.text();
+    if (Buffer.byteLength(rawBody, 'utf8') > MAX_RESUME_PAYLOAD_BYTES) {
+      return NextResponse.json(
+        { error: 'Resume payload exceeds the 250KB size limit.' },
+        { status: 413 }
+      );
+    }
+
+    let parsedJson: unknown;
+    try {
+      parsedJson = JSON.parse(rawBody);
+    } catch {
+      return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 });
+    }
+
+    const validation = resumeSaveSchema.safeParse(parsedJson);
+    if (!validation.success) {
+      return NextResponse.json(
+        { error: 'Invalid resume payload format.' },
+        { status: 400 }
+      );
+    }
+
+    const { id, title, templateId, content } = validation.data;
+
     const email = authUser.email.trim().toLowerCase();
     const dbUser = await prisma.user.upsert({
       where: { email },
       create: {
         id: authUser.id,
         email,
-        name: authUser.user_metadata?.full_name || email.split('@')[0],
+        name: (authUser.user_metadata?.full_name || email.split('@')[0]).slice(0, 60),
         tier: 'FREE',
       },
       update: {},
     });
 
-    const body = await request.json();
-    const { id, title, templateId, content } = body;
-
     let resume;
     if (id) {
-      // Check if resume belongs to this user before updating
-      const existing = await prisma.resume.findFirst({
-        where: { id, userId: dbUser.id },
+      // Check ownership of the targeted resume ID
+      const existing = await prisma.resume.findUnique({
+        where: { id },
+        select: { id: true, userId: true, title: true, templateId: true, content: true },
       });
 
       if (existing) {
+        if (existing.userId !== dbUser.id) {
+          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+        }
+
         resume = await prisma.resume.update({
           where: { id },
           data: {
             title: title || existing.title,
             templateId: templateId || existing.templateId,
-            content: content !== undefined ? content : existing.content,
+            content: content !== undefined ? content : (existing.content as any),
           },
         });
       } else {
+        // Generate server-controlled UUID instead of accepting an arbitrary primary key
         resume = await prisma.resume.create({
           data: {
-            id,
             userId: dbUser.id,
             title: title || 'My ATS Resume',
             templateId: templateId || 'classic-ats',
@@ -120,6 +180,15 @@ export async function POST(request: Request) {
 // DELETE a resume
 export async function DELETE(request: Request) {
   try {
+    const ip = getClientIp(request);
+    const rate = checkRateLimit(`resumes:delete:${ip}`, 30, 60_000);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please slow down.' },
+        { status: 429, headers: { 'Retry-After': String(rate.retryAfterSeconds) } }
+      );
+    }
+
     const supabase = createClient();
     const {
       data: { user: authUser },
@@ -133,8 +202,8 @@ export async function DELETE(request: Request) {
     const { searchParams } = new URL(request.url);
     const resumeId = searchParams.get('id');
 
-    if (!resumeId) {
-      return NextResponse.json({ error: 'Resume ID required' }, { status: 400 });
+    if (!resumeId || !isValidUuid(resumeId)) {
+      return NextResponse.json({ error: 'Valid resume ID required' }, { status: 400 });
     }
 
     const email = authUser.email.trim().toLowerCase();
@@ -144,12 +213,16 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    await prisma.resume.deleteMany({
+    const deleted = await prisma.resume.deleteMany({
       where: {
         id: resumeId,
         userId: dbUser.id,
       },
     });
+
+    if (deleted.count === 0) {
+      return NextResponse.json({ error: 'Resume not found' }, { status: 404 });
+    }
 
     return NextResponse.json({ success: true });
   } catch (err: any) {

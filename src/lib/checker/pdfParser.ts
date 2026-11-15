@@ -1,5 +1,6 @@
 import { extractText, extractLinks } from 'unpdf';
 import mammoth from 'mammoth';
+import { sanitizeExternalUrl, sanitizeMailto } from '@/lib/utils';
 
 export interface ExtractedDoc {
   text: string;
@@ -7,6 +8,26 @@ export interface ExtractedDoc {
   isParseable: boolean;
   fileType: 'pdf' | 'docx' | 'unknown';
   links: string[];
+  errorMessage?: string;
+}
+
+function filterSafeLink(raw: unknown): string {
+  if (typeof raw !== 'string') return '';
+  const trimmed = raw.trim();
+  if (!trimmed) return '';
+  if (trimmed.toLowerCase().startsWith('mailto:')) {
+    return sanitizeMailto(trimmed.slice(7));
+  }
+  return sanitizeExternalUrl(trimmed);
+}
+
+function hasPdfSignature(buf: Buffer): boolean {
+  const header = buf.subarray(0, 1024).toString('latin1');
+  return header.includes('%PDF-');
+}
+
+function hasZipSignature(buf: Buffer): boolean {
+  return buf.length >= 2 && buf[0] === 0x50 && buf[1] === 0x4b;
 }
 
 export async function parseDocument(fileBuffer: Buffer, mimeType: string, fileName: string): Promise<ExtractedDoc> {
@@ -14,6 +35,17 @@ export async function parseDocument(fileBuffer: Buffer, mimeType: string, fileNa
     const lowerName = fileName.toLowerCase();
 
     if (mimeType === 'application/pdf' || lowerName.endsWith('.pdf')) {
+      if (!hasPdfSignature(fileBuffer)) {
+        return {
+          text: '',
+          pageCount: 0,
+          isParseable: false,
+          fileType: 'unknown',
+          links: [],
+          errorMessage: 'Invalid PDF file signature. Please upload a valid PDF document.',
+        };
+      }
+
       const uint8 = new Uint8Array(fileBuffer);
       const { text, totalPages } = await extractText(uint8);
       const fullText = Array.isArray(text) ? text.join('\n') : text;
@@ -26,8 +58,8 @@ export async function parseDocument(fileBuffer: Buffer, mimeType: string, fileNa
           links = Array.from(
             new Set(
               linkResult.links
-                .map((l: any) => (typeof l === 'string' ? l.trim() : ''))
-                .filter((l: string) => l.length > 0 && !l.startsWith('javascript:'))
+                .map((l: any) => filterSafeLink(l))
+                .filter((l: string) => l.length > 0)
             )
           );
         }
@@ -59,6 +91,17 @@ export async function parseDocument(fileBuffer: Buffer, mimeType: string, fileNa
       lowerName.endsWith('.docx') ||
       lowerName.endsWith('.doc')
     ) {
+      if (!hasZipSignature(fileBuffer)) {
+        return {
+          text: '',
+          pageCount: 0,
+          isParseable: false,
+          fileType: 'unknown',
+          links: [],
+          errorMessage: 'Unsupported or corrupted Word file. Please save as a standard .docx or .pdf file.',
+        };
+      }
+
       const { value: htmlText } = await mammoth.convertToHtml({ buffer: fileBuffer });
       const { value: rawText } = await mammoth.extractRawText({ buffer: fileBuffer });
 
@@ -68,7 +111,8 @@ export async function parseDocument(fileBuffer: Buffer, mimeType: string, fileNa
       );
       const docxLinks: string[] = [];
       for (const m of hrefMatches) {
-        if (m[1]) docxLinks.push(m[1]);
+        const safe = filterSafeLink(m[1]);
+        if (safe) docxLinks.push(safe);
       }
 
       // Convert HTML structure to clean text while preserving hyperlinks as "Label (url)"
@@ -100,7 +144,14 @@ export async function parseDocument(fileBuffer: Buffer, mimeType: string, fileNa
       };
     }
 
-    throw new Error('Unsupported file format. Please upload a PDF or DOCX file.');
+    return {
+      text: '',
+      pageCount: 0,
+      isParseable: false,
+      fileType: 'unknown',
+      links: [],
+      errorMessage: 'Unsupported file format. Please upload a PDF or DOCX file.',
+    };
   } catch (error) {
     console.error('Error parsing document:', error);
     return { text: '', pageCount: 0, isParseable: false, fileType: 'unknown', links: [] };

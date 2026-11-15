@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
 import { ResumeContent } from '@/types/resume';
+import { sanitizeExternalUrl, sanitizeMailto } from '@/lib/utils';
 
 const styles = StyleSheet.create({
   page: {
@@ -154,15 +155,15 @@ export default function TraditionalAtsTemplate({ content }: { content: ResumeCon
         
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.name}>{personalInfo.fullName || 'DANIRU DE SILVA'}</Text>
+          <Text style={styles.name}>{personalInfo.fullName || 'YOUR NAME'}</Text>
           {personalInfo.jobTitle && (
             <Text style={styles.jobTitle}>{personalInfo.jobTitle}</Text>
           )}
           
           {/* Contact Line 1 */}
           <View style={styles.contactRow}>
-            {personalInfo.email && (
-              <Link src={`mailto:${personalInfo.email}`} style={styles.link}>
+            {personalInfo.email && sanitizeMailto(personalInfo.email) && (
+              <Link src={sanitizeMailto(personalInfo.email)} style={styles.link}>
                 <Text>{personalInfo.email}</Text>
               </Link>
             )}
@@ -170,30 +171,30 @@ export default function TraditionalAtsTemplate({ content }: { content: ResumeCon
             {personalInfo.phone && <Text>{personalInfo.phone}</Text>}
             {personalInfo.phone && personalInfo.location && <Text style={styles.divider}>|</Text>}
             {personalInfo.location && <Text>{personalInfo.location}</Text>}
-            {personalInfo.location && personalInfo.website && <Text style={styles.divider}>|</Text>}
-            {personalInfo.website && (
-              <Link src={personalInfo.website.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`} style={styles.link}>
+            {personalInfo.location && sanitizeExternalUrl(personalInfo.website) && <Text style={styles.divider}>|</Text>}
+            {sanitizeExternalUrl(personalInfo.website) && (
+              <Link src={sanitizeExternalUrl(personalInfo.website)} style={styles.link}>
                 <Text>{formatUrlForDisplay(personalInfo.website)}</Text>
               </Link>
             )}
           </View>
 
           {/* Contact Line 2: LinkedIn & GitHub */}
-          {(personalInfo.linkedin || personalInfo.github) && (
+          {(sanitizeExternalUrl(personalInfo.linkedin) || sanitizeExternalUrl(personalInfo.github)) && (
             <View style={styles.contactRow}>
-              {personalInfo.linkedin && (
+              {sanitizeExternalUrl(personalInfo.linkedin) && (
                 <View style={{ flexDirection: 'row' }}>
                   <Text>LinkedIn: </Text>
-                  <Link src={personalInfo.linkedin.startsWith('http') ? personalInfo.linkedin : `https://${personalInfo.linkedin}`} style={styles.link}>
+                  <Link src={sanitizeExternalUrl(personalInfo.linkedin)} style={styles.link}>
                     <Text>{formatUrlForDisplay(personalInfo.linkedin)}</Text>
                   </Link>
                 </View>
               )}
-              {personalInfo.linkedin && personalInfo.github && <Text style={styles.divider}>|</Text>}
-              {personalInfo.github && (
+              {sanitizeExternalUrl(personalInfo.linkedin) && sanitizeExternalUrl(personalInfo.github) && <Text style={styles.divider}>|</Text>}
+              {sanitizeExternalUrl(personalInfo.github) && (
                 <View style={{ flexDirection: 'row' }}>
                   <Text>GitHub: </Text>
-                  <Link src={personalInfo.github.startsWith('http') ? personalInfo.github : `https://${personalInfo.github}`} style={styles.link}>
+                  <Link src={sanitizeExternalUrl(personalInfo.github)} style={styles.link}>
                     <Text>{formatUrlForDisplay(personalInfo.github)}</Text>
                   </Link>
                 </View>
@@ -298,18 +299,18 @@ export default function TraditionalAtsTemplate({ content }: { content: ResumeCon
                     {proj.technologies && proj.technologies.length > 0 && (
                       <Text style={styles.itemSubtitle}> | {proj.technologies.join(', ')}</Text>
                     )}
-                    {proj.url && (
+                    {sanitizeExternalUrl(proj.url) && (
                       <>
                         <Text style={styles.divider}>|</Text>
-                        <Link src={proj.url.startsWith('http') ? proj.url : `https://${proj.url}`} style={styles.blueLink}>
+                        <Link src={sanitizeExternalUrl(proj.url)} style={styles.blueLink}>
                           <Text>Website Link</Text>
                         </Link>
                       </>
                     )}
-                    {proj.githubUrl && (
+                    {sanitizeExternalUrl(proj.githubUrl) && (
                       <>
                         <Text style={styles.divider}>|</Text>
-                        <Link src={proj.githubUrl.startsWith('http') ? proj.githubUrl : `https://${proj.githubUrl}`} style={styles.blueLink}>
+                        <Link src={sanitizeExternalUrl(proj.githubUrl)} style={styles.blueLink}>
                           <Text>Github</Text>
                         </Link>
                       </>
@@ -379,10 +380,10 @@ export default function TraditionalAtsTemplate({ content }: { content: ResumeCon
                 <Text style={styles.itemTitle}>
                   {ref.name}{ref.designation ? ` | ${ref.designation}` : ''}{ref.institution ? `, ${ref.institution}` : ''}
                 </Text>
-                {ref.email && (
+                {sanitizeMailto(ref.email) && (
                   <View style={{ flexDirection: 'row', marginTop: 1 }}>
                     <Text style={styles.itemSubtitle}>Email: </Text>
-                    <Link src={`mailto:${ref.email}`} style={styles.link}>
+                    <Link src={sanitizeMailto(ref.email)} style={styles.link}>
                       <Text style={styles.itemSubtitle}>{ref.email}</Text>
                     </Link>
                     {ref.phone && <Text style={styles.itemSubtitle}> | Phone: {ref.phone}</Text>}

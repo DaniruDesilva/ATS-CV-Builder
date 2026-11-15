@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { TemplateId } from '@/types/resume';
 import { useResumeStore } from '@/lib/store/useResumeStore';
@@ -64,23 +64,23 @@ function BuilderPageContent() {
 
   const [savingCloud, setSavingCloud] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [authModalFeature, setAuthModalFeature] = useState<GuestFeatureType>('builder_save');
+  const isSavingRef = useRef(false);
 
-  const handleSaveToCloud = async () => {
-    if (!isAuthenticated) {
-      setAuthModalFeature('builder_save');
-      setShowAuthModal(true);
-      return;
-    }
-
+  const persistResumeToCloud = useCallback(async () => {
+    if (isSavingRef.current) return;
+    isSavingRef.current = true;
     setSavingCloud(true);
+    setSaveError(null);
     try {
+      const activeId = useResumeStore.getState().currentResumeId;
       const res = await fetch('/api/resumes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: currentResumeId || undefined,
+          id: activeId || undefined,
           title,
           templateId,
           content,
@@ -89,18 +89,32 @@ function BuilderPageContent() {
 
       if (res.ok) {
         const data = await res.json();
-        if (data.resume?.id && !currentResumeId) {
+        if (data.resume?.id && !activeId) {
           setCurrentResumeId(data.resume.id);
         }
         setLastSavedTime(
           new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         );
+      } else {
+        const errData = await res.json().catch(() => ({}));
+        setSaveError(errData.error || 'Cloud sync failed');
       }
     } catch (err) {
-      console.error('Manual save error:', err);
+      console.error('Cloud save error:', err);
+      setSaveError('Offline — changes kept locally');
     } finally {
+      isSavingRef.current = false;
       setSavingCloud(false);
     }
+  }, [title, templateId, content, setCurrentResumeId]);
+
+  const handleSaveToCloud = async () => {
+    if (!isAuthenticated) {
+      setAuthModalFeature('builder_save');
+      setShowAuthModal(true);
+      return;
+    }
+    await persistResumeToCloud();
   };
 
   // User synchronization & initial active resume loading
@@ -164,38 +178,12 @@ function BuilderPageContent() {
       return;
     }
 
-    const timer = setTimeout(async () => {
-      setSavingCloud(true);
-      try {
-        const res = await fetch('/api/resumes', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            id: currentResumeId || undefined,
-            title,
-            templateId,
-            content,
-          }),
-        });
-
-        if (res.ok) {
-          const data = await res.json();
-          if (data.resume?.id && !currentResumeId) {
-            setCurrentResumeId(data.resume.id);
-          }
-          setLastSavedTime(
-            new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-          );
-        }
-      } catch (err) {
-        console.error('Cloud auto-save error:', err);
-      } finally {
-        setSavingCloud(false);
-      }
+    const timer = setTimeout(() => {
+      void persistResumeToCloud();
     }, 1500);
 
     return () => clearTimeout(timer);
-  }, [title, templateId, content, isAuthenticated, currentResumeId, setCurrentResumeId]);
+  }, [title, templateId, content, isAuthenticated, persistResumeToCloud]);
 
   useEffect(() => {
     const tpl = searchParams.get('template');
@@ -376,6 +364,16 @@ function BuilderPageContent() {
             <span className="text-xs text-slate-500 flex items-center gap-1.5 animate-pulse">
               <Loader2 className="w-3.5 h-3.5 text-emerald-600 animate-spin" /> Saving...
             </span>
+          ) : saveError ? (
+            <button
+              type="button"
+              onClick={handleSaveToCloud}
+              className="text-xs text-red-700 font-semibold flex items-center gap-1.5 bg-red-50 hover:bg-red-100 px-2.5 py-1 rounded-full border border-red-200 transition-colors cursor-pointer"
+              title={`${saveError} — Click to retry`}
+            >
+              <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
+              <span>Sync Retry</span>
+            </button>
           ) : isAuthenticated ? (
             <span className="text-xs text-emerald-700 font-medium flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
               <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />

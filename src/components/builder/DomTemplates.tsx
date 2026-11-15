@@ -2,6 +2,7 @@
 
 import { useRef } from 'react';
 import { ResumeContent } from '@/types/resume';
+import { sanitizeExternalUrl, sanitizeMailto } from '@/lib/utils';
 
 export type PageViewMode = 1 | 2 | 'all';
 
@@ -181,20 +182,20 @@ export function ClassicAtsDom({
           marginBottom: '3px',
         }}
       >
-        {personalInfo.email && (
-          <a href={`mailto:${personalInfo.email}`} style={{ color: '#2563eb', textDecoration: 'underline' }}>
+        {sanitizeMailto(personalInfo.email) && (
+          <a href={sanitizeMailto(personalInfo.email)} style={{ color: '#2563eb', textDecoration: 'underline' }}>
             {personalInfo.email}
           </a>
         )}
         {personalInfo.phone && <span>• {personalInfo.phone}</span>}
         {personalInfo.location && <span>• {personalInfo.location}</span>}
-        {personalInfo.website && (
+        {sanitizeExternalUrl(personalInfo.website) && (
           <span>
             •{' '}
             <a
-              href={personalInfo.website.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
+              href={sanitizeExternalUrl(personalInfo.website)}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               style={{ color: '#2563eb', textDecoration: 'underline' }}
             >
               {formatDisplayUrl(personalInfo.website)}
@@ -204,7 +205,7 @@ export function ClassicAtsDom({
       </div>
 
       {/* Contact Line 2: LinkedIn & GitHub */}
-      {(personalInfo.linkedin || personalInfo.github) && (
+      {(sanitizeExternalUrl(personalInfo.linkedin) || sanitizeExternalUrl(personalInfo.github)) && (
         <div
           style={{
             display: 'flex',
@@ -216,27 +217,27 @@ export function ClassicAtsDom({
             color: '#64748b',
           }}
         >
-          {personalInfo.linkedin && (
+          {sanitizeExternalUrl(personalInfo.linkedin) && (
             <span>
               LinkedIn:{' '}
               <a
-                href={personalInfo.linkedin.startsWith('http') ? personalInfo.linkedin : `https://${personalInfo.linkedin}`}
+                href={sanitizeExternalUrl(personalInfo.linkedin)}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 style={{ color: '#2563eb', textDecoration: 'underline' }}
               >
                 {formatDisplayUrl(personalInfo.linkedin)}
               </a>
             </span>
           )}
-          {personalInfo.linkedin && personalInfo.github && <span style={{ color: '#94a3b8' }}>|</span>}
-          {personalInfo.github && (
+          {sanitizeExternalUrl(personalInfo.linkedin) && sanitizeExternalUrl(personalInfo.github) && <span style={{ color: '#94a3b8' }}>|</span>}
+          {sanitizeExternalUrl(personalInfo.github) && (
             <span>
               GitHub:{' '}
               <a
-                href={personalInfo.github.startsWith('http') ? personalInfo.github : `https://${personalInfo.github}`}
+                href={sanitizeExternalUrl(personalInfo.github)}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 style={{ color: '#2563eb', textDecoration: 'underline' }}
               >
                 {formatDisplayUrl(personalInfo.github)}
@@ -360,26 +361,26 @@ export function ClassicAtsDom({
                   | {proj.technologies.join(', ')}
                 </span>
               )}
-              {proj.url && (
+              {sanitizeExternalUrl(proj.url) && (
                 <>
                   <span style={{ color: '#94a3b8', fontSize: '11.3px' }}>|</span>
                   <a
-                    href={proj.url.startsWith('http') ? proj.url : `https://${proj.url}`}
+                    href={sanitizeExternalUrl(proj.url)}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     style={{ fontSize: '11.3px', color: '#2563eb', textDecoration: 'underline' }}
                   >
                     Website Link
                   </a>
                 </>
               )}
-              {proj.githubUrl && (
+              {sanitizeExternalUrl(proj.githubUrl) && (
                 <>
                   <span style={{ color: '#94a3b8', fontSize: '11.3px' }}>|</span>
                   <a
-                    href={proj.githubUrl.startsWith('http') ? proj.githubUrl : `https://${proj.githubUrl}`}
+                    href={sanitizeExternalUrl(proj.githubUrl)}
                     target="_blank"
-                    rel="noreferrer"
+                    rel="noopener noreferrer"
                     style={{ fontSize: '11.3px', color: '#2563eb', textDecoration: 'underline' }}
                   >
                     Github
@@ -450,10 +451,10 @@ export function ClassicAtsDom({
             <div style={{ fontSize: '12.6px', fontWeight: 700, color: '#0f172a' }}>
               {ref.name}{ref.designation ? ` | ${ref.designation}` : ''}{ref.institution ? `, ${ref.institution}` : ''}
             </div>
-            {ref.email && (
+            {sanitizeMailto(ref.email) && (
               <div style={{ fontSize: '11.3px', color: '#475569', marginTop: '2px' }}>
                 Email:{' '}
-                <a href={`mailto:${ref.email}`} style={{ color: '#2563eb', textDecoration: 'underline' }}>
+                <a href={sanitizeMailto(ref.email)} style={{ color: '#2563eb', textDecoration: 'underline' }}>
                   {ref.email}
                 </a>
                 {ref.phone && <span> | Phone: {ref.phone}</span>}
@@ -627,8 +628,8 @@ export function TraditionalAtsDom({
           marginBottom: '3px',
         }}
       >
-        {personalInfo.email && (
-          <a href={`mailto:${personalInfo.email}`} style={{ color: '#000', textDecoration: 'underline' }}>
+        {sanitizeMailto(personalInfo.email) && (
+          <a href={sanitizeMailto(personalInfo.email)} style={{ color: '#000', textDecoration: 'underline' }}>
             {personalInfo.email}
           </a>
         )}
@@ -636,12 +637,12 @@ export function TraditionalAtsDom({
         {personalInfo.phone && <span>{personalInfo.phone}</span>}
         {personalInfo.phone && personalInfo.location && <span style={{ color: '#555' }}>|</span>}
         {personalInfo.location && <span>{personalInfo.location}</span>}
-        {personalInfo.location && personalInfo.website && <span style={{ color: '#555' }}>|</span>}
-        {personalInfo.website && (
+        {personalInfo.location && sanitizeExternalUrl(personalInfo.website) && <span style={{ color: '#555' }}>|</span>}
+        {sanitizeExternalUrl(personalInfo.website) && (
           <a
-            href={personalInfo.website.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`}
+            href={sanitizeExternalUrl(personalInfo.website)}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             style={{ color: '#000', textDecoration: 'underline' }}
           >
             {formatDisplayUrl(personalInfo.website)}
@@ -650,7 +651,7 @@ export function TraditionalAtsDom({
       </div>
 
       {/* Contact Line 2: LinkedIn & GitHub */}
-      {(personalInfo.linkedin || personalInfo.github) && (
+      {(sanitizeExternalUrl(personalInfo.linkedin) || sanitizeExternalUrl(personalInfo.github)) && (
         <div
           style={{
             display: 'flex',
@@ -662,27 +663,27 @@ export function TraditionalAtsDom({
             color: '#000000',
           }}
         >
-          {personalInfo.linkedin && (
+          {sanitizeExternalUrl(personalInfo.linkedin) && (
             <span>
               LinkedIn:{' '}
               <a
-                href={personalInfo.linkedin.startsWith('http') ? personalInfo.linkedin : `https://${personalInfo.linkedin}`}
+                href={sanitizeExternalUrl(personalInfo.linkedin)}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 style={{ color: '#0056b3', textDecoration: 'underline' }}
               >
                 {formatDisplayUrl(personalInfo.linkedin)}
               </a>
             </span>
           )}
-          {personalInfo.linkedin && personalInfo.github && <span style={{ color: '#555' }}>|</span>}
-          {personalInfo.github && (
+          {sanitizeExternalUrl(personalInfo.linkedin) && sanitizeExternalUrl(personalInfo.github) && <span style={{ color: '#555' }}>|</span>}
+          {sanitizeExternalUrl(personalInfo.github) && (
             <span>
               GitHub:{' '}
               <a
-                href={personalInfo.github.startsWith('http') ? personalInfo.github : `https://${personalInfo.github}`}
+                href={sanitizeExternalUrl(personalInfo.github)}
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 style={{ color: '#0056b3', textDecoration: 'underline' }}
               >
                 {formatDisplayUrl(personalInfo.github)}
@@ -791,26 +792,26 @@ export function TraditionalAtsDom({
                 {proj.technologies && proj.technologies.length > 0 && (
                   <span style={{ color: '#000' }}>| {proj.technologies.join(', ')}</span>
                 )}
-                {proj.url && (
+                {sanitizeExternalUrl(proj.url) && (
                   <>
                     <span style={{ color: '#555' }}>|</span>
                     <a
-                      href={proj.url.startsWith('http') ? proj.url : `https://${proj.url}`}
+                      href={sanitizeExternalUrl(proj.url)}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       style={{ color: '#0056b3', textDecoration: 'underline', fontWeight: 500 }}
                     >
                       Website Link
                     </a>
                   </>
                 )}
-                {proj.githubUrl && (
+                {sanitizeExternalUrl(proj.githubUrl) && (
                   <>
                     <span style={{ color: '#555' }}>|</span>
                     <a
-                      href={proj.githubUrl.startsWith('http') ? proj.githubUrl : `https://${proj.githubUrl}`}
+                      href={sanitizeExternalUrl(proj.githubUrl)}
                       target="_blank"
-                      rel="noreferrer"
+                      rel="noopener noreferrer"
                       style={{ color: '#0056b3', textDecoration: 'underline', fontWeight: 500 }}
                     >
                       Github
@@ -883,10 +884,10 @@ export function TraditionalAtsDom({
               <div style={{ fontWeight: 700, fontSize: '12.7px', color: '#000' }}>
                 {ref.name}{ref.designation ? ` | ${ref.designation}` : ''}{ref.institution ? `, ${ref.institution}` : ''}
               </div>
-              {ref.email && (
+              {sanitizeMailto(ref.email) && (
                 <div style={{ fontSize: '12px', color: '#000', marginTop: '1px' }}>
                   Email:{' '}
-                  <a href={`mailto:${ref.email}`} style={{ color: '#000', textDecoration: 'underline' }}>
+                  <a href={sanitizeMailto(ref.email)} style={{ color: '#000', textDecoration: 'underline' }}>
                     {ref.email}
                   </a>
                   {ref.phone && <span> | Phone: {ref.phone}</span>}

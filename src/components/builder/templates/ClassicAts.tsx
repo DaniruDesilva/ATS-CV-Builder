@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
 import { ResumeContent } from '@/types/resume';
+import { sanitizeExternalUrl, sanitizeMailto } from '@/lib/utils';
 
 const styles = StyleSheet.create({
   page: {
@@ -157,29 +158,29 @@ export default function ClassicAts({ content }: { content: ResumeContent }) {
           <Text style={styles.name}>{personalInfo.fullName || 'YOUR NAME'}</Text>
           {personalInfo.jobTitle && <Text style={styles.title}>{personalInfo.jobTitle}</Text>}
           <View style={styles.contactRow}>
-            {personalInfo.email && (
-              <Link src={`mailto:${personalInfo.email}`} style={styles.link}>
+            {sanitizeMailto(personalInfo.email) && (
+              <Link src={sanitizeMailto(personalInfo.email)} style={styles.link}>
                 <Text>{personalInfo.email}</Text>
               </Link>
             )}
             {personalInfo.phone && <Text>•  {personalInfo.phone}</Text>}
             {personalInfo.location && <Text>•  {personalInfo.location}</Text>}
-            {personalInfo.website && (
-              <Link src={personalInfo.website.startsWith('http') ? personalInfo.website : `https://${personalInfo.website}`} style={styles.link}>
+            {sanitizeExternalUrl(personalInfo.website) && (
+              <Link src={sanitizeExternalUrl(personalInfo.website)} style={styles.link}>
                 <Text>•  {formatUrl(personalInfo.website)}</Text>
               </Link>
             )}
           </View>
-          {(personalInfo.linkedin || personalInfo.github) && (
+          {(sanitizeExternalUrl(personalInfo.linkedin) || sanitizeExternalUrl(personalInfo.github)) && (
             <View style={styles.contactRow}>
-              {personalInfo.linkedin && (
-                <Link src={personalInfo.linkedin.startsWith('http') ? personalInfo.linkedin : `https://${personalInfo.linkedin}`} style={styles.link}>
+              {sanitizeExternalUrl(personalInfo.linkedin) && (
+                <Link src={sanitizeExternalUrl(personalInfo.linkedin)} style={styles.link}>
                   <Text>LinkedIn: {formatUrl(personalInfo.linkedin)}</Text>
                 </Link>
               )}
-              {personalInfo.linkedin && personalInfo.github && <Text style={styles.divider}>|</Text>}
-              {personalInfo.github && (
-                <Link src={personalInfo.github.startsWith('http') ? personalInfo.github : `https://${personalInfo.github}`} style={styles.link}>
+              {sanitizeExternalUrl(personalInfo.linkedin) && sanitizeExternalUrl(personalInfo.github) && <Text style={styles.divider}>|</Text>}
+              {sanitizeExternalUrl(personalInfo.github) && (
+                <Link src={sanitizeExternalUrl(personalInfo.github)} style={styles.link}>
                   <Text>GitHub: {formatUrl(personalInfo.github)}</Text>
                 </Link>
               )}
@@ -285,18 +286,18 @@ export default function ClassicAts({ content }: { content: ResumeContent }) {
                     {proj.technologies && proj.technologies.length > 0 && (
                       <Text style={[styles.roleTitle, { fontSize: 8.5, color: '#64748b' }]}> | {proj.technologies.join(', ')}</Text>
                     )}
-                    {proj.url && (
+                    {sanitizeExternalUrl(proj.url) && (
                       <>
                         <Text style={styles.divider}>|</Text>
-                        <Link src={proj.url.startsWith('http') ? proj.url : `https://${proj.url}`} style={styles.link}>
+                        <Link src={sanitizeExternalUrl(proj.url)} style={styles.link}>
                           <Text style={{ fontSize: 8.5 }}>Website Link</Text>
                         </Link>
                       </>
                     )}
-                    {proj.githubUrl && (
+                    {sanitizeExternalUrl(proj.githubUrl) && (
                       <>
                         <Text style={styles.divider}>|</Text>
-                        <Link src={proj.githubUrl.startsWith('http') ? proj.githubUrl : `https://${proj.githubUrl}`} style={styles.link}>
+                        <Link src={sanitizeExternalUrl(proj.githubUrl)} style={styles.link}>
                           <Text style={{ fontSize: 8.5 }}>Github</Text>
                         </Link>
                       </>
@@ -367,10 +368,10 @@ export default function ClassicAts({ content }: { content: ResumeContent }) {
                 <Text style={styles.companyName}>
                   {ref.name}{ref.designation ? ` | ${ref.designation}` : ''}{ref.institution ? `, ${ref.institution}` : ''}
                 </Text>
-                {ref.email && (
+                {sanitizeMailto(ref.email) && (
                   <View style={{ flexDirection: 'row', marginTop: 1 }}>
                     <Text style={[styles.summaryText, { fontSize: 8.5 }]}>Email: </Text>
-                    <Link src={`mailto:${ref.email}`} style={[styles.link, { fontSize: 8.5 }]}>
+                    <Link src={sanitizeMailto(ref.email)} style={[styles.link, { fontSize: 8.5 }]}>
                       <Text>{ref.email}</Text>
                     </Link>
                     {ref.phone && <Text style={[styles.summaryText, { fontSize: 8.5 }]}> | Phone: {ref.phone}</Text>}

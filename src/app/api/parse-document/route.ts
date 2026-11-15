@@ -1,11 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { parseDocument } from '@/lib/checker/pdfParser';
 import { parseStructuredResumeFromText } from '@/lib/checker/ruleEngine';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const rate = checkRateLimit(`parse-document:${ip}`, 15, 60_000);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Too many document uploads. Please wait a minute and try again.' },
+        { status: 429, headers: { 'Retry-After': String(rate.retryAfterSeconds) } }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
 
@@ -19,9 +29,13 @@ export async function POST(req: NextRequest) {
 
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const mimeType = file.type;
-    const fileName = file.name;
+    const fileName = file.name.slice(0, 200);
 
     const extracted = await parseDocument(fileBuffer, mimeType, fileName);
+
+    if (extracted.fileType === 'unknown' && extracted.errorMessage) {
+      return NextResponse.json({ error: extracted.errorMessage }, { status: 415 });
+    }
 
     if (!extracted.isParseable || extracted.text.trim().length === 0) {
       return NextResponse.json(
@@ -49,7 +63,7 @@ export async function POST(req: NextRequest) {
   } catch (error: any) {
     console.error('Error parsing document in parse-document API:', error);
     return NextResponse.json(
-      { error: error?.message || 'Failed to extract text from document.' },
+      { error: 'Failed to extract text from document.' },
       { status: 500 }
     );
   }

@@ -69,6 +69,8 @@ export const useAuthStore = create<AuthState>()(
             } else {
               set({ user: null, isAuthenticated: false, isLoading: false });
             }
+          } else {
+            set({ isLoading: false });
           }
 
           // Attach real-time auth state listener once

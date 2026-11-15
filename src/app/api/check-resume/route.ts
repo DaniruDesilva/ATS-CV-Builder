@@ -8,11 +8,21 @@ import {
 import { analyzeResumeWithGemini, fallbackStructuredResume } from '@/lib/ai/gemini';
 import { ScanReportData, ScanResultData } from '@/types/checker';
 import { checkGuestLimit, applyGuestUsageCookie } from '@/lib/auth/guestLimits';
+import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    const rate = checkRateLimit(`check-resume:${ip}`, 15, 60_000);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { error: 'Too many scan requests. Please wait a minute and try again.' },
+        { status: 429, headers: { 'Retry-After': String(rate.retryAfterSeconds) } }
+      );
+    }
+
     // 0. Enforce guest usage limits (1 free scan for unauthenticated users)
     const { allowed, isAuthenticated, usage } = await checkGuestLimit(req, 'scan');
     if (!allowed) {
@@ -27,7 +37,8 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
-    const jobDescription = (formData.get('jobDescription') as string) || '';
+    const rawJd = formData.get('jobDescription');
+    const jobDescription = typeof rawJd === 'string' ? rawJd.slice(0, 15_000) : '';
 
     if (!file) {
       return NextResponse.json({ error: 'No document file provided.' }, { status: 400 });
@@ -39,10 +50,14 @@ export async function POST(req: NextRequest) {
 
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const mimeType = file.type;
-    const fileName = file.name;
+    const fileName = file.name.slice(0, 200);
 
     // 1. Parse text & page count
     const extracted = await parseDocument(fileBuffer, mimeType, fileName);
+
+    if (extracted.fileType === 'unknown' && extracted.errorMessage) {
+      return NextResponse.json({ error: extracted.errorMessage }, { status: 415 });
+    }
 
     if (!extracted.isParseable || extracted.text.trim().length === 0) {
       return NextResponse.json(
