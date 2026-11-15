@@ -142,7 +142,7 @@ export function Navbar() {
               type="button"
               onClick={() => setResumeDropdownOpen(!resumeDropdownOpen)}
               className={`flex items-center gap-1 px-3.5 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                pathname.startsWith('/builder')
+                pathname.startsWith('/builder') || pathname.startsWith('/templates')
                   ? 'text-emerald-700 bg-emerald-50/80 font-bold'
                   : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50'
               }`}
@@ -178,9 +178,9 @@ export function Navbar() {
                     </div>
                   </Link>
 
-                  {/* Item 2: Templates */}
+                  {/* Item 2: Dedicated Templates Showcase */}
                   <Link
-                    href="/builder?step=9"
+                    href="/templates"
                     onClick={() => setResumeDropdownOpen(false)}
                     className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-slate-50 transition-colors group"
                   >
@@ -370,6 +370,14 @@ export function Navbar() {
                     </Link>
 
                     <Link
+                      href="/templates"
+                      onClick={() => setUserDropdownOpen(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-emerald-700 transition-colors"
+                    >
+                      <Layers className="w-3.5 h-3.5 text-indigo-600" /> ATS Templates
+                    </Link>
+
+                    <Link
                       href="/checker"
                       onClick={() => setUserDropdownOpen(false)}
                       className="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 hover:text-emerald-700 transition-colors"
@@ -452,7 +460,7 @@ export function Navbar() {
           </Link>
 
           <Link
-            href="/builder?step=9"
+            href="/templates"
             onClick={() => setMobileMenuOpen(false)}
             className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold text-slate-900 bg-slate-50"
           >

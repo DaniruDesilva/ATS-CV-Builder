@@ -181,7 +181,7 @@ export function Footer() {
                   </li>
                   <li>
                     <Link
-                      href="/builder?step=9"
+                      href="/templates"
                       className="hover:text-emerald-600 transition-colors"
                     >
                       Resume Templates
@@ -252,7 +252,7 @@ export function Footer() {
                   </li>
                   <li>
                     <Link
-                      href="/builder?step=9"
+                      href="/templates"
                       className="text-emerald-700 font-bold hover:text-emerald-800 transition-colors inline-flex items-center gap-1"
                     >
                       <span>Browse All 4 Layouts</span>

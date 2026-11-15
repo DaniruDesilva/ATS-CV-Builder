@@ -265,7 +265,7 @@ export default function LandingPage() {
                     A4 Standard • 100% ATS Parseable
                   </span>
                   <Link
-                    href={`/builder?template=${activeHeroTab === 'classic' ? 'classic-ats' : activeHeroTab === 'traditional' ? 'traditional-ats' : activeHeroTab === 'skills' ? 'technical-clean' : 'modern-executive'}&step=9`}
+                    href={`/builder?template=${activeHeroTab === 'classic' ? 'classic-ats' : activeHeroTab === 'traditional' ? 'traditional-ats' : activeHeroTab === 'skills' ? 'technical-clean' : 'modern-executive'}`}
                     className="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1"
                   >
                     Edit <ArrowRight className="w-3 h-3" />
@@ -348,7 +348,7 @@ export default function LandingPage() {
                     {/* Hover Action Overlay */}
                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-2xs opacity-0 group-hover:opacity-100 transition-all duration-200 flex flex-col items-center justify-center p-4">
                       <Link
-                        href={`/builder?template=${tpl.templateId}&step=9`}
+                        href={`/builder?template=${tpl.templateId}`}
                         className="px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-lg transition-transform hover:scale-105 flex items-center gap-1.5"
                       >
                         <span>Use This Template</span>
@@ -363,10 +363,10 @@ export default function LandingPage() {
                       {tpl.description}
                     </p>
                     <Link
-                      href={`/builder?template=${tpl.templateId}&step=9`}
+                      href={`/builder?template=${tpl.templateId}`}
                       className="text-xs font-bold text-emerald-600 group-hover:text-emerald-700 flex items-center gap-1 pt-1"
                     >
-                      Customize Template <ArrowRight className="w-3 h-3" />
+                      Use Template <ArrowRight className="w-3 h-3" />
                     </Link>
                   </div>
                 </div>
@@ -392,10 +392,10 @@ export default function LandingPage() {
           
           <div className="mt-8 text-center">
             <Link
-              href="/builder?step=9"
+              href="/templates"
               className="text-emerald-700 font-extrabold text-sm hover:text-emerald-800 flex items-center justify-center gap-1.5 transition-all hover:gap-2"
             >
-              Browse All ATS Templates in Builder <ArrowRight className="w-4 h-4" />
+              Explore All Certified ATS Templates <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
 

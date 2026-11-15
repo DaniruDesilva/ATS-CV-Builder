@@ -515,7 +515,7 @@ export default function DashboardPage() {
               Complex 2-column tables and non-standard icons often scramble ATS parsing scanners (Workday, Taleo). ResumAI generates pure text vector streams guaranteed to score 100% on OCR.
             </p>
             <Link
-              href="/builder?step=9"
+              href="/templates"
               className="text-xs font-bold text-slate-800 hover:text-slate-900 inline-flex items-center gap-1 pt-1"
             >
               Browse ATS Templates →
