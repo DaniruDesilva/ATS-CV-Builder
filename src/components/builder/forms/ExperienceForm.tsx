@@ -1,6 +1,9 @@
 'use client';
 
 import { useResumeStore } from '@/lib/store/useResumeStore';
+import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useGuestUsageStore } from '@/lib/store/useGuestUsageStore';
+import { GuestAuthModal } from '@/components/auth/GuestAuthModal';
 import { ACTION_VERBS, ExperienceItem } from '@/types/resume';
 import { Briefcase, Plus, Trash2, Sparkles, Zap, Check } from 'lucide-react';
 import { useState } from 'react';
@@ -15,15 +18,24 @@ export function ExperienceForm() {
     updateExperienceHighlight,
     removeExperienceHighlight
   } = useResumeStore();
+  const { isAuthenticated } = useAuthStore();
+  const { canUseBuilderAi, recordBuilderAi } = useGuestUsageStore();
 
   const [activeVerbIndex, setActiveVerbIndex] = useState<{ expId: string; bulletIdx: number } | null>(null);
   const [optimizingBullet, setOptimizingBullet] = useState<{ expId: string; bulletIdx: number } | null>(null);
   const [optimizedSuccess, setOptimizedSuccess] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors";
 
   const handleOptimizeBullet = async (expId: string, bulletIdx: number, text: string) => {
     if (!text || text.length < 5) return;
+
+    if (!canUseBuilderAi(isAuthenticated)) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setOptimizingBullet({ expId, bulletIdx });
     setOptimizedSuccess(null);
     try {
@@ -32,6 +44,15 @@ export function ExperienceForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bulletText: text }),
       });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        if (res.status === 403 || errData.requireAuth) {
+          setShowAuthModal(true);
+          return;
+        }
+      }
+
       if (res.ok) {
         const data = await res.json();
         if (data.improved) {
@@ -39,6 +60,9 @@ export function ExperienceForm() {
           const key = `${expId}-${bulletIdx}`;
           setOptimizedSuccess(key);
           setTimeout(() => setOptimizedSuccess(null), 2500);
+          if (!isAuthenticated) {
+            recordBuilderAi();
+          }
         }
       }
     } catch (err) {
@@ -294,6 +318,14 @@ export function ExperienceForm() {
           </div>
         ))
       )}
+
+      {/* Guest AI Authentication Modal */}
+      <GuestAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        feature="builder_ai"
+        redirectUrl="/builder?step=4"
+      />
     </div>
   );
 }

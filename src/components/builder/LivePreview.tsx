@@ -24,6 +24,9 @@ import {
   Maximize2,
   FileCode,
 } from 'lucide-react';
+import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useGuestUsageStore } from '@/lib/store/useGuestUsageStore';
+import { GuestAuthModal } from '@/components/auth/GuestAuthModal';
 
 // Dynamically import @react-pdf/renderer components with SSR disabled
 const PDFDownloadLink = dynamic(
@@ -51,6 +54,10 @@ export type { PageViewMode };
 
 export function LivePreview() {
   const { content, templateId, setTemplateId } = useResumeStore();
+  const { isAuthenticated } = useAuthStore();
+  const { canExport, recordExport } = useGuestUsageStore();
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
   const [isClient, setIsClient] = useState(false);
   const [previewMode, setPreviewMode] = useState<'dom' | 'pdf'>('dom');
   const [pageView, setPageView] = useState<PageViewMode>('all');
@@ -307,8 +314,15 @@ export function LivePreview() {
           {isClient && (
             <button
               type="button"
-              onClick={handleExportJson}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-all"
+              onClick={() => {
+                if (!canExport(isAuthenticated)) {
+                  setShowAuthModal(true);
+                  return;
+                }
+                handleExportJson();
+                if (!isAuthenticated) recordExport();
+              }}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold shadow-2xs transition-all cursor-pointer"
               title="Export Resume Data as JSON"
             >
               <FileCode className="w-3.5 h-3.5 text-slate-500" />
@@ -317,19 +331,36 @@ export function LivePreview() {
           )}
 
           {isClient && (
-            <PDFDownloadLink
-              document={getPdfDocument()}
-              fileName={`${(content.personalInfo.fullName || 'resume').toLowerCase().replace(/\s+/g, '_')}_ats.pdf`}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition-all hover:shadow"
-            >
-              {/* @ts-ignore */}
-              {({ loading }: { loading: boolean }) => (
-                <>
-                  <Download className={`w-3.5 h-3.5 ${loading ? 'animate-bounce' : ''}`} />
-                  <span>{loading ? 'Compiling ATS PDF...' : 'Download PDF'}</span>
-                </>
-              )}
-            </PDFDownloadLink>
+            canExport(isAuthenticated) ? (
+              <PDFDownloadLink
+                document={getPdfDocument()}
+                fileName={`${(content.personalInfo.fullName || 'resume').toLowerCase().replace(/\s+/g, '_')}_ats.pdf`}
+                onClick={() => {
+                  if (!isAuthenticated) {
+                    recordExport();
+                  }
+                }}
+                className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition-all hover:shadow cursor-pointer"
+              >
+                {/* @ts-ignore */}
+                {({ loading }: { loading: boolean }) => (
+                  <>
+                    <Download className={`w-3.5 h-3.5 ${loading ? 'animate-bounce' : ''}`} />
+                    <span>{loading ? 'Compiling ATS PDF...' : 'Download PDF'}</span>
+                  </>
+                )}
+              </PDFDownloadLink>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowAuthModal(true)}
+                className="flex items-center gap-2 px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-2xs transition-all hover:shadow cursor-pointer"
+                title="Sign in to unlock unlimited downloads"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Download PDF</span>
+              </button>
+            )
           )}
         </div>
       </div>
@@ -372,6 +403,14 @@ export function LivePreview() {
           </div>
         )}
       </div>
+
+      {/* Guest Export Authentication Modal */}
+      <GuestAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        feature="builder_export"
+        redirectUrl="/builder"
+      />
     </div>
   );
 }

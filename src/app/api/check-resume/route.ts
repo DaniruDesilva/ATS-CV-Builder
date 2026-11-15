@@ -7,11 +7,24 @@ import {
 } from '@/lib/checker/ruleEngine';
 import { analyzeResumeWithGemini, fallbackStructuredResume } from '@/lib/ai/gemini';
 import { ScanReportData, ScanResultData } from '@/types/checker';
+import { checkGuestLimit, applyGuestUsageCookie } from '@/lib/auth/guestLimits';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   try {
+    // 0. Enforce guest usage limits (1 free scan for unauthenticated users)
+    const { allowed, isAuthenticated, usage } = await checkGuestLimit(req, 'scan');
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          error: 'You have used your 1 free guest scan. Please sign in or create an account to scan unlimited resumes.',
+          requireAuth: true,
+        },
+        { status: 403 }
+      );
+    }
+
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
     const jobDescription = (formData.get('jobDescription') as string) || '';
@@ -115,7 +128,11 @@ export async function POST(req: NextRequest) {
       createdAt: new Date().toISOString()
     };
 
-    return NextResponse.json(scanResult);
+    const response = NextResponse.json(scanResult);
+    if (!isAuthenticated) {
+      applyGuestUsageCookie(response, 'scan', usage);
+    }
+    return response;
   } catch (error) {
     console.error('Error processing check-resume API:', error);
     return NextResponse.json(

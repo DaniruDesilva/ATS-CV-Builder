@@ -29,6 +29,9 @@ import {
   FileSearch,
 } from 'lucide-react';
 import { useResumeStore } from '@/lib/store/useResumeStore';
+import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useGuestUsageStore } from '@/lib/store/useGuestUsageStore';
+import { GuestAuthModal } from '@/components/auth/GuestAuthModal';
 import { KeywordGapItem, KeywordMatchAnalysis } from '@/lib/ai/gemini';
 import { ResumeContent } from '@/types/resume';
 
@@ -85,6 +88,8 @@ Core Competencies & Requirements:
 function KeywordMatcherContent() {
   const router = useRouter();
   const { content, appendSkill, loadSampleData, importScannedResume } = useResumeStore();
+  const { isAuthenticated } = useAuthStore();
+  const { canMatchKeywords, recordKeyword } = useGuestUsageStore();
 
   const [jobDescription, setJobDescription] = useState(SAMPLE_JOB_PRESETS[0].text);
   const [resumeMode, setResumeMode] = useState<'store' | 'upload' | 'paste'>('store');
@@ -108,6 +113,7 @@ function KeywordMatcherContent() {
   const [analysisResult, setAnalysisResult] = useState<KeywordMatchAnalysis | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
   const [addedSkills, setAddedSkills] = useState<string[]>([]);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   // Format active resume from store into text for analysis
   const storeResumeText = useMemo(() => {
@@ -201,6 +207,12 @@ function KeywordMatcherContent() {
   };
 
   const handleAnalyze = async () => {
+    // 1. Guard against guest trying to scan a 2nd time
+    if (!canMatchKeywords(isAuthenticated)) {
+      setShowAuthModal(true);
+      return;
+    }
+
     if (!jobDescription.trim()) {
       setErrorMsg('Please paste or select a target job description.');
       return;
@@ -242,11 +254,19 @@ function KeywordMatcherContent() {
       });
 
       if (!res.ok) {
-        throw new Error('Failed to analyze keyword gap.');
+        const errData = await res.json().catch(() => ({}));
+        if (res.status === 403 || errData.requireAuth) {
+          setShowAuthModal(true);
+          return;
+        }
+        throw new Error(errData.error || 'Failed to analyze keyword gap.');
       }
 
       const data = await res.json();
       setAnalysisResult(data);
+      if (!isAuthenticated) {
+        recordKeyword();
+      }
     } catch (err: any) {
       setErrorMsg(err?.message || 'Failed to match keywords. Please try again.');
     } finally {
@@ -300,6 +320,19 @@ function KeywordMatcherContent() {
         <p className="text-sm sm:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
           Compare your resume directly against any job posting. Discover the exact keywords, tools, and technical skills ATS algorithms screen for, and close critical gaps before submitting your application.
         </p>
+
+        {!isAuthenticated && (
+          <div className="pt-1">
+            <button
+              type="button"
+              onClick={() => setShowAuthModal(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors cursor-pointer"
+            >
+              <span>Guest Mode (1 Free Scan) • Sign In for Unlimited Matches</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* ── INPUT PANELS GRID ── */}
@@ -946,6 +979,13 @@ function KeywordMatcherContent() {
         </div>
       )}
 
+      {/* Guest Authentication Modal */}
+      <GuestAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        feature="keyword"
+        redirectUrl="/keyword-matcher"
+      />
     </div>
   );
 }

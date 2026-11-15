@@ -32,9 +32,13 @@ import {
   HelpCircle,
   Loader2,
   Cloud,
+  CloudOff,
+  Save,
 } from 'lucide-react';
 import Link from 'next/link';
 import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useGuestUsageStore } from '@/lib/store/useGuestUsageStore';
+import { GuestAuthModal, GuestFeatureType } from '@/components/auth/GuestAuthModal';
 import { getAtsScoreBreakdown } from '@/lib/checker/atsScorer';
 
 function BuilderPageContent() {
@@ -60,6 +64,44 @@ function BuilderPageContent() {
 
   const [savingCloud, setSavingCloud] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authModalFeature, setAuthModalFeature] = useState<GuestFeatureType>('builder_save');
+
+  const handleSaveToCloud = async () => {
+    if (!isAuthenticated) {
+      setAuthModalFeature('builder_save');
+      setShowAuthModal(true);
+      return;
+    }
+
+    setSavingCloud(true);
+    try {
+      const res = await fetch('/api/resumes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: currentResumeId || undefined,
+          title,
+          templateId,
+          content,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.resume?.id && !currentResumeId) {
+          setCurrentResumeId(data.resume.id);
+        }
+        setLastSavedTime(
+          new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        );
+      }
+    } catch (err) {
+      console.error('Manual save error:', err);
+    } finally {
+      setSavingCloud(false);
+    }
+  };
 
   // User synchronization & initial active resume loading
   useEffect(() => {
@@ -299,6 +341,28 @@ function BuilderPageContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-5 w-full animate-fade-in">
       
+      {/* Guest Mode Status Banner */}
+      {!isAuthenticated && (
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs text-amber-900 shadow-2xs">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0" />
+            <span>
+              <strong>Guest Builder Mode:</strong> You can build and download 1 free resume. Sign in to save your CV to cloud and unlock all templates & AI features.
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setAuthModalFeature('builder_save');
+              setShowAuthModal(true);
+            }}
+            className="text-amber-900 font-extrabold hover:underline inline-flex items-center gap-1 cursor-pointer shrink-0"
+          >
+            <span>Save CV to Account →</span>
+          </button>
+        </div>
+      )}
+
       {/* Top Controls Bar */}
       <div className="bg-white border border-slate-200 rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4 shadow-sm">
         <div className="flex items-center gap-3">
@@ -312,11 +376,24 @@ function BuilderPageContent() {
             <span className="text-xs text-slate-500 flex items-center gap-1.5 animate-pulse">
               <Loader2 className="w-3.5 h-3.5 text-emerald-600 animate-spin" /> Saving...
             </span>
-          ) : (
+          ) : isAuthenticated ? (
             <span className="text-xs text-emerald-700 font-medium flex items-center gap-1.5 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
               <FileCheck2 className="w-3.5 h-3.5 text-emerald-600" />
               <span>{lastSavedTime ? `Cloud Saved (${lastSavedTime})` : 'Cloud Synced'}</span>
             </span>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setAuthModalFeature('builder_save');
+                setShowAuthModal(true);
+              }}
+              className="text-xs text-amber-800 font-bold flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 px-3 py-1 rounded-full border border-amber-200 transition-colors cursor-pointer"
+              title="Click to sign in and save your CV to cloud"
+            >
+              <CloudOff className="w-3.5 h-3.5 text-amber-600" />
+              <span>Guest Draft • Sign in to Save</span>
+            </button>
           )}
         </div>
 
@@ -343,14 +420,23 @@ function BuilderPageContent() {
 
         <div className="flex items-center gap-2">
           <button
+            type="button"
+            onClick={handleSaveToCloud}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-200/80 transition-colors cursor-pointer"
+            title={isAuthenticated ? 'Save changes to cloud' : 'Sign in to save to your account'}
+          >
+            <Cloud className="w-3.5 h-3.5 text-emerald-600" />
+            <span>{isAuthenticated ? 'Save Cloud' : 'Save to Account'}</span>
+          </button>
+          <button
             onClick={loadSampleData}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Load Sample
           </button>
           <button
             onClick={() => setShowResetModal(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-red-50 hover:text-red-700 text-slate-600 text-xs font-semibold transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-red-50 hover:text-red-700 text-slate-600 text-xs font-semibold transition-colors cursor-pointer"
           >
             <RotateCcw className="w-3.5 h-3.5" /> Reset
           </button>
@@ -551,6 +637,14 @@ function BuilderPageContent() {
           </div>
         </div>
       )}
+
+      {/* Guest Authentication Modal */}
+      <GuestAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        feature={authModalFeature}
+        redirectUrl="/builder"
+      />
     </div>
   );
 }

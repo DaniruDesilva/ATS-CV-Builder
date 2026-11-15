@@ -4,21 +4,34 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useResumeStore } from '@/lib/store/useResumeStore';
+import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useGuestUsageStore } from '@/lib/store/useGuestUsageStore';
+import { GuestAuthModal } from '@/components/auth/GuestAuthModal';
 import { Dropzone } from '@/components/checker/Dropzone';
 import { ScoreGauge } from '@/components/checker/ScoreGauge';
 import { SectionBreakdown } from '@/components/checker/SectionBreakdown';
 import { SuggestionList } from '@/components/checker/SuggestionList';
 import { ScanResultData } from '@/types/checker';
-import { CheckCircle2, FileSearch, RefreshCw, AlertCircle, Shield, ArrowRight, Target } from 'lucide-react';
+import { CheckCircle2, FileSearch, RefreshCw, AlertCircle, Shield, ArrowRight, Target, Lock, UserCheck } from 'lucide-react';
 
 export default function CheckerPage() {
   const router = useRouter();
   const { importScannedResume } = useResumeStore();
+  const { isAuthenticated } = useAuthStore();
+  const { canScan, recordScan, scanCount } = useGuestUsageStore();
+
   const [isLoading, setIsLoading] = useState(false);
   const [scanResult, setScanResult] = useState<ScanResultData | null>(null);
   const [errorMsg, setErrorMsg] = useState('');
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleAnalyzeResume = async (file: File, jobDescription: string) => {
+    // 1. Guard against guest trying to scan a 2nd time
+    if (!canScan(isAuthenticated)) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setIsLoading(true);
     setErrorMsg('');
     try {
@@ -33,11 +46,16 @@ export default function CheckerPage() {
 
       if (!res.ok) {
         const errData = await res.json();
+        if (res.status === 403 || errData.requireAuth) {
+          setShowAuthModal(true);
+          return;
+        }
         throw new Error(errData.error || 'Failed to scan resume document.');
       }
 
       const data: ScanResultData = await res.json();
       setScanResult(data);
+      recordScan();
     } catch (err: any) {
       console.error(err);
       setErrorMsg(err.message || 'An error occurred while analyzing the file.');
@@ -123,8 +141,14 @@ export default function CheckerPage() {
 
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setScanResult(null)}
-                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors"
+                onClick={() => {
+                  if (!canScan(isAuthenticated)) {
+                    setShowAuthModal(true);
+                  } else {
+                    setScanResult(null);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
               >
                 <RefreshCw className="w-3.5 h-3.5" /> Scan Another
               </button>
@@ -139,6 +163,26 @@ export default function CheckerPage() {
               </button>
             </div>
           </div>
+
+          {/* Guest Mode Status Banner */}
+          {!isAuthenticated && (
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 py-3 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl text-xs text-slate-700">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
+                <span>
+                  <strong>Guest Mode:</strong> You have used your 1 free ATS resume scan.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowAuthModal(true)}
+                className="text-emerald-700 font-extrabold hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                <span>Sign in to unlock unlimited scans & cloud save</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
 
           {/* Score Gauge */}
           <ScoreGauge score={scanResult.overallScore} />
@@ -155,6 +199,14 @@ export default function CheckerPage() {
           </div>
         </div>
       )}
+
+      {/* Guest Authentication Modal */}
+      <GuestAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        feature="checker"
+        redirectUrl="/checker"
+      />
     </div>
   );
 }

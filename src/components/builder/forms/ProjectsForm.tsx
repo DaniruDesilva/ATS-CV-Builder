@@ -1,6 +1,9 @@
 'use client';
 
 import { useResumeStore } from '@/lib/store/useResumeStore';
+import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useGuestUsageStore } from '@/lib/store/useGuestUsageStore';
+import { GuestAuthModal } from '@/components/auth/GuestAuthModal';
 import { ACTION_VERBS, ProjectItem } from '@/types/resume';
 import { FolderGit2, Plus, Trash2, Sparkles, Zap, Github, Globe, Check } from 'lucide-react';
 import { useState } from 'react';
@@ -15,11 +18,14 @@ export function ProjectsForm() {
     updateProjectHighlight,
     removeProjectHighlight
   } = useResumeStore();
+  const { isAuthenticated } = useAuthStore();
+  const { canUseBuilderAi, recordBuilderAi } = useGuestUsageStore();
 
   const [techInput, setTechInput] = useState<{ [projId: string]: string }>({});
   const [activeVerbIndex, setActiveVerbIndex] = useState<{ projId: string; bulletIdx: number } | null>(null);
   const [optimizingBullet, setOptimizingBullet] = useState<{ projId: string; bulletIdx: number } | null>(null);
   const [optimizedSuccess, setOptimizedSuccess] = useState<string | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const inputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors";
   const urlInputClass = "w-full bg-white border border-slate-200 rounded-lg px-3 py-2 text-xs font-mono text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-colors";
@@ -65,6 +71,12 @@ export function ProjectsForm() {
 
   const handleOptimizeBullet = async (projId: string, bulletIdx: number, text: string) => {
     if (!text || text.length < 5) return;
+
+    if (!canUseBuilderAi(isAuthenticated)) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setOptimizingBullet({ projId, bulletIdx });
     setOptimizedSuccess(null);
     try {
@@ -73,6 +85,15 @@ export function ProjectsForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bulletText: text }),
       });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        if (res.status === 403 || errData.requireAuth) {
+          setShowAuthModal(true);
+          return;
+        }
+      }
+
       if (res.ok) {
         const data = await res.json();
         if (data.improved) {
@@ -80,6 +101,9 @@ export function ProjectsForm() {
           const key = `${projId}-${bulletIdx}`;
           setOptimizedSuccess(key);
           setTimeout(() => setOptimizedSuccess(null), 2500);
+          if (!isAuthenticated) {
+            recordBuilderAi();
+          }
         }
       }
     } catch (err) {
@@ -334,6 +358,14 @@ export function ProjectsForm() {
           </div>
         ))
       )}
+
+      {/* Guest AI Authentication Modal */}
+      <GuestAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        feature="builder_ai"
+        redirectUrl="/builder?step=5"
+      />
     </div>
   );
 }

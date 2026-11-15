@@ -1,16 +1,28 @@
 'use client';
 
 import { useResumeStore } from '@/lib/store/useResumeStore';
+import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useGuestUsageStore } from '@/lib/store/useGuestUsageStore';
+import { GuestAuthModal } from '@/components/auth/GuestAuthModal';
 import { AlignLeft, Sparkles, CheckCircle, Check } from 'lucide-react';
 import { useState } from 'react';
 
 export function SummaryForm() {
   const { content, updateSummary } = useResumeStore();
+  const { isAuthenticated } = useAuthStore();
+  const { canUseBuilderAi, recordBuilderAi } = useGuestUsageStore();
   const [isPolishing, setIsPolishing] = useState(false);
   const [justPolished, setJustPolished] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleAiPolish = async () => {
     if (!content.summary || content.summary.trim().length < 10) return;
+
+    if (!canUseBuilderAi(isAuthenticated)) {
+      setShowAuthModal(true);
+      return;
+    }
+
     setIsPolishing(true);
     setJustPolished(false);
     try {
@@ -19,12 +31,24 @@ export function SummaryForm() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bulletText: content.summary, isSummary: true }),
       });
+
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        if (res.status === 403 || errData.requireAuth) {
+          setShowAuthModal(true);
+          return;
+        }
+      }
+
       if (res.ok) {
         const data = await res.json();
         if (data.improved) {
           updateSummary(data.improved);
           setJustPolished(true);
           setTimeout(() => setJustPolished(false), 3000);
+          if (!isAuthenticated) {
+            recordBuilderAi();
+          }
         }
       }
     } catch (e) {
@@ -93,6 +117,14 @@ export function SummaryForm() {
           <li>Keep abbreviations standard (e.g., AWS, API, SQL).</li>
         </ul>
       </div>
+
+      {/* Guest AI Authentication Modal */}
+      <GuestAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        feature="builder_ai"
+        redirectUrl="/builder?step=1"
+      />
     </div>
   );
 }

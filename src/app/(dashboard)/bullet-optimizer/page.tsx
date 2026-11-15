@@ -18,6 +18,9 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import { useResumeStore } from '@/lib/store/useResumeStore';
+import { useAuthStore } from '@/lib/store/useAuthStore';
+import { useGuestUsageStore } from '@/lib/store/useGuestUsageStore';
+import { GuestAuthModal } from '@/components/auth/GuestAuthModal';
 import { useRouter } from 'next/navigation';
 
 const sampleBullets = [
@@ -42,6 +45,8 @@ const sampleBullets = [
 export default function BulletOptimizerPage() {
   const router = useRouter();
   const { content, addExperience, addExperienceHighlight } = useResumeStore();
+  const { isAuthenticated } = useAuthStore();
+  const { canOptimizeBullet, recordBullet } = useGuestUsageStore();
 
   const [inputBullet, setInputBullet] = useState(sampleBullets[0].raw);
   const [isOptimizing, setIsOptimizing] = useState(false);
@@ -50,10 +55,17 @@ export default function BulletOptimizerPage() {
   );
   const [copied, setCopied] = useState(false);
   const [insertedToBuilder, setInsertedToBuilder] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   const handleOptimize = async (textToOptimize?: string) => {
     const text = (textToOptimize || inputBullet).trim();
     if (!text) return;
+
+    // Guard guest 1-time optimization
+    if (!canOptimizeBullet(isAuthenticated)) {
+      setShowAuthModal(true);
+      return;
+    }
 
     setIsOptimizing(true);
     setInsertedToBuilder(false);
@@ -65,6 +77,14 @@ export default function BulletOptimizerPage() {
         body: JSON.stringify({ bulletText: text }),
       });
 
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        if (res.status === 403 || errData.requireAuth) {
+          setShowAuthModal(true);
+          return;
+        }
+      }
+
       if (res.ok) {
         const data = await res.json();
         if (data.improved) {
@@ -73,6 +93,9 @@ export default function BulletOptimizerPage() {
           setOptimizedResult(
             `Spearheaded cross-functional project deliverables across 3 business units, slashing delivery delays by 28% and ensuring 99.4% milestone achievement.`
           );
+        }
+        if (!isAuthenticated) {
+          recordBullet();
         }
       } else {
         // Fallback transformation
@@ -141,10 +164,21 @@ export default function BulletOptimizerPage() {
         </p>
 
         {/* Formula pill */}
-        <div className="pt-1">
+        <div className="pt-1 flex flex-wrap items-center justify-center gap-2">
           <span className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
             <strong>Formula:</strong> &ldquo;Accomplished [X], measured by [Y], by doing [Z]&rdquo;
           </span>
+
+          {!isAuthenticated && (
+            <button
+              type="button"
+              onClick={() => setShowAuthModal(true)}
+              className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-500/10 text-emerald-800 border border-emerald-500/20 hover:bg-emerald-500/20 transition-colors cursor-pointer"
+            >
+              <span>Guest Mode (1 Free Use) • Sign In for Unlimited</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -337,6 +371,13 @@ export default function BulletOptimizerPage() {
 
       </div>
 
+      {/* Guest Authentication Modal */}
+      <GuestAuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+        feature="bullet"
+        redirectUrl="/bullet-optimizer"
+      />
     </div>
   );
 }
