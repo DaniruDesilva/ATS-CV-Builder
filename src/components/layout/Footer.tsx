@@ -40,44 +40,8 @@ export function Footer() {
         {/* Subtle decorative background gradient */}
         <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[900px] h-[250px] bg-gradient-to-t from-emerald-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 relative z-10 space-y-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 relative z-10 space-y-10">
           
-          {/* ── TOP ACTION BAR: QUICK LAUNCH CTA ── */}
-          <div className="bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 rounded-3xl p-6 sm:p-8 text-white shadow-lg shadow-emerald-900/10 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-            <div className="space-y-1.5 text-center md:text-left z-10">
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/15 text-white text-[11px] font-bold backdrop-blur-xs">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-200" />
-                <span>Engineered for 100% Parseability</span>
-              </div>
-              <h3 className="text-xl sm:text-2xl font-extrabold tracking-tight text-white">
-                Ready to Pass Enterprise ATS Screeners?
-              </h3>
-              <p className="text-xs sm:text-sm text-emerald-100/90 max-w-xl">
-                Build your ATS-friendly resume from scratch or test your existing PDF against top recruitment filters.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-3 z-10 shrink-0">
-              <Link
-                href="/builder"
-                className="px-5 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-emerald-900 text-xs font-extrabold shadow-sm transition-all hover:shadow inline-flex items-center gap-1.5 cursor-pointer"
-              >
-                <span>Launch AI Builder</span>
-                <ArrowRight className="w-3.5 h-3.5 text-emerald-700" />
-              </Link>
-              <Link
-                href="/checker"
-                className="px-5 py-2.5 rounded-xl bg-emerald-800/60 hover:bg-emerald-800/80 border border-white/20 text-white text-xs font-bold transition-all inline-flex items-center gap-1.5 cursor-pointer"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-300" />
-                <span>Check ATS Score Free</span>
-              </Link>
-            </div>
-
-            {/* Decorative background glow inside CTA */}
-            <div className="absolute -right-10 -bottom-10 w-44 h-44 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-          </div>
-
           {/* ── MAIN NAVIGATION COLUMNS ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 pb-10 border-b border-slate-200/80">
             
