@@ -6,12 +6,13 @@ import { checkRateLimit, getClientIp } from '@/lib/rateLimit';
 import { isValidUuid } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
 
 const MAX_RESUME_PAYLOAD_BYTES = 250_000; // 250 KB cap on JSON resume content
 
 const resumeSaveSchema = z.object({
-  id: z.string().uuid().optional().nullable(),
-  title: z.string().trim().min(1).max(120).optional(),
+  id: z.string().optional().nullable(),
+  title: z.string().trim().max(150).optional(),
   templateId: z
     .enum(['classic-ats', 'traditional-ats', 'modern-executive', 'technical-clean'])
     .optional(),
@@ -125,20 +126,17 @@ export async function POST(request: Request) {
     });
 
     let resume;
-    if (id) {
-      // Check ownership of the targeted resume ID
-      const existing = await prisma.resume.findUnique({
-        where: { id },
-        select: { id: true, userId: true, title: true, templateId: true, content: true },
+    const validId = id && isValidUuid(id) ? id : undefined;
+    if (validId) {
+      // Check if resume exists and belongs to this user before updating
+      const existing = await prisma.resume.findFirst({
+        where: { id: validId, userId: dbUser.id },
+        select: { id: true, title: true, templateId: true, content: true },
       });
 
       if (existing) {
-        if (existing.userId !== dbUser.id) {
-          return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-        }
-
         resume = await prisma.resume.update({
-          where: { id },
+          where: { id: validId },
           data: {
             title: title || existing.title,
             templateId: templateId || existing.templateId,
@@ -146,7 +144,7 @@ export async function POST(request: Request) {
           },
         });
       } else {
-        // Generate server-controlled UUID instead of accepting an arbitrary primary key
+        // Not found for this user (or switched accounts): create a fresh server-UUID resume owned by this user
         resume = await prisma.resume.create({
           data: {
             userId: dbUser.id,

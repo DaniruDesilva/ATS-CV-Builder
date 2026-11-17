@@ -75,7 +75,12 @@ export async function POST(req: NextRequest) {
     let aiEnhanced = false;
     let aiResult: any = null;
     try {
-      aiResult = await analyzeResumeWithGemini(extracted.text, jobDescription, fileName);
+      aiResult = await analyzeResumeWithGemini(
+        extracted.text,
+        jobDescription,
+        fileName,
+        extracted.links || []
+      );
       // Check if this is a real AI result (not fallback) by checking if it has non-default values
       if (aiResult && aiResult._isAiGenerated) {
         aiEnhanced = true;

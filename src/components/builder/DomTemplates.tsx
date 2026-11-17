@@ -11,6 +11,14 @@ function formatDisplayUrl(url?: string) {
   return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
 }
 
+function formatProjectUrlLabel(url?: string) {
+  if (!url) return 'Website Link';
+  if (/play\.google\.com/i.test(url)) return 'Google Play Store';
+  if (/apps\.apple\.com/i.test(url)) return 'App Store';
+  const display = formatDisplayUrl(url);
+  return display.length > 0 && display.length <= 34 ? display : 'Live Demo';
+}
+
 /**
  * A4 Page Break Guide Component (retained as null for backwards-compatibility)
  * Discrete A4 sheet rendering replaces the old text-slicing overlay.
@@ -90,7 +98,7 @@ function partitionResumeForA4(content: ResumeContent) {
     if (idx === 0 && page1Room >= 70) {
       page1Projects.push(proj);
       accumulatedProj += pScore;
-    } else if (accumulatedProj + pScore <= page1Room && idx < 2) {
+    } else if (accumulatedProj + pScore <= page1Room && idx < 3) {
       page1Projects.push(proj);
       accumulatedProj += pScore;
     } else {
@@ -272,27 +280,39 @@ export function ClassicAtsDom({
     content.education.length > 0 ? (
       <div style={{ marginBottom: '11px' }}>
         <div style={sectionHeadingStyle}>Education</div>
-        {content.education.map((edu) => (
-          <div key={edu.id} style={{ marginBottom: '9px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1px' }}>
-              <span style={{ fontSize: '12.6px', fontWeight: 700, color: '#0f172a' }}>{edu.institution}</span>
-              <span style={{ fontSize: '11.3px', fontWeight: 700, color: '#64748b' }}>
-                {edu.startDate} – {edu.endDate}
-              </span>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-              <span style={{ fontSize: '12.6px', color: '#334155' }}>
-                {edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}
-              </span>
-              {edu.gpa && <span style={{ fontSize: '11.3px', color: '#64748b' }}>{edu.gpa}</span>}
-            </div>
-            {edu.highlights && edu.highlights.map((h, idx) => (
-              <div key={idx} style={{ fontSize: '11.3px', color: '#475569', marginTop: '2px', lineHeight: '1.4', textAlign: 'justify' }}>
-                {h}
+        {content.education.map((edu) => {
+          const dateStr = [edu.startDate, edu.endDate].filter(Boolean).join(' – ');
+          const gpaInHighlights = Boolean(
+            edu.gpa && edu.highlights?.some((h) => h.toLowerCase().includes(edu.gpa!.toLowerCase()))
+          );
+          const rightSubText = edu.location || (!gpaInHighlights ? edu.gpa : '') || '';
+          return (
+            <div key={edu.id} style={{ marginBottom: '9px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1px' }}>
+                <span style={{ fontSize: '12.6px', fontWeight: 700, color: '#0f172a' }}>{edu.institution}</span>
+                {dateStr && (
+                  <span style={{ fontSize: '11.3px', fontWeight: 700, color: '#64748b' }}>
+                    {dateStr}
+                  </span>
+                )}
               </div>
-            ))}
-          </div>
-        ))}
+              {(edu.degree || rightSubText) && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <span style={{ fontSize: '12.2px', color: '#334155', fontStyle: 'italic' }}>
+                    {edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}
+                  </span>
+                  {rightSubText && <span style={{ fontSize: '11.3px', color: '#64748b' }}>{rightSubText}</span>}
+                </div>
+              )}
+              {edu.highlights && edu.highlights.map((h, idx) => h ? (
+                <div key={idx} style={{ display: 'flex', alignItems: 'flex-start', marginTop: '2px', paddingLeft: '5px' }}>
+                  <span style={{ width: '12px', flexShrink: 0, fontSize: '12px', color: '#64748b' }}>•</span>
+                  <span style={{ flex: 1, fontSize: '11.6px', color: '#475569', lineHeight: '1.4' }}>{h}</span>
+                </div>
+              ) : null)}
+            </div>
+          );
+        })}
       </div>
     ) : null
   );
@@ -370,7 +390,7 @@ export function ClassicAtsDom({
                     rel="noopener noreferrer"
                     style={{ fontSize: '11.3px', color: '#2563eb', textDecoration: 'underline' }}
                   >
-                    Website Link
+                    {formatProjectUrlLabel(proj.url)}
                   </a>
                 </>
               )}
@@ -383,7 +403,7 @@ export function ClassicAtsDom({
                     rel="noopener noreferrer"
                     style={{ fontSize: '11.3px', color: '#2563eb', textDecoration: 'underline' }}
                   >
-                    Github
+                    GitHub
                   </a>
                 </>
               )}
@@ -431,7 +451,18 @@ export function ClassicAtsDom({
             <span style={{ width: '12px', flexShrink: 0, fontSize: '12px', color: '#64748b' }}>•</span>
             <span style={{ flex: 1, fontSize: '12px', color: '#475569', lineHeight: '1.4' }}>
               {cert.issuer && <span style={{ fontWeight: 700, color: '#0f172a' }}>{cert.issuer}: </span>}
-              {cert.name}
+              {sanitizeExternalUrl(cert.url) ? (
+                <a
+                  href={sanitizeExternalUrl(cert.url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#2563eb', textDecoration: 'underline' }}
+                >
+                  {cert.name}
+                </a>
+              ) : (
+                cert.name
+              )}
               {cert.credentialId && (
                 <span> ({cert.credentialId.includes(':') ? cert.credentialId : `ID: ${cert.credentialId}`})</span>
               )}
@@ -711,23 +742,39 @@ export function TraditionalAtsDom({
       <div style={{ marginBottom: '12px' }}>
         <h2 style={sectionHeadingStyle}>Education</h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {content.education.map((edu, idx) => (
-            <div key={edu.id}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '12.7px' }}>
-                <span>
-                  {idx + 1}. {edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}
-                </span>
-                <span style={{ fontWeight: 400, color: '#333' }}>
-                  {edu.startDate} – {edu.endDate}
-                </span>
+          {content.education.map((edu, idx) => {
+            const dateStr = [edu.startDate, edu.endDate].filter(Boolean).join(' – ');
+            const gpaInHighlights = Boolean(
+              edu.gpa && edu.highlights?.some((h) => h.toLowerCase().includes(edu.gpa!.toLowerCase()))
+            );
+            return (
+              <div key={edu.id || idx}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: '12.7px' }}>
+                  <span>
+                    {idx + 1}. {edu.degree || edu.institution}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}
+                  </span>
+                  {dateStr && (
+                    <span style={{ fontWeight: 400, color: '#333' }}>
+                      {dateStr}
+                    </span>
+                  )}
+                </div>
+                {edu.degree && edu.institution && (
+                  <div style={{ fontSize: '12.5px', color: '#000000' }}>
+                    {edu.institution}{edu.location ? `, ${edu.location}` : ''}
+                  </div>
+                )}
+                {edu.gpa && !gpaInHighlights && (
+                  <div style={{ fontSize: '12px', color: '#444' }}>
+                    {/gpa|score|rank/i.test(edu.gpa) ? edu.gpa : `Cumulative GPA: ${edu.gpa}`}
+                  </div>
+                )}
+                {edu.highlights && edu.highlights.map((h, hIdx) => (
+                  <div key={hIdx} style={{ fontSize: '12px', color: '#333', marginTop: '1px' }}>• {h}</div>
+                ))}
               </div>
-              <div style={{ fontSize: '12.5px', color: '#000000' }}>{edu.institution}</div>
-              {edu.gpa && <div style={{ fontSize: '12px', color: '#444' }}>Cumulative GPA: {edu.gpa}</div>}
-              {edu.highlights && edu.highlights.map((h, hIdx) => (
-                <div key={hIdx} style={{ fontSize: '12px', color: '#333', marginTop: '1px' }}>{h}</div>
-              ))}
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     ) : null
@@ -801,7 +848,7 @@ export function TraditionalAtsDom({
                       rel="noopener noreferrer"
                       style={{ color: '#0056b3', textDecoration: 'underline', fontWeight: 500 }}
                     >
-                      Website Link
+                      {formatProjectUrlLabel(proj.url)}
                     </a>
                   </>
                 )}
@@ -814,7 +861,7 @@ export function TraditionalAtsDom({
                       rel="noopener noreferrer"
                       style={{ color: '#0056b3', textDecoration: 'underline', fontWeight: 500 }}
                     >
-                      Github
+                      GitHub
                     </a>
                   </>
                 )}
@@ -861,7 +908,18 @@ export function TraditionalAtsDom({
           {content.certifications.map((cert) => (
             <li key={cert.id} style={{ fontSize: '12.5px', lineHeight: '1.35', color: '#000' }}>
               <span style={{ fontWeight: 700 }}>{cert.issuer ? `${cert.issuer}: ` : ''}</span>
-              {cert.name}
+              {sanitizeExternalUrl(cert.url) ? (
+                <a
+                  href={sanitizeExternalUrl(cert.url)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: '#0056b3', textDecoration: 'underline' }}
+                >
+                  {cert.name}
+                </a>
+              ) : (
+                cert.name
+              )}
               {cert.credentialId && (
                 <span style={{ color: '#333' }}>
                   {' '}({cert.credentialId.includes(':') ? cert.credentialId : `ID: ${cert.credentialId}`})
@@ -1082,11 +1140,38 @@ export function ModernExecutiveDom({
                 </h2>
                 {content.projects.map((proj) => (
                   <div key={proj.id} style={{ marginBottom: '10px', fontSize: '11px' }}>
-                    <div style={{ fontWeight: 700, color: '#0f172a' }}>{proj.name}</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ fontWeight: 700, color: '#0f172a' }}>{proj.name}</span>
+                      {sanitizeExternalUrl(proj.url) && (
+                        <a
+                          href={sanitizeExternalUrl(proj.url)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ fontSize: '10px', color: '#2563eb', textDecoration: 'underline' }}
+                        >
+                          {formatProjectUrlLabel(proj.url)}
+                        </a>
+                      )}
+                      {sanitizeExternalUrl(proj.githubUrl) && (
+                        <a
+                          href={sanitizeExternalUrl(proj.githubUrl)}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          style={{ fontSize: '10px', color: '#2563eb', textDecoration: 'underline' }}
+                        >
+                          GitHub
+                        </a>
+                      )}
+                    </div>
                     {proj.technologies && proj.technologies.length > 0 && (
                       <div style={{ fontSize: '10px', color: '#2563eb', fontWeight: 500 }}>{proj.technologies.join(', ')}</div>
                     )}
                     {proj.description && <p style={{ fontSize: '10.5px', color: '#64748b', marginTop: '2px' }}>{proj.description}</p>}
+                    {proj.highlights && proj.highlights.length > 0 && (
+                      <ul style={{ listStyleType: 'disc', paddingLeft: '16px', margin: '3px 0 0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                        {proj.highlights.map((h, idx) => h ? <li key={idx} style={{ fontSize: '10.5px', color: '#475569' }}>{h}</li> : null)}
+                      </ul>
+                    )}
                   </div>
                 ))}
               </div>
@@ -1286,13 +1371,53 @@ export function TechnicalCleanDom({
               </h2>
               {content.projects.map((proj) => (
                 <div key={proj.id} style={{ marginBottom: '12px' }}>
-                  <div style={{ fontWeight: 700, color: '#0f172a' }}>{proj.name}</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontWeight: 700, color: '#0f172a' }}>{proj.name}</span>
+                    {sanitizeExternalUrl(proj.url) && (
+                      <a
+                        href={sanitizeExternalUrl(proj.url)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: '10px', color: '#047857', textDecoration: 'underline' }}
+                      >
+                        {formatProjectUrlLabel(proj.url)}
+                      </a>
+                    )}
+                    {sanitizeExternalUrl(proj.githubUrl) && (
+                      <a
+                        href={sanitizeExternalUrl(proj.githubUrl)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        style={{ fontSize: '10px', color: '#047857', textDecoration: 'underline' }}
+                      >
+                        GitHub
+                      </a>
+                    )}
+                  </div>
                   {proj.technologies && (
                     <div style={{ fontSize: '10px', color: '#047857', fontWeight: 500 }}>{proj.technologies.join(', ')}</div>
                   )}
                   <ul style={{ listStyleType: 'disc', paddingLeft: '16px', margin: '4px 0 0', display: 'flex', flexDirection: 'column', gap: '2px' }}>
                     {proj.highlights?.map((h, idx) => h ? <li key={idx} style={{ color: '#475569', fontSize: '10.5px' }}>{h}</li> : null)}
                   </ul>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {content.education && content.education.length > 0 && (
+            <div style={{ marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px', color: '#065f46', borderBottom: '1px solid #a7f3d0', paddingBottom: '4px', marginBottom: '8px', fontFamily: 'monospace' }}>
+                {'// Education'}
+              </h2>
+              {content.education.map((edu) => (
+                <div key={edu.id} style={{ marginBottom: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 700, color: '#0f172a' }}>
+                    <span>{edu.institution}</span>
+                    <span style={{ color: '#64748b', fontSize: '10px' }}>{[edu.startDate, edu.endDate].filter(Boolean).join(' – ')}</span>
+                  </div>
+                  {edu.degree && <div style={{ color: '#047857', fontWeight: 500, fontSize: '10.5px' }}>{edu.degree}</div>}
+                  {edu.highlights?.map((h, idx) => h ? <div key={idx} style={{ color: '#475569', fontSize: '10px', marginTop: '2px' }}>• {h}</div> : null)}
                 </div>
               ))}
             </div>

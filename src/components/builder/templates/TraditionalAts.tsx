@@ -149,6 +149,14 @@ export default function TraditionalAtsTemplate({ content }: { content: ResumeCon
     return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
   };
 
+  const formatProjectUrlLabel = (url?: string) => {
+    if (!url) return 'Website Link';
+    if (/play\.google\.com/i.test(url)) return 'Google Play Store';
+    if (/apps\.apple\.com/i.test(url)) return 'App Store';
+    const display = formatUrlForDisplay(url);
+    return display.length > 0 && display.length <= 34 ? display : 'Live Demo';
+  };
+
   return (
     <Document title={`${personalInfo.fullName || 'Resume'} - ATS CV`}>
       <Page size="A4" style={styles.page} wrap={true}>
@@ -303,7 +311,7 @@ export default function TraditionalAtsTemplate({ content }: { content: ResumeCon
                       <>
                         <Text style={styles.divider}>|</Text>
                         <Link src={sanitizeExternalUrl(proj.url)} style={styles.blueLink}>
-                          <Text>Website Link</Text>
+                          <Text>{formatProjectUrlLabel(proj.url)}</Text>
                         </Link>
                       </>
                     )}
@@ -311,7 +319,7 @@ export default function TraditionalAtsTemplate({ content }: { content: ResumeCon
                       <>
                         <Text style={styles.divider}>|</Text>
                         <Link src={sanitizeExternalUrl(proj.githubUrl)} style={styles.blueLink}>
-                          <Text>Github</Text>
+                          <Text>GitHub</Text>
                         </Link>
                       </>
                     )}

@@ -8,20 +8,29 @@ import {
 } from '@/lib/checker/ruleEngine';
 import { ResumeContent } from '@/types/resume';
 
-const apiKey = process.env.GEMINI_API_KEY || '';
-const modelName = process.env.GEMINI_MODEL || 'gemini-3.5-flash';
-
 function getGeminiClient(): GoogleGenAI | null {
-  if (!apiKey) return null;
-  return new GoogleGenAI({ apiKey });
+  const key = process.env.GEMINI_API_KEY || '';
+  if (!key) return null;
+  return new GoogleGenAI({ apiKey: key });
 }
 
-export async function analyzeResumeWithGemini(resumeText: string, jobDescription?: string, fileName?: string) {
+function getModelName(): string {
+  const configured = process.env.GEMINI_MODEL;
+  if (configured && configured !== 'gemini-3.5-flash') return configured;
+  return 'gemini-2.5-flash';
+}
+
+export async function analyzeResumeWithGemini(
+  resumeText: string,
+  jobDescription?: string,
+  fileName?: string,
+  links: string[] = []
+) {
   const client = getGeminiClient();
 
   if (!client) {
-    console.warn('GEMINI_API_KEY is missing. Using heuristic fallback evaluation.');
-    return generateFallbackAiAnalysis(resumeText, jobDescription, fileName);
+    console.warn('GEMINI_API_KEY is missing. Using deterministic evaluation.');
+    return generateFallbackAiAnalysis(resumeText, jobDescription, fileName, links);
   }
 
   try {
@@ -142,7 +151,7 @@ Respond ONLY with a valid JSON object matching this schema:
 }`;
 
     const response = await client.models.generateContent({
-      model: modelName,
+      model: getModelName(),
       contents: prompt,
       config: {
         responseMimeType: 'application/json',
@@ -156,7 +165,7 @@ Respond ONLY with a valid JSON object matching this schema:
     parsed._isAiGenerated = true;
 
     // Merge AI extracted data with deterministic parser to guarantee no links, projects, certs, or fields are missed
-    const deterministicFallback = parseStructuredResumeFromText(resumeText, fileName, []);
+    const deterministicFallback = parseStructuredResumeFromText(resumeText, fileName, links);
     parsed.extractedResume = parsed.extractedResume
       ? mergeResumeData(parsed.extractedResume, deterministicFallback)
       : deterministicFallback;
@@ -164,7 +173,7 @@ Respond ONLY with a valid JSON object matching this schema:
     return parsed;
   } catch (error) {
     console.error('Gemini API Error, falling back to deterministic engine:', error);
-    return generateFallbackAiAnalysis(resumeText, jobDescription, fileName);
+    return generateFallbackAiAnalysis(resumeText, jobDescription, fileName, links);
   }
 }
 
@@ -193,7 +202,7 @@ Guidelines:
 4. Respond ONLY with the rewritten text without quotes, markdown bullet symbols, asterisks, bold markers, or conversational preamble.\n\nBullet Point:\n${bulletText}`;
 
     const response = await client.models.generateContent({
-      model: modelName,
+      model: getModelName(),
       contents: prompt,
       config: {
         temperature: 0.3,
@@ -223,7 +232,12 @@ export function fallbackStructuredResume(text: string, fileName?: string, links:
   return parseStructuredResumeFromText(text, fileName, links);
 }
 
-function generateFallbackAiAnalysis(resumeText: string, _jobDescription?: string, fileName?: string) {
+function generateFallbackAiAnalysis(
+  resumeText: string,
+  _jobDescription?: string,
+  fileName?: string,
+  links: string[] = []
+) {
   return {
     _isAiGenerated: false,
     contentScore: null,
@@ -232,7 +246,7 @@ function generateFallbackAiAnalysis(resumeText: string, _jobDescription?: string
     matchedSkills: [],
     missingKeywords: [],
     bulletImprovements: [],
-    extractedResume: parseStructuredResumeFromText(resumeText, fileName, []),
+    extractedResume: parseStructuredResumeFromText(resumeText, fileName, links),
   };
 }
 
@@ -344,7 +358,7 @@ Respond ONLY with valid JSON matching this schema:
 }`;
 
     const response = await client.models.generateContent({
-      model: modelName,
+      model: getModelName(),
       contents: prompt,
       config: {
         responseMimeType: 'application/json',

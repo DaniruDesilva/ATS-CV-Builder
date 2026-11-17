@@ -175,21 +175,23 @@ export function ExperienceForm() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Start</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Start Date</label>
                   <input
-                    type="month"
+                    type="text"
                     value={exp.startDate || ''}
                     onChange={(e) => updateExperience(exp.id, { startDate: e.target.value })}
+                    placeholder="e.g. Aug 2025 or 2025-08"
                     className={inputClass}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">End</label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">End Date</label>
                   <input
-                    type="month"
+                    type="text"
                     disabled={exp.current}
-                    value={exp.current ? '' : exp.endDate || ''}
+                    value={exp.current ? 'Present' : exp.endDate || ''}
                     onChange={(e) => updateExperience(exp.id, { endDate: e.target.value })}
+                    placeholder="e.g. Present or Dec 2025"
                     className={`${inputClass} disabled:opacity-40`}
                   />
                 </div>

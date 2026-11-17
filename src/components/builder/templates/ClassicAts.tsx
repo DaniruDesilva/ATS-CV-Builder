@@ -149,6 +149,14 @@ export default function ClassicAts({ content }: { content: ResumeContent }) {
     return url.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
   };
 
+  const formatProjectUrlLabel = (url?: string) => {
+    if (!url) return 'Website Link';
+    if (/play\.google\.com/i.test(url)) return 'Google Play Store';
+    if (/apps\.apple\.com/i.test(url)) return 'App Store';
+    const display = formatUrl(url);
+    return display.length > 0 && display.length <= 34 ? display : 'Live Demo';
+  };
+
   return (
     <Document title={`${personalInfo.fullName || 'Resume'} - ATS Classic`}>
       <Page size="A4" style={styles.page} wrap={true}>
@@ -204,25 +212,35 @@ export default function ClassicAts({ content }: { content: ResumeContent }) {
             <View style={styles.sectionHeadingContainer} minPresenceAhead={20}>
               <Text style={styles.sectionHeading}>Education</Text>
             </View>
-            {content.education.map((edu) => (
-              <View key={edu.id} style={styles.itemBlock} wrap={false}>
-                <View style={styles.itemHeader}>
-                  <Text style={styles.companyName}>{edu.institution}</Text>
-                  <Text style={styles.dateText}>
-                    {edu.startDate} – {edu.endDate}
-                  </Text>
+            {content.education.map((edu) => {
+              const dateStr = [edu.startDate, edu.endDate].filter(Boolean).join(' – ');
+              const gpaInHighlights = Boolean(
+                edu.gpa && edu.highlights?.some((h) => h.toLowerCase().includes(edu.gpa!.toLowerCase()))
+              );
+              const rightSubText = edu.location || (!gpaInHighlights ? edu.gpa : '') || '';
+              return (
+                <View key={edu.id} style={styles.itemBlock} wrap={false}>
+                  <View style={styles.itemHeader}>
+                    <Text style={styles.companyName}>{edu.institution}</Text>
+                    {dateStr ? <Text style={styles.dateText}>{dateStr}</Text> : null}
+                  </View>
+                  {(edu.degree || rightSubText) && (
+                    <View style={styles.itemHeader}>
+                      <Text style={styles.roleTitle}>
+                        {edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}
+                      </Text>
+                      {rightSubText ? <Text style={styles.locationText}>{rightSubText}</Text> : null}
+                    </View>
+                  )}
+                  {edu.highlights && edu.highlights.map((h, idx) => h ? (
+                    <View key={idx} style={[styles.bulletRow, { marginTop: 1 }]}>
+                      <Text style={styles.bulletPoint}>•</Text>
+                      <Text style={styles.bulletText}>{h}</Text>
+                    </View>
+                  ) : null)}
                 </View>
-                <View style={styles.itemHeader}>
-                  <Text style={styles.roleTitle}>
-                    {edu.degree}{edu.fieldOfStudy ? ` in ${edu.fieldOfStudy}` : ''}
-                  </Text>
-                  {edu.gpa && <Text style={styles.locationText}>{edu.gpa}</Text>}
-                </View>
-                {edu.highlights && edu.highlights.map((h, idx) => (
-                  <Text key={idx} style={[styles.summaryText, { fontSize: 8.5, marginTop: 1 }]}>{h}</Text>
-                ))}
-              </View>
-            ))}
+              );
+            })}
           </View>
         )}
 
@@ -290,7 +308,7 @@ export default function ClassicAts({ content }: { content: ResumeContent }) {
                       <>
                         <Text style={styles.divider}>|</Text>
                         <Link src={sanitizeExternalUrl(proj.url)} style={styles.link}>
-                          <Text style={{ fontSize: 8.5 }}>Website Link</Text>
+                          <Text style={{ fontSize: 8.5 }}>{formatProjectUrlLabel(proj.url)}</Text>
                         </Link>
                       </>
                     )}
@@ -298,7 +316,7 @@ export default function ClassicAts({ content }: { content: ResumeContent }) {
                       <>
                         <Text style={styles.divider}>|</Text>
                         <Link src={sanitizeExternalUrl(proj.githubUrl)} style={styles.link}>
-                          <Text style={{ fontSize: 8.5 }}>Github</Text>
+                          <Text style={{ fontSize: 8.5 }}>GitHub</Text>
                         </Link>
                       </>
                     )}

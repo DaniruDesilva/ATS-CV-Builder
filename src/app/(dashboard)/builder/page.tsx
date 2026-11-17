@@ -89,13 +89,13 @@ function BuilderPageContent() {
 
       if (res.ok) {
         const data = await res.json();
-        if (data.resume?.id && !activeId) {
+        if (data.resume?.id && data.resume.id !== activeId) {
           setCurrentResumeId(data.resume.id);
         }
         setLastSavedTime(
           new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         );
-      } else {
+      } else if (res.status !== 401) {
         const errData = await res.json().catch(() => ({}));
         setSaveError(errData.error || 'Cloud sync failed');
       }
@@ -120,6 +120,15 @@ function BuilderPageContent() {
   // User synchronization & initial active resume loading
   useEffect(() => {
     if (!isAuthenticated || !user) return;
+
+    // If user just imported a resume from Checker, preserve the imported draft and bind it to this user
+    const isFreshImport = Boolean(title?.includes('(Imported)') && !currentResumeId);
+    if (isFreshImport) {
+      if (userId !== user.id) {
+        setUserId(user.id);
+      }
+      return;
+    }
 
     // 1. If the current store was owned by a DIFFERENT user, reset & sync
     if (userId && userId !== user.id) {
