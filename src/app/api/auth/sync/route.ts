@@ -44,49 +44,67 @@ export async function POST(request: Request) {
         ? rawAvatar.slice(0, 500)
         : null;
 
-    const dbUser = await prisma.user.upsert({
-      where: { email },
-      create: {
-        id: authUser.id,
-        email,
-        name: sanitizedName,
-        avatarUrl: sanitizedAvatar,
-        tier: 'FREE',
-      },
-      update: {
-        name: sanitizedName || undefined,
-        avatarUrl: sanitizedAvatar || undefined,
-      },
-      include: {
-        _count: {
-          select: { resumes: true, scans: true },
+    try {
+      const dbUser = await prisma.user.upsert({
+        where: { email },
+        create: {
+          id: authUser.id,
+          email,
+          name: sanitizedName,
+          avatarUrl: sanitizedAvatar,
+          tier: 'FREE',
         },
-      },
-    });
+        update: {
+          name: sanitizedName || undefined,
+          avatarUrl: sanitizedAvatar || undefined,
+        },
+        include: {
+          _count: {
+            select: { resumes: true, scans: true },
+          },
+        },
+      });
 
-    const planTier = dbUser.tier.toLowerCase() as
-      | 'free'
-      | 'pro_monthly'
-      | 'lifetime';
+      const planTier = dbUser.tier.toLowerCase() as
+        | 'free'
+        | 'pro_monthly'
+        | 'lifetime';
 
-    let credits = 5;
-    if (planTier === 'pro_monthly') credits = 150;
-    else if (planTier === 'lifetime') credits = 300;
+      let credits = 5;
+      if (planTier === 'pro_monthly') credits = 150;
+      else if (planTier === 'lifetime') credits = 300;
 
-    return NextResponse.json({
-      user: {
-        id: dbUser.id,
-        email: dbUser.email,
-        name: dbUser.name || email.split('@')[0],
-        avatarUrl: dbUser.avatarUrl,
-        plan: planTier,
-        aiCredits: credits,
-        maxAiCredits: credits,
-        pdfExportsUsed: dbUser._count?.resumes || 0,
-        createdAt: dbUser.createdAt.toISOString(),
-      },
-      isAuthenticated: true,
-    });
+      return NextResponse.json({
+        user: {
+          id: dbUser.id,
+          email: dbUser.email,
+          name: dbUser.name || email.split('@')[0],
+          avatarUrl: dbUser.avatarUrl,
+          plan: planTier,
+          aiCredits: credits,
+          maxAiCredits: credits,
+          pdfExportsUsed: dbUser._count?.resumes || 0,
+          createdAt: dbUser.createdAt.toISOString(),
+        },
+        isAuthenticated: true,
+      });
+    } catch (dbErr) {
+      console.warn('Database unavailable in /api/auth/sync, returning Supabase auth session user:', dbErr);
+      return NextResponse.json({
+        user: {
+          id: authUser.id,
+          email,
+          name: sanitizedName || email.split('@')[0],
+          avatarUrl: sanitizedAvatar,
+          plan: 'free',
+          aiCredits: 5,
+          maxAiCredits: 5,
+          pdfExportsUsed: 0,
+          createdAt: authUser.created_at || new Date().toISOString(),
+        },
+        isAuthenticated: true,
+      });
+    }
   } catch (err: any) {
     console.error('Error in /api/auth/sync:', err);
     return NextResponse.json(

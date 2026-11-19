@@ -245,7 +245,12 @@ function extractBullets(rawText: string): string[] {
 }
 
 function hasMetric(line: string): boolean {
-  return /(\d+%|\$[\d,]+|\b\d+(\.\d+)?\s*(k|m|million|billion|x|ghz|mbps|gb|tb|ms|d|users|customers|clients|percent|times|sessions|transactions|requests|records|orders|skus|students|items|portals|apis)\b|\b\d{2,}\b|oauth\s*2\.0|row-level\s+security|\brbac\b|multi-tenant|real-time|cross-platform)/i.test(line);
+  const cleaned = line
+    .replace(/\b(oauth\s*2\.0|2\.4\/5\s*ghz|[23]d|html5|css3|es6\+|ipv[46]|sha-?\d+|base64|a4|v\d+(\.\d+)*)\b/gi, '')
+    .trim();
+  return /(\d+(\.\d+)?%|\$[\d,]+|\b\d+(\.\d+)?x\b|\b\d[\d,]*\+?\s*(k|m|million|billion|users|customers|clients|students|orders|skus|requests|records|queries|endpoints|downloads|installs|sessions|transactions|team|engineers|developers|members|hours|days|weeks|months|ms|seconds|mins|minutes|percent|gpa|portals|modules|tenants|institutes|teachers|brands)\b|\b\d{2,}\b)/i.test(
+    cleaned
+  );
 }
 
 function startsWithStrongVerb(line: string): boolean {

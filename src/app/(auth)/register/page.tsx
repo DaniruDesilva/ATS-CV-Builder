@@ -181,13 +181,12 @@ function RegisterForm() {
                 setName(e.target.value);
                 if (formErrors.name) setFormErrors((prev) => ({ ...prev, name: undefined }));
               }}
-              placeholder="Daniru De Silva"
+              placeholder="Your Name"
               autoComplete="name"
-              className={`w-full bg-slate-50 border rounded-xl pl-10 pr-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
-                formErrors.name
+              className={`w-full bg-slate-50 border rounded-xl pl-10 pr-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${formErrors.name
                   ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
                   : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-500'
-              }`}
+                }`}
             />
           </div>
           {formErrors.name && (
@@ -212,11 +211,10 @@ function RegisterForm() {
               }}
               placeholder="you@example.com"
               autoComplete="email"
-              className={`w-full bg-slate-50 border rounded-xl pl-10 pr-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
-                formErrors.email
+              className={`w-full bg-slate-50 border rounded-xl pl-10 pr-3.5 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${formErrors.email
                   ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
                   : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-500'
-              }`}
+                }`}
             />
           </div>
           {formErrors.email && (
@@ -241,11 +239,10 @@ function RegisterForm() {
               }}
               placeholder="Minimum 8 characters with letters & numbers"
               autoComplete="new-password"
-              className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
-                formErrors.password
+              className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${formErrors.password
                   ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
                   : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-500'
-              }`}
+                }`}
             />
             <button
               type="button"
@@ -297,11 +294,10 @@ function RegisterForm() {
               }}
               placeholder="Re-enter your password"
               autoComplete="new-password"
-              className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${
-                formErrors.confirmPassword
+              className={`w-full bg-slate-50 border rounded-xl pl-10 pr-10 py-2.5 text-xs font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 transition-all ${formErrors.confirmPassword
                   ? 'border-red-300 focus:ring-red-500/20 focus:border-red-500'
                   : 'border-slate-200 focus:ring-emerald-500/20 focus:border-emerald-500'
-              }`}
+                }`}
             />
             <button
               type="button"

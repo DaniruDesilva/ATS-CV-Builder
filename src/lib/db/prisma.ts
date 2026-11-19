@@ -5,8 +5,12 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function getNormalizedDatabaseUrl(): string | undefined {
-  const url = process.env.DATABASE_URL;
+  const raw = process.env.DATABASE_URL;
+  if (!raw) return undefined;
+  // Strip any accidental surrounding quotes pasted into Vercel env settings
+  const url = raw.trim().replace(/^["']+|["']+$/g, '').trim();
   if (!url) return undefined;
+
   // Ensure Supabase transaction pooler (port 6543) always has pgbouncer=true
   if (url.includes(':6543') && !url.includes('pgbouncer=true')) {
     const sep = url.includes('?') ? '&' : '?';

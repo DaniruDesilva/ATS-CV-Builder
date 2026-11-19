@@ -25,9 +25,14 @@ const ACTION_VERBS = [
   'upgraded'
 ];
 
-function isQuantifiedOrTechnicalBullet(bullet: string): boolean {
-  return /(\d+%|\$[\d,]+|\b\d+(\.\d+)?\s*(k|m|x|ghz|mbps|ms|gb|tb|users|clients|students|percent|gpa|skus|orders|items|portals|apis)\b|\b\d{2,}\b|oauth\s*2\.0|row-level\s+security|multi-tenant|real-time|cross-platform|full-stack|restful)/i.test(
-    bullet
+function hasImpactMetric(bullet: string): boolean {
+  // Strip technology version / spec tokens so "OAuth 2.0", "2.4/5GHz", "2D", "HTML5", "CSS3", "ES6+" are not mistaken for impact metrics
+  const cleaned = bullet
+    .replace(/\b(oauth\s*2\.0|2\.4\/5\s*ghz|[23]d|html5|css3|es6\+|ipv[46]|sha-?\d+|base64|a4|v\d+(\.\d+)*)\b/gi, '')
+    .trim();
+
+  return /(\d+(\.\d+)?%|\$[\d,]+|\b\d+(\.\d+)?x\b|\b\d[\d,]*\+?\s*(k|m|million|billion|users|customers|clients|students|orders|skus|requests|records|queries|endpoints|downloads|installs|sessions|transactions|team|engineers|developers|members|hours|days|weeks|months|ms|seconds|mins|minutes|percent|gpa|portals|modules|tenants|institutes|teachers|brands| puzzles|levels)\b|\b\d{2,}\b)/i.test(
+    cleaned
   );
 }
 
@@ -56,27 +61,39 @@ export function getAtsScoreBreakdown(content?: ResumeContent | null): AtsScoreBr
   let contactScore = 0;
   const contactTips: string[] = [];
   if (personalInfo.fullName?.trim()) contactScore += 3; else contactTips.push('Add your full legal name');
+  if (personalInfo.jobTitle?.trim()) contactScore += 1; else contactTips.push('Add your target job title');
   if (personalInfo.email?.trim()) contactScore += 3; else contactTips.push('Add a professional email address');
-  if (personalInfo.phone?.trim()) contactScore += 3; else contactTips.push('Add a direct phone number with country code');
-  if (personalInfo.location?.trim()) contactScore += 2; else contactTips.push('Add your location (City, Country)');
-  if (personalInfo.linkedin?.trim()) contactScore += 2; else contactTips.push('Add your LinkedIn profile URL');
-  if (personalInfo.github?.trim() || personalInfo.website?.trim()) contactScore += 2; else contactTips.push('Add GitHub or Portfolio website URL');
+  if (personalInfo.phone?.trim()) contactScore += 2.5; else contactTips.push('Add a direct phone number with country code');
+  if (personalInfo.location?.trim()) contactScore += 1.5; else contactTips.push('Add your location (City, Country)');
+  if (personalInfo.linkedin?.trim()) contactScore += 1.5; else contactTips.push('Add your LinkedIn profile URL');
+  if (personalInfo.github?.trim()) contactScore += 1.5; else contactTips.push('Add your GitHub profile URL');
+  if (personalInfo.website?.trim()) contactScore += 1; else contactTips.push('Add a personal portfolio or website URL');
 
   // 2. Professional Summary (max 12)
   let summaryScore = 0;
   const summaryTips: string[] = [];
   if (summary && summary.trim().length > 0) {
     const len = summary.trim().length;
-    if (len >= 140 && len <= 600) summaryScore += 8;
-    else if (len >= 50 && len < 140) { summaryScore += 5; summaryTips.push('Expand summary to 150–500 characters'); }
-    else if (len > 600) { summaryScore += 6; summaryTips.push('Keep summary concise (under 600 characters)'); }
-    else { summaryScore += 3; summaryTips.push('Write a 2–4 sentence professional summary (150–500 chars)'); }
+    if (len >= 200 && len <= 500) summaryScore += 7;
+    else if (len >= 120 && len < 200) { summaryScore += 5; summaryTips.push('Expand summary to 200–500 characters for optimal keyword density'); }
+    else if (len > 500) { summaryScore += 5.5; summaryTips.push('Keep summary concise (between 200 and 500 characters)'); }
+    else { summaryScore += 3; summaryTips.push('Write a 2–4 sentence professional summary (200–500 chars)'); }
 
     if (!/\b(I|my|me)\b/i.test(summary)) summaryScore += 2;
     else summaryTips.push('Remove first-person pronouns ("I", "my", "me")');
 
-    if (/\d|full-stack|software|engineer|developer|architect/i.test(summary)) summaryScore += 2;
-    else summaryTips.push('Include role keywords, GPA, or years of experience in summary');
+    // Check for measurable metric (%, years, GPA, N+ apps/projects/users)
+    if (/(\d+(\.\d+)?%|\b\d+(\.\d+)?\s*gpa\b|\b\d+\+?\s*(years?|projects?|apps?|applications?|users?|clients?))/i.test(summary)) {
+      summaryScore += 2;
+    } else {
+      summaryTips.push('Include a concrete metric in your summary (e.g. GPA, years of experience, or number of production apps shipped)');
+    }
+
+    if (/(\d+%|\b\d+\+\s*(projects?|apps?|users?|years?))/i.test(summary)) {
+      summaryScore += 1;
+    } else {
+      summaryTips.push('Add a quantified impact figure (e.g. "5+ production apps" or "99.9% uptime") to your summary');
+    }
   } else {
     summaryTips.push('Add a 2–4 sentence professional summary');
   }
@@ -85,16 +102,22 @@ export function getAtsScoreBreakdown(content?: ResumeContent | null): AtsScoreBr
   let educationScore = 0;
   const educationTips: string[] = [];
   if (education.length > 0) {
-    educationScore += 5;
+    educationScore += 4;
     const firstEdu = education[0];
     if (firstEdu.institution?.trim()) educationScore += 3; else educationTips.push('Add university / institution name');
-    if (firstEdu.degree?.trim()) educationScore += 2; else educationTips.push('Add degree or qualification title');
-    if (firstEdu.startDate || firstEdu.endDate) educationScore += 1.5; else educationTips.push('Add graduation dates / years');
+    if (firstEdu.degree?.trim()) educationScore += 2.5; else educationTips.push('Add degree or qualification title');
+    if (firstEdu.startDate && firstEdu.endDate) educationScore += 1.5;
+    else if (firstEdu.startDate || firstEdu.endDate) {
+      educationScore += 1;
+      educationTips.push('Include both start and graduation years for your primary degree');
+    } else {
+      educationTips.push('Add graduation dates / years');
+    }
     const hasGpaOrHighlights =
       Boolean(firstEdu.gpa?.trim()) ||
       Boolean(firstEdu.highlights && firstEdu.highlights.length > 0) ||
       education.some((e) => Boolean(e.gpa?.trim()) || Boolean(e.highlights && e.highlights.length > 0));
-    if (hasGpaOrHighlights) educationScore += 1.5;
+    if (hasGpaOrHighlights) educationScore += 2;
     else educationTips.push('Add cumulative GPA, academic honors, or exam rank');
   } else {
     educationTips.push('Add your academic degree or qualification');
@@ -112,24 +135,24 @@ export function getAtsScoreBreakdown(content?: ResumeContent | null): AtsScoreBr
   else if (categories >= 1) { skillsScore += 2; skillsTips.push('Group skills into 3+ distinct categories'); }
   else skillsTips.push('Create skill categories (e.g. Languages, Frontend, Backend)');
 
-  if (totalSkills >= 15) skillsScore += 7;
-  else if (totalSkills >= 10) { skillsScore += 5; skillsTips.push('Include 15+ relevant technical skills'); }
-  else if (totalSkills >= 5) { skillsScore += 3; skillsTips.push('Include 15+ relevant technical skills'); }
-  else if (totalSkills >= 1) { skillsScore += 1; skillsTips.push('Include 15+ relevant technical skills'); }
-  else skillsTips.push('Add at least 10–15 industry skills');
+  if (totalSkills >= 18) skillsScore += 7;
+  else if (totalSkills >= 12) { skillsScore += 5.5; skillsTips.push('Include 18+ relevant technical skills across your stack'); }
+  else if (totalSkills >= 6) { skillsScore += 3.5; skillsTips.push('Include 15+ relevant technical skills'); }
+  else if (totalSkills >= 1) { skillsScore += 1.5; skillsTips.push('Include 15+ relevant technical skills'); }
+  else skillsTips.push('Add at least 12–18 industry skills');
 
-  if (categories >= 3 && totalSkills >= 12) skillsScore += 5;
-  else if (categories >= 2 && totalSkills >= 6) skillsScore += 3;
+  if (categories >= 3 && totalSkills >= 15) skillsScore += 5;
+  else if (categories >= 2 && totalSkills >= 8) skillsScore += 3;
 
   // 5. Work Experience & Verbs (max 20)
   let experienceScore = 0;
   const experienceTips: string[] = [];
-  let totalBullets = 0;
-  let quantifiedBullets = 0;
-  let actionVerbBullets = 0;
+  let totalExpBullets = 0;
+  let quantifiedExpBullets = 0;
+  let actionVerbExpBullets = 0;
 
   if (experience.length > 0) {
-    experienceScore += 6;
+    experienceScore += 4;
     experience.forEach((exp) => {
       if (exp.position?.trim()) experienceScore += 1;
       if (exp.company?.trim()) experienceScore += 1;
@@ -137,54 +160,54 @@ export function getAtsScoreBreakdown(content?: ResumeContent | null): AtsScoreBr
 
       (exp.highlights || []).forEach((bullet) => {
         if (!bullet?.trim()) return;
-        totalBullets++;
-        if (isQuantifiedOrTechnicalBullet(bullet)) {
-          quantifiedBullets++;
+        totalExpBullets++;
+        if (hasImpactMetric(bullet)) {
+          quantifiedExpBullets++;
         }
         const firstWord = bullet.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g, '') || '';
         if (ACTION_VERBS.includes(firstWord)) {
-          actionVerbBullets++;
+          actionVerbExpBullets++;
         }
       });
     });
+    // Cap base metadata score at 7
+    experienceScore = Math.min(7, experienceScore);
 
-    // Also include project bullets when evaluating overall bullet depth for early-career / intern resumes
-    const projectBullets = (projects || []).flatMap((p) => p.highlights || []).filter((b) => b?.trim());
-    const combinedBulletCount = totalBullets + projectBullets.length;
-    const combinedQuantCount =
-      quantifiedBullets + projectBullets.filter((b) => isQuantifiedOrTechnicalBullet(b)).length;
-    const combinedVerbCount =
-      actionVerbBullets +
-      projectBullets.filter((b) => {
-        const fw = b.trim().split(/\s+/)[0]?.toLowerCase().replace(/[^a-z]/g, '') || '';
-        return ACTION_VERBS.includes(fw);
-      }).length;
-
-    if (totalBullets >= 3 || combinedBulletCount >= 8) experienceScore += 3;
-    else if (totalBullets >= 1) {
-      experienceScore += 1.5;
-      experienceTips.push('Include at least 3 impact bullets per work experience');
+    // Bullet depth in Work Experience (max 3)
+    if (totalExpBullets >= 5) {
+      experienceScore += 3;
+    } else if (totalExpBullets >= 3) {
+      experienceScore += 2;
+      experienceTips.push('Add 1–2 more quantified achievement bullets to your work experience');
+    } else if (totalExpBullets >= 1) {
+      experienceScore += 1;
+      experienceTips.push('Include at least 3–4 impact bullets per work experience');
     } else {
       experienceTips.push('Add at least 3 bullet points describing your work impact');
     }
 
-    if (combinedBulletCount > 0) {
-      const quantRate = combinedQuantCount / combinedBulletCount;
-      if (quantRate >= 0.45) experienceScore += 5;
-      else if (quantRate >= 0.25) {
-        experienceScore += 3.5;
-        experienceTips.push('Add more quantified metrics (%, latency, users, scale) to bullets');
+    // True Quantification Rate in Experience (max 7)
+    if (totalExpBullets > 0) {
+      const expQuantRate = quantifiedExpBullets / totalExpBullets;
+      if (expQuantRate >= 0.65) {
+        experienceScore += 7;
+      } else if (expQuantRate >= 0.33) {
+        experienceScore += 4.5;
+        experienceTips.push('Quantify at least 2/3 of your experience bullets with %, $, latency reduction, or user volume (use "AI Optimize")');
       } else {
         experienceScore += 1.5;
-        experienceTips.push('Add quantified metrics (%, $, time saved, users) to experience bullets');
+        experienceTips.push('Add measurable impact metrics (e.g. % latency reduction, 99.9% uptime, order volume) to experience bullets using "AI Optimize"');
       }
 
-      const verbRate = combinedVerbCount / combinedBulletCount;
-      if (verbRate >= 0.6) experienceScore += 3;
-      else if (verbRate >= 0.3) {
-        experienceScore += 1.5;
-        experienceTips.push('Start every bullet with a strong action verb (Engineered, Architected)');
+      // Strong Action Verbs (max 3)
+      const verbRate = actionVerbExpBullets / totalExpBullets;
+      if (verbRate >= 0.8) {
+        experienceScore += 3;
+      } else if (verbRate >= 0.5) {
+        experienceScore += 2;
+        experienceTips.push('Start every experience bullet with a strong action verb (Engineered, Architected, Spearheaded)');
       } else {
+        experienceScore += 1;
         experienceTips.push('Start bullets with strong action verbs (Engineered, Architected, Spearheaded)');
       }
     }
@@ -196,24 +219,38 @@ export function getAtsScoreBreakdown(content?: ResumeContent | null): AtsScoreBr
   let projectsScore = 0;
   const projectTips: string[] = [];
   if (projects && projects.length > 0) {
-    projectsScore += 4;
+    projectsScore += 3;
     const projWithDetails = projects.filter(
       (p) => p.name?.trim() && (p.description?.trim() || (p.highlights && p.highlights.length > 0))
     ).length;
-    if (projWithDetails >= 3) projectsScore += 5;
-    else if (projWithDetails >= 2) projectsScore += 3.5;
-    else if (projWithDetails >= 1) projectsScore += 2;
+    if (projWithDetails >= 3) projectsScore += 3;
+    else if (projWithDetails >= 2) projectsScore += 2;
+    else if (projWithDetails >= 1) projectsScore += 1;
     else projectTips.push('Add detailed achievement bullets to projects');
 
     const projWithTech = projects.filter((p) => p.technologies && p.technologies.length > 0).length;
     if (projWithTech >= 3) projectsScore += 3;
-    else if (projWithTech >= 1) projectsScore += 2;
+    else if (projWithTech >= 1) projectsScore += 1.5;
     else projectTips.push('List tech stack tags (e.g. Next.js, PostgreSQL) on each project');
 
     const projWithLinks = projects.filter((p) => Boolean(p.url?.trim() || p.githubUrl?.trim())).length;
-    if (projWithLinks >= 2) projectsScore += 2;
+    if (projWithLinks >= 3) projectsScore += 2;
     else if (projWithLinks >= 1) projectsScore += 1;
     else projectTips.push('Include GitHub repository or live demo links for projects');
+
+    // Check quantified metrics in project bullets (max 3)
+    const projectBullets = projects.flatMap((p) => p.highlights || []).filter((b) => b?.trim());
+    const quantProjBullets = projectBullets.filter((b) => hasImpactMetric(b)).length;
+    const projQuantRate = projectBullets.length > 0 ? quantProjBullets / projectBullets.length : 0;
+    if (projQuantRate >= 0.5) {
+      projectsScore += 3;
+    } else if (projQuantRate >= 0.25) {
+      projectsScore += 2;
+      projectTips.push('Add measurable impact numbers (%, users, latency, scale) to more project bullets');
+    } else {
+      projectsScore += 1;
+      projectTips.push('Quantify project bullets with concrete metrics (e.g. % speed improvement, user count, or dataset scale)');
+    }
   } else {
     projectTips.push('Add 2–4 key technical projects');
   }
@@ -221,19 +258,38 @@ export function getAtsScoreBreakdown(content?: ResumeContent | null): AtsScoreBr
   // 7. Certifications, Honors & Referees (max 8)
   let extrasScore = 0;
   const extrasTips: string[] = [];
-  if (certifications && certifications.length > 0) extrasScore += 4;
-  else extrasTips.push('Add professional certifications or course credentials');
+  if (certifications && certifications.length > 0) {
+    extrasScore += 3;
+    const hasCredId = certifications.some((c) => Boolean(c.credentialId?.trim()));
+    if (hasCredId) {
+      extrasScore += 1;
+    } else {
+      extrasTips.push('Add certificate credential IDs or verification codes in Certifications');
+    }
+  } else {
+    extrasTips.push('Add professional certifications or course credentials');
+  }
   if (achievements && achievements.length > 0) extrasScore += 2.5;
   else extrasTips.push('Add awards, university clubs, or competition achievements');
   if (references && references.length > 0) extrasScore += 1.5;
+  else extrasTips.push('Add at least 1 academic or professional referee');
 
-  const cappedContact = Math.min(15, Math.round(contactScore));
-  const cappedSummary = Math.min(12, Math.round(summaryScore));
-  const cappedEducation = Math.min(13, Math.round(educationScore));
-  const cappedSkills = Math.min(18, Math.round(skillsScore));
-  const cappedExperience = Math.min(20, Math.round(experienceScore));
-  const cappedProjects = Math.min(14, Math.round(projectsScore));
-  const cappedExtras = Math.min(8, Math.round(extrasScore));
+  const capSection = (raw: number, max: number, hasTips: boolean): number => {
+    const rounded = Math.min(max, Math.round(raw));
+    // Never display max/max if there are still actionable improvement tips for that section
+    if (hasTips && rounded >= max) {
+      return Math.max(0, max - 1);
+    }
+    return rounded;
+  };
+
+  const cappedContact = capSection(contactScore, 15, contactTips.length > 0);
+  const cappedSummary = capSection(summaryScore, 12, summaryTips.length > 0);
+  const cappedEducation = capSection(educationScore, 13, educationTips.length > 0);
+  const cappedSkills = capSection(skillsScore, 18, skillsTips.length > 0);
+  const cappedExperience = capSection(experienceScore, 20, experienceTips.length > 0);
+  const cappedProjects = capSection(projectsScore, 14, projectTips.length > 0);
+  const cappedExtras = capSection(extrasScore, 8, extrasTips.length > 0);
 
   const total = Math.min(
     100,
